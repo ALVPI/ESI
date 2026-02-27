@@ -21,3 +21,15 @@ Una vez clonado el repositorio, entra en la carpeta y ejecuta:
 
 ```bash
 uv sync
+### 4. Salir o desactivar el entorno
+Dependiendo de cómo estés trabajando, puedes salir del entorno virtual así:
+
+* **Si entraste con `uv shell`:**
+    ```bash
+    exit
+    ```
+* **Si activaste el entorno manualmente:**
+    ```bash
+    deactivate
+    ```
+* **Si usas `uv run`:** No es necesario hacer nada. `uv` gestiona la activación y desactivación automáticamente por cada comando.
