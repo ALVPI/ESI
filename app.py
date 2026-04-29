@@ -6,16 +6,27 @@ Run with:  uv run python app.py
 """
 #DISCLAIMER we've commented in english to mantain the consistence of the code
 
+#request had the request info 
+#g will be use to store the request live time
 from flask import Flask, request, g
+#wsi will be the way promethus get their data
 from prometheus_client import make_wsgi_app
+#use for the comunication btw the wsgi and metrics.py 
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import time
 
 from database import close_db, init_db
 from oauth2_routes import oauth2
 from admin_routes import admin
-from metrics import http_requests
+#we need this lib for the metrics that we've allready defined on metrics.py
+from metrics import (
+        http_requests,
+        http_requests_token,
+        http_requests_admin,
+        http_requests_authorize
+)
 
+from werkzeug.serving import run_simple
 # ---------------------------------------------------------------------------
 # Hardcoded test users (resource owners for the authorization code flow).
 # In production these would live in a proper user store.
@@ -44,17 +55,17 @@ def create_app() -> Flask:
     with app.app_context():
         init_db()
 
-    #Registro automatico de métricas HTTP
     #Automatic HTTP metrics log
+    # the Flask decorator
     @app.before_request
-    def antes_de_peticion():
-        # Guardamos el momento en que llega la peticion
+    def before_request():
         # Store the moment of the request arrives
         g.start_time = time.time()
 
+    #This force that every request must execute this methods 
     @app.after_request
-    def despues_de_peticion(response):
-        # get the request endopoint
+    def after_request(response):
+        # get the request endpoint
         endpoint = request.path
 
         # we increment the general counter 
@@ -66,19 +77,16 @@ def create_app() -> Flask:
 
         # We increment the specific counter for each endpoint
         if "/token" in endpoint:
-            from metrics import http_requests_token
             http_requests_token.labels(
                 method=request.method,
                 status_code=str(response.status_code)
             ).inc()
         elif "/authorize" in endpoint:
-            from metrics import http_requests_authorize
             http_requests_authorize.labels(
                 method=request.method,
                 status_code=str(response.status_code)
             ).inc()
         elif "/admin" in endpoint:
-            from metrics import http_requests_admin
             http_requests_admin.labels(
                 method=request.method,
                 status_code=str(response.status_code)
@@ -90,7 +98,7 @@ def create_app() -> Flask:
 
 
 if __name__ == "__main__":
-    # Cretaion of the Flask's app
+    # Cretaion of the Flask app
     flask_app = create_app()
 
     # Merge Flask with the /metrics (Prometheus) endpoint 
@@ -108,5 +116,4 @@ if __name__ == "__main__":
     print("  DELETE /admin/clients/<id>    — Delete a client")
     print()
 
-    from werkzeug.serving import run_simple
     run_simple("0.0.0.0", 5001, application, use_reloader=True, use_debugger=True)
