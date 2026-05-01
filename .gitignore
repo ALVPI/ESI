@@ -200,7 +200,9 @@ cython_debug/
 *.log
 *.out
 *.toc
-*.synctext.gz
+*.synctex.gz
+*.fls
+*.fdb_latexmk
 # Marimo
 marimo/_static/
 marimo/_lsp/
