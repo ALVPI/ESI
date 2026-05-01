@@ -1,65 +1,113 @@
-\documentclass[10pt]{article}
+\documentclass[12pt, a4paper]{article}
 
-% Idioma y codificación
+% ── Paquetes ────────────────────────────────────────────────────────────────
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
-
-% Márgenes
 \usepackage{geometry}
-\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
-
-% Gráficos
 \usepackage{graphicx}
-\usepackage{graphics}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{amssymb}
-
-% Listings para código
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{caption}
-\usepackage{capt-of}
-\lstdefinestyle{terminal}{
-	backgroundcolor=\color{gray!10},
-	basicstyle=\ttfamily\small,
-	keywordstyle=\color{blue},
-	commentstyle=\color{gray},
-	frame=single,
-	columns=fullflexible,
-	morecomment=[l]{//}
-}
-\usepackage{listings}
-\lstset{
-	inputencoding=utf8,
-	extendedchars=true,
-	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
-}
-
-% Hipervínculos
-\usepackage[hidelinks]{hyperref}
-\hypersetup{
-	colorlinks=true,
-	linkcolor=blue,
-	filecolor=magenta,
-	urlcolor=cyan,
-}
-
-% Encabezados y pies de página
+\usepackage{hyperref}
 \usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+
+% ── Geometría de página ──────────────────────────────────────────────────────
+\geometry{
+	top=2.5cm,
+	bottom=2.5cm,
+	left=3cm,
+	right=3cm
+}
+
+% ── Colores ──────────────────────────────────────────────────────────────────
+\definecolor{azulUVa}{RGB}{0, 51, 153}
+\definecolor{rojoUVa}{RGB}{193, 0, 60}
+\definecolor{grisClaro}{RGB}{245, 245, 245}
+\definecolor{verdeCodigo}{RGB}{0, 128, 0}
+\definecolor{azulCodigo}{RGB}{0, 0, 255}
+\definecolor{grisComentario}{RGB}{128, 128, 128}
+
+% ── Estilo de código ─────────────────────────────────────────────────────────
+\lstdefinestyle{python}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numberstyle=\tiny\color{gray},
+	numbers=left,
+	numbersep=5pt,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	language=Python,
+	showstringspaces=false,
+	tabsize=4,
+	captionpos=b
+}
+
+\lstdefinestyle{bash}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{verdeCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	language=bash,
+	showstringspaces=false,
+	captionpos=b
+}
+
+\lstdefinestyle{yaml}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	showstringspaces=false,
+	captionpos=b
+}
+
+% ── Cabecera y pie de página ─────────────────────────────────────────────────
 \pagestyle{fancy}
 \fancyhf{}
-\fancyfoot[R]{\thepage}
+\fancyhead[L]{\textcolor{azulUVa}{\small Práctica 2 Pruebas de carga, Locust y Prometheus}}
+\fancyhead[R]{\textcolor{azulUVa}{\small Evaluación de Sistemas Informáticos}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{azulUVa}\leaders\hrule height \headrulewidth\hfill}}
 
-% Formato de títulos
-\usepackage{titlesec}
-\titleformat{\subsection}{\normalfont\large\bfseries}{\hspace{1em}\thesubsection}{1em}{}
-\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\hspace{2em}\thesubsubsection}{1em}{}
+% ── Estilo de títulos ────────────────────────────────────────────────────────
+\titleformat{\section}
+{\large\bfseries\color{azulUVa}}
+{\thesection}{1em}{}[\color{azulUVa}\titlerule]
 
-% Datos de la portada
-\title{\textbf{Entregable 2: DARS}
-\author{\textbf{\small Álvaro López Primo}}
-\date{}
+\titleformat{\subsection}
+{\normalsize\bfseries\color{rojoUVa}}
+{\thesubsection}{1em}{}
+
+% ── Hipervínculos ────────────────────────────────────────────────────────────
+\hypersetup{
+	colorlinks=true,
+	linkcolor=azulUVa,
+	urlcolor=rojoUVa
+}
+
+% ── Datos de la portada ──────────────────────────────────────────────────────
+\title{\textbf{Práctica 2: Pruebas de carga, Locust y Prometheus}}
+\author{\textbf{\small Grupo 16}} % Pon aquí el nombre de los autores
+\date{\today}
 
 \makeatletter
 \let\thetitle\@title
@@ -67,23 +115,463 @@
 \let\thedate\@date
 \makeatother
 
+% ════════════════════════════════════════════════════════════════════════════
 \begin{document}
 	
+	% ── Portada ──────────────────────────────────────────────────────────────────
 	\begin{titlepage}
 		\centering
 		\includegraphics[scale=0.3]{Recursos/UVA-3881270087.pdf}\\[0.5cm]
 		\rule{\linewidth}{0.2mm}\\[0.4cm]
 		{\huge\bfseries \thetitle}\\
 		\rule{\linewidth}{0.2mm}\\[1.5cm]
-		{\Large\bfseries Ingeniería informática}\\[0.3cm]
-		{\Large\bfseries Tecnologías de la información y la comunicación}\\[1cm]
+		{\Large\bfseries Grado en Ingeniería Informática}\\[0.3cm]
+		{\Large\bfseries Evaluación de Sistemas Informáticos}\\[1cm]
 		{\Large \theauthor}\\[1.5cm]
-		{\Large \thedate}
 	\end{titlepage}
 	
-	\renewcommand{\contentsname}{Índice}
-	\tableofcontents 
+	% ── Índice ────────────────────────────────────────────────────────────────────
+	\tableofcontents
 	\newpage
-\section{}
-
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Introducción}
+	
+	Esta práctica tiene como objetivo instrumentar un servidor de autenticación OAuth2
+	con métricas de Prometheus, visualizarlas en Grafana y posteriormente realizar
+	pruebas de carga y estrés con Locust. El trabajo se divide en tres grandes bloques:
+	
+	\begin{enumerate}
+		\item Instrumentación del backend con métricas Prometheus
+		\item Despliegue y configuración de Prometheus y Grafana
+		\item Pruebas de carga y estrés con Locust
+	\end{enumerate}
+	
+	\subsection{Descripción del sistema bajo prueba}
+	
+	El backend proporcionado es un servidor de autenticación OAuth2 desarrollado en
+	Python con Flask y SQLite, que implementa los tres flujos principales definidos
+	en el RFC 6749 de la IETF:
+	
+	\begin{itemize}
+		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde
+		un usuario humano se autentica mediante un formulario de login. El servidor
+		emite un código temporal que posteriormente se canjea por un par de tokens.
+		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a
+		máquina donde no hay un usuario humano. La aplicación se autentica
+		directamente con sus credenciales y obtiene un token de acceso.
+		\item \textbf{Refresh Token}: flujo que permite renovar un token de acceso
+		caducado sin necesidad de repetir el proceso de autenticación completo.
+	\end{itemize}
+	
+	La aplicación se gestiona con \texttt{uv}, un gestor de paquetes moderno para
+	Python, y se ejecuta en el puerto 5001.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Estructura del proyecto}
+	
+	El proyecto está compuesto por los siguientes ficheros:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{>{\ttfamily}lp{9cm}}
+			\toprule
+			\textbf{Fichero} & \textbf{Descripción} \\
+			\midrule
+			app.py & Punto de entrada de la aplicación Flask. Registra blueprints,
+			configura la base de datos y expone el endpoint \texttt{/metrics}. \\
+			oauth2\_routes.py & Implementación de los endpoints OAuth2:
+			\texttt{/authorize} y \texttt{/token}. \\
+			admin\_routes.py & Endpoints de administración bajo \texttt{/admin/clients}
+			para gestionar clientes OAuth2. \\
+			models.py & Capa de acceso a datos: clientes, códigos de autorización
+			y tokens. \\
+			database.py & Gestión de la conexión SQLite y definición del esquema. \\
+			metrics.py & Definición centralizada de todas las métricas Prometheus
+			(fichero creado en esta práctica). \\
+			seed.py & Script de inicialización que crea dos clientes de prueba
+			en la base de datos. \\
+			\bottomrule
+		\end{tabular}
+		\caption{Estructura de ficheros del proyecto}
+	\end{table}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Instrumentación con Prometheus}
+	
+	\subsection{Conceptos previos}
+	
+	Prometheus es una base de datos de series temporales de tipo \textit{pull},
+	lo que significa que es la propia base de datos quien periódicamente consulta
+	a las aplicaciones por sus métricas, en lugar de que las aplicaciones las
+	envíen activamente.
+	
+	Para que Prometheus pueda recoger las métricas, la aplicación debe exponer
+	un endpoint \texttt{/metrics} con los datos en el formato de texto que Prometheus
+	entiende. La librería \texttt{prometheus\_client} para Python se encarga
+	de gestionar este endpoint y formatear los datos automáticamente.
+	
+	Prometheus define cuatro tipos de métricas, de las cuales utilizamos las dos
+	más comunes:
+	
+	\begin{itemize}
+		\item \textbf{Counter}: contador de incremento monotónico. Solo puede
+		crecer. Se usa para contar eventos como peticiones recibidas, tokens
+		emitidos o errores producidos. Por convención, los counters tienen el
+		sufijo \texttt{\_total}.
+		\item \textbf{Gauge}: contador que puede crecer y decrecer. Se usa para
+		valores que fluctúan como memoria usada o conexiones activas.
+	\end{itemize}
+	
+	\subsection{Instalación de la librería}
+	
+	La librería oficial de Prometheus para Python se instala con:
+	
+	\begin{lstlisting}[style=bash]
+		uv add prometheus-client
+	\end{lstlisting}
+	
+	El comando \texttt{uv add} instala la librería y actualiza automáticamente
+	\texttt{pyproject.toml} y \texttt{uv.lock} para registrar la dependencia.
+	
+	\subsection{Definición de métricas — metrics.py}
+	
+	Se crea un fichero \texttt{metrics.py} centralizado con todos los contadores,
+	evitando así importaciones circulares entre módulos:
+	
+	\begin{lstlisting}[style=python, caption=metrics.py]
+		from prometheus_client import Counter
+		
+		# Flujos de autenticacion
+		auth_flows_started = Counter(
+		"oauth2_auth_flows_started_total",
+		"Flujos de autenticacion iniciados",
+		["grant_type"]
+		)
+		auth_flows_success = Counter(
+		"oauth2_auth_flows_success_total",
+		"Flujos de autenticacion completados con exito",
+		["grant_type"]
+		)
+		auth_flows_failed = Counter(
+		"oauth2_auth_flows_failed_total",
+		"Flujos de autenticacion fallidos",
+		["grant_type"]
+		)
+		
+		# Tokens emitidos (general)
+		tokens_issued = Counter(
+		"oauth2_tokens_issued_total",
+		"Tokens emitidos",
+		["token_type", "grant_type"]
+		)
+		
+		# Tokens emitidos (separados por tipo)
+		access_tokens_issued = Counter(
+		"oauth2_access_tokens_issued_total",
+		"Access tokens emitidos",
+		["grant_type"]
+		)
+		refresh_tokens_issued = Counter(
+		"oauth2_refresh_tokens_issued_total",
+		"Refresh tokens emitidos",
+		["grant_type"]
+		)
+		
+		# Llamadas HTTP (general)
+		http_requests = Counter(
+		"oauth2_http_requests_total",
+		"Numero de llamadas HTTP",
+		["method", "endpoint", "status_code"]
+		)
+		
+		# Llamadas HTTP (separadas por endpoint)
+		http_requests_token = Counter(
+		"oauth2_http_requests_token_total",
+		"Llamadas al endpoint /token",
+		["method", "status_code"]
+		)
+		http_requests_authorize = Counter(
+		"oauth2_http_requests_authorize_total",
+		"Llamadas al endpoint /authorize",
+		["method", "status_code"]
+		)
+		http_requests_admin = Counter(
+		"oauth2_http_requests_admin_total",
+		"Llamadas a los endpoints /admin",
+		["method", "status_code"]
+		)
+	\end{lstlisting}
+	
+	Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene
+	valores independientes para cada combinación de etiquetas. Por ejemplo,
+	\texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
+	un contador separado para cada tipo de flujo:
+	
+	\begin{lstlisting}[style=bash]
+		oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
+		oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
+		oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
+	\end{lstlisting}
+	
+	\subsection{Exposición del endpoint /metrics — app.py}
+	
+	Se modifica \texttt{app.py} para exponer el endpoint \texttt{/metrics} y
+	registrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
+	
+	\begin{lstlisting}[style=python, caption=Fragmentos añadidos a app.py]
+		from flask import Flask, request, g
+		from prometheus_client import make_wsgi_app
+		from werkzeug.middleware.dispatcher import DispatcherMiddleware
+		from werkzeug.serving import run_simple
+		import time
+		
+		from metrics import (
+		http_requests,
+		http_requests_token,
+		http_requests_admin,
+		http_requests_authorize
+		)
+		
+		def create_app() -> Flask:
+		# ... configuracion existente ...
+		
+		@app.before_request
+		def before_request():
+		# Guardamos el instante de llegada de la peticion
+		g.start_time = time.time()
+		
+		@app.after_request
+		def after_request(response):
+		endpoint = request.path
+		
+		# Counter general de peticiones HTTP
+		http_requests.labels(
+		method=request.method,
+		endpoint=endpoint,
+		status_code=str(response.status_code)
+		).inc()
+		
+		# Counters especificos por endpoint
+		if "/token" in endpoint:
+		http_requests_token.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		elif "/authorize" in endpoint:
+		http_requests_authorize.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		elif "/admin" in endpoint:
+		http_requests_admin.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		
+		return response
+		
+		return app
+		
+		if __name__ == "__main__":
+		flask_app = create_app()
+		
+		# Combinamos Flask con el endpoint /metrics de Prometheus
+		application = DispatcherMiddleware(flask_app, {
+			"/metrics": make_wsgi_app()
+		})
+		
+		run_simple("0.0.0.0", 5001, application,
+		use_reloader=True, use_debugger=True)
+	\end{lstlisting}
+	
+	Los \textbf{decoradores} \texttt{@before\_request} y \texttt{@after\_request}
+	son hooks de Flask que se ejecutan automáticamente antes y después de cada
+	petición HTTP respectivamente. Esto permite registrar todas las peticiones
+	en un único lugar sin modificar cada ruta individualmente, siguiendo el
+	principio DRY (\textit{Don't Repeat Yourself}).
+	
+	El \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini
+	aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo
+	que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto
+	lo gestiona Flask.
+	
+	\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
+	
+	Se modifica \texttt{oauth2\_routes.py} para incrementar los contadores en
+	cada uno de los tres flujos de autenticación. La lógica es la misma para
+	los tres: se incrementa \texttt{started} al entrar en la función,
+	\texttt{failed} en cada punto de fallo y \texttt{success} junto con los
+	contadores de tokens al completarse con éxito.
+	
+	A continuación se muestra el flujo \texttt{client\_credentials} como ejemplo:
+	
+	\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
+		def _handle_client_credentials():
+		auth_flows_started.labels(
+		grant_type="client_credentials").inc()
+		
+		client_id, err = _authenticate_client()
+		if err:
+		auth_flows_failed.labels(
+		grant_type="client_credentials").inc()
+		return _error_response("invalid_client", err, 401)
+		
+		client = get_client(client_id)
+		if client is None or \
+		"client_credentials" not in client["grant_types"]:
+		auth_flows_failed.labels(
+		grant_type="client_credentials").inc()
+		return _error_response("unauthorized_client",
+		"Client is not authorized for client_credentials")
+		
+		scope = request.form.get("scope", "")
+		token_response = issue_token_pair(
+		client_id=client_id,
+		scope=scope,
+		user_id=None,
+		include_refresh=False,
+		)
+		
+		auth_flows_success.labels(
+		grant_type="client_credentials").inc()
+		tokens_issued.labels(
+		token_type="access",
+		grant_type="client_credentials").inc()
+		access_tokens_issued.labels(
+		grant_type="client_credentials").inc()
+		# client_credentials no emite refresh token (RFC 6749)
+		
+		return jsonify(token_response)
+	\end{lstlisting}
+	
+	Los flujos \texttt{authorization\_code} y \texttt{refresh\_token} siguen
+	la misma lógica pero con más puntos de fallo y emiten además un
+	\texttt{refresh\_token}, por lo que incrementan cinco contadores en lugar
+	de tres al completarse con éxito.
+	
+	\subsection{Verificación del sistema de métricas}
+	
+	Tras arrancar la aplicación y realizar dos peticiones de prueba (una correcta
+	y una con credenciales incorrectas), se verifica el correcto funcionamiento
+	consultando el endpoint \texttt{/metrics}:
+	
+	\begin{lstlisting}[style=bash]
+		curl http://localhost:5001/metrics | grep oauth2
+	\end{lstlisting}
+	
+	Los resultados obtenidos son los esperados:
+	
+	\begin{lstlisting}[style=bash]
+		oauth2_auth_flows_started_total{grant_type="client_credentials"} 2.0
+		oauth2_auth_flows_success_total{grant_type="client_credentials"} 1.0
+		oauth2_auth_flows_failed_total{grant_type="client_credentials"} 1.0
+		oauth2_tokens_issued_total{grant_type="client_credentials",
+			token_type="access"} 1.0
+		oauth2_http_requests_total{endpoint="/token",
+			method="POST",status_code="200"} 1.0
+		oauth2_http_requests_total{endpoint="/token",
+			method="POST",status_code="401"} 1.0
+	\end{lstlisting}
+	
+	Los contadores cuadran perfectamente: 2 flujos iniciados, 1 exitoso
+	(petición correcta) y 1 fallido (credenciales incorrectas). Solo se emitió
+	1 token de acceso, correspondiente al flujo exitoso. No se emitieron
+	refresh tokens porque el flujo \texttt{client\_credentials} no los emite
+	según el RFC 6749.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Despliegue de Prometheus}
+	
+	\subsection{Instalación}
+	
+	Se descarga el binario oficial de Prometheus desde GitHub y se extrae:
+	
+	\begin{lstlisting}[style=bash]
+		wget https://github.com/prometheus/prometheus/releases/download/\
+		v3.3.1/prometheus-3.3.1.linux-amd64.tar.gz
+		tar -xvf prometheus-3.3.1.linux-amd64.tar.gz
+		cd prometheus-3.3.1.linux-amd64
+	\end{lstlisting}
+	
+	\subsection{Configuración}
+	
+	Se edita el fichero \texttt{prometheus.yml} para añadir un nuevo job que
+	apunte a nuestra aplicación en el puerto 5001:
+	
+	\begin{lstlisting}[style=yaml, caption=prometheus.yml]
+		global:
+		# Intervalo de busqueda de metricas en localhost:5001
+		scrape_interval: 15s
+		# Intervalo de evaluacion de reglas de alertas
+		# No se usa en esta practica
+		evaluation_interval: 15s
+		
+		scrape_configs:
+		- job_name: "prometheus"
+		static_configs:
+		- targets: ["localhost:9090"]
+		
+		# Job que apunta a nuestra aplicacion OAuth2
+		- job_name: "oauth2"
+		static_configs:
+		- targets: ["localhost:5001"]
+	\end{lstlisting}
+	
+	El parámetro \texttt{scrape\_interval} define cada cuánto Prometheus va a
+	buscar métricas a la aplicación. El parámetro \texttt{evaluation\_interval}
+	define cada cuánto evalúa las reglas de alertas, que no se utilizan en
+	esta práctica.
+	
+	\subsection{Arranque}
+	
+	\begin{lstlisting}[style=bash]
+		./prometheus --config.file=prometheus.yml
+	\end{lstlisting}
+	
+	Prometheus queda corriendo en el puerto 9090 y empieza a recoger métricas
+	de nuestra aplicación cada 15 segundos.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Conexión con Grafana}
+	
+	\subsection{Arquitectura del sistema}
+	
+	Una vez desplegados los tres componentes, la arquitectura queda así:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccc}
+			\toprule
+			\textbf{Componente} & \textbf{Puerto} & \textbf{Función} \\
+			\midrule
+			App OAuth2 & 5001 & Genera métricas en \texttt{/metrics} \\
+			Prometheus & 9090 & Recoge y almacena las métricas cada 15s \\
+			Grafana    & 3000 & Visualiza las métricas en dashboards \\
+			\bottomrule
+		\end{tabular}
+		\caption{Arquitectura del sistema de monitorización}
+	\end{table}
+	
+	El flujo de datos es el siguiente:
+	
+	\begin{center}
+		\texttt{App OAuth2 (5001)} $\rightarrow$ \texttt{Prometheus (9090)} $\rightarrow$ \texttt{Grafana (3000)}
+	\end{center}
+	
+	\subsection{Configuración del Data Source}
+	
+	Se accede a Grafana en \texttt{http://localhost:3000} y se añade Prometheus
+	como fuente de datos en \textit{Connections > Data Sources > Add data source}.
+	Se configura la URL \texttt{http://localhost:9090} y se verifica la conexión
+	con \textit{Save \& Test}, obteniendo el mensaje:
+	
+	\begin{center}
+		\textit{``Successfully queried the Prometheus API.''}
+	\end{center}
+	
+	Esto confirma que Grafana puede acceder a los datos almacenados en Prometheus
+	y está listo para visualizarlos en dashboards mediante consultas PromQL.
+	
+	% ════════════════════════════════════════════════════════════════════════════
 \end{document}
