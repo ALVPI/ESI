@@ -81,6 +81,7 @@ request_duration = Histogram(
     "oauth2_request_duration_seconds",
     "Tiempo de respuesta de cada peticion",
     ["endpoint", "method"]
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
 )
 
 #Con esto intentamos ver si esta pasando algo raro con los tokens 
@@ -104,15 +105,46 @@ pending_auth_codes = Gauge(
     "Codigos de autorizacion emitidos pero no canjeados"
 )
 
-#Intentos fallios de login, interesante para ver si nos estan intentado hacer un ataque de fuerza bruta
+# Intentos de uso de tokens ya revocados
+# Señal de posible token replay attack
+revoked_token_usage = Counter(
+    "oauth2_revoked_token_usage_total",
+    "Intentos de uso de tokens ya revocados"
+)
+
+# Intentos de uso de tokens expirados
+expired_token_usage = Counter(
+    "oauth2_expired_token_usage_total",
+    "Intentos de uso de tokens expirados"
+)
+
+# Intentos de reutilizacion de codigos de autorizacion ya usados
+# Señal de posible authorization code replay attack
+auth_code_reuse = Counter(
+    "oauth2_auth_code_reuse_total",
+    "Intentos de reutilizacion de codigos ya usados"
+)
+
+# Intentos fallidos de autenticacion por client_id
+# Util para detectar ataques de fuerza bruta contra un cliente concreto
+brute_force_attempts = Counter(
+    "oauth2_brute_force_attempts_total",
+    "Intentos fallidos de autenticacion por cliente",
+    ["client_id"]
+)
+
+# Intentos fallidos de login de usuario
+# Util para detectar ataques de fuerza bruta contra usuarios concretos
 user_auth_failed = Counter(
     "oauth2_user_auth_failed_total",
     "Intentos fallidos de autenticacion de usuario",
-    ["username"]
+    ["username", "client_id"]
 )
 
-#Informacion sobre los clientes de la web activos y que han pedido un token válido.
+# Numero de clientes distintos activos que han pedido tokens validos
 active_clients = Gauge(
     "oauth2_active_clients",
     "Numero de clientes distintos que han pedido tokens"
 )
+
+
