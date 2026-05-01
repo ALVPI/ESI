@@ -200,6 +200,7 @@ cython_debug/
 *.log
 *.out
 *.toc
+*.synctext.gz
 # Marimo
 marimo/_static/
 marimo/_lsp/
