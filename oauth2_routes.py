@@ -248,7 +248,7 @@ def _handle_authorization_code():
         #if the system cannot validate the cliend id we swap into unknown and then the trigger for the metrics
         cid_label = client_id if client_id else "unknown"
         brute_force_attempts.labels(client_id=cid_label).inc()
-        auth_flows_started.labels(grant_type="authorization_code").inc()
+        auth_flows_failed.labels(grant_type="authorization_code").inc()
         return _error_response("invalid_client", err, 401)
     assert client_id is not None  # guaranteed by _authenticate_client
 
@@ -275,8 +275,6 @@ def _handle_authorization_code():
     if code_data["redirect_uri"] != redirect_uri:
         #if there is any errors with the url we increment the failed counter
         auth_flows_failed.labels(grant_type="authorization_code").inc()
-        # could be a reply attack so we cut it
-        auth_code_reuse.inc()
         return _error_response("invalid_grant", "redirect_uri does not match the authorization request")
 
     # The code must have been issued to this client

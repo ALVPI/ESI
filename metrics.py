@@ -73,14 +73,19 @@ http_requests_admin = Counter(
     ["method", "status_code"]
 )
 
-
+#Permite la medicion del numero de request que estan en proceso en este momento
+requests_in_progress = Gauge(
+    "oauth2_requests_in_progress",
+    "Peticiones HTTP en curso en este momento",
+    ["endpoint"]
+)
 
 #Metricas extra para el planteamiento de ser un EDR 
 #Con esto podemos medir el tiempo medio de duracion de un request
 request_duration = Histogram(
     "oauth2_request_duration_seconds",
     "Tiempo de respuesta de cada peticion",
-    ["endpoint", "method"]
+    ["endpoint", "method"],
     # 0.25 es el umbral de 250ms que marca el enunciado como referencia
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
 )

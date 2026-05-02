@@ -17,8 +17,13 @@ from typing import Optional
 from database import get_db, get_standalone_db
 
 #We need this for out metrics
-from metrics import pending_auth_codes, active_tokens, tokens_revoked
-
+from metrics import (
+    pending_auth_codes,
+    active_tokens,
+    tokens_revoked,
+    revoked_token_usage,
+    expired_token_usage
+)
 # ---------------------------------------------------------------------------
 # Hashing helper (SHA-256 — adequate for a demo; use bcrypt in production)
 # ---------------------------------------------------------------------------
@@ -284,8 +289,12 @@ def validate_refresh_token(token: str) -> Optional[dict]:
     data = dict(row)
 
     if data["revoked"]:
+        # If someone is using a token after been revoked replay attack
+        revoked_token_usage.inc()
         return None
     if time.time() > data["expires_at"]:
+        #At this point someone is trying to use a taken that is not longer valid
+        expired_token_usage.inc()
         return None
 
     return data
@@ -305,3 +314,9 @@ def revoke_refresh_token(token: str) -> None:
     db.commit()
     #add 1 to the revoked token
     tokens_revoked.labels(token_type="refresh").inc()
+    #the actual token is revoked too so we add it 
+    tokens_revoked.labels(token_type="access").inc()
+    # Decrement the number of active tokens
+    active_tokens.labels(token_type="refresh").dec()
+    active_tokens.labels(token_type="access").dec()
+
