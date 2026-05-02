@@ -32,7 +32,7 @@ auth_flows_failed = Counter(
 tokens_issued = Counter(
     "oauth2_tokens_issued_total",
     "Tokens emitidos",
-    ["token_type", "grant_type"]
+    ["token_type", "grant_type", "client_id"]
 )
 
 #Tokens emitidos (separados por tipo)

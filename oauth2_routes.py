@@ -292,8 +292,8 @@ def _handle_authorization_code():
     )
     #we increment the successful counters
     auth_flows_success.labels(grant_type="authorization_code").inc()
-    tokens_issued.labels(token_type="access", grant_type="authorization_code").inc()
-    tokens_issued.labels(token_type="refresh", grant_type="authorization_code").inc()
+    tokens_issued.labels(token_type="access", grant_type="authorization_code", client_id=client_id).inc()
+    tokens_issued.labels(token_type="refresh", grant_type="authorization_code", client_id=client_id).inc()
     access_tokens_issued.labels(grant_type="authorization_code").inc()
     refresh_tokens_issued.labels(grant_type="authorization_code").inc()
 
@@ -335,8 +335,8 @@ def _handle_client_credentials():
     )
 
     auth_flows_success.labels(grant_type="client_credentials").inc() #increment the valid access count
-    tokens_issued.labels(token_type="access", grant_type="client_credentials").inc() #increment the counter of generate tokens
-    access_tokens_issued.labels(grant_type="client_credentials").inc() #increment the counter of access token (bc we have the distintions on our metrics.py)
+    tokens_issued.labels(token_type="access", grant_type="client_credentials",client_id=client_id).inc() #increment the counter of generate tokens
+    access_tokens_issued.labels(grant_type="client_credentials",).inc() #increment the counter of access token (bc we have the distintions on our metrics.py)
 
     return jsonify(token_response)
 
@@ -366,8 +366,6 @@ def _handle_refresh_token():
     if token_data is None:
         #if there is any errors with the validation of the token data we increment the failed counter
         auth_flows_failed.labels(grant_type="refresh_token").inc()
-        #At this point we add a death token use
-        expired_token_usage.inc()
         return _error_response("invalid_grant", "Refresh token is invalid, expired, or revoked")
 
     # The refresh token must belong to this client
@@ -389,8 +387,8 @@ def _handle_refresh_token():
     )
     #if there is any error, we increment the counter of successful token
     auth_flows_success.labels(grant_type="refresh_token").inc()
-    tokens_issued.labels(token_type="access", grant_type="refresh_token").inc()
-    tokens_issued.labels(token_type="refresh", grant_type="refresh_token").inc()
+    tokens_issued.labels(token_type="access", grant_type="refresh_token", client_id=client_id).inc()
+    tokens_issued.labels(token_type="refresh", grant_type="refresh_token", client_id=client_id).inc()
     access_tokens_issued.labels(grant_type="refresh_token").inc()
     refresh_tokens_issued.labels(grant_type="refresh_token").inc()
 

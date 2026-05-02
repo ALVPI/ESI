@@ -23,7 +23,9 @@ from metrics import (
         http_requests,
         http_requests_token,
         http_requests_admin,
-        http_requests_authorize
+        http_requests_authorize,
+        request_duration,
+        requests_in_progress
 )
 
 from werkzeug.serving import run_simple
@@ -61,7 +63,7 @@ def create_app() -> Flask:
     def before_request():
         # Store the moment of the request arrives
         g.start_time = time.time()
-
+        requests_in_progress.labels(endpoint=request.path).inc()
     #This force that every request must execute this methods 
     @app.after_request
     def after_request(response):
@@ -91,7 +93,13 @@ def create_app() -> Flask:
                 method=request.method,
                 status_code=str(response.status_code)
             ).inc()
-
+        requests_in_progress.labels(endpoint=request.path).dec()
+        # Calc and store the request duration
+        duration = time.time() - g.start_time
+        request_duration.labels(
+            endpoint=request.path,
+            method=request.method
+        ).observe(duration)
         return response
 
     return app

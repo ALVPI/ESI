@@ -21,6 +21,7 @@ from metrics import (
     pending_auth_codes,
     active_tokens,
     tokens_revoked,
+    auth_code_reuse,
     revoked_token_usage,
     expired_token_usage
 )
@@ -178,6 +179,7 @@ def consume_authorization_code(code: str) -> Optional[dict]:
 
     # Already used — RFC 6749 §4.1.2 requires single-use codes
     if data["used"]:
+        auth_code_reuse.inc()
         return None
 
     # Expired
