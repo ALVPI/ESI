@@ -147,10 +147,5 @@ user_auth_failed = Counter(
     ["username", "client_id"]
 )
 
-# Numero de clientes distintos activos que han pedido tokens validos
-active_clients = Gauge(
-    "oauth2_active_clients",
-    "Numero de clientes distintos que han pedido tokens"
-)
 
 
