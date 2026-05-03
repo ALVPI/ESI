@@ -59,6 +59,25 @@
 	columns=fullflexible % Ayuda a manejar mejor el espaciado de caracteres UTF-8
 }
 
+\lstdefinestyle{yaml}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	showstringspaces=false,
+	captionpos=b,
+	% --- Traducción de caracteres para Mac/UTF-8 ---
+	extendedchars=true,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
+}
+
 \lstdefinestyle{bash}{
 	backgroundcolor=\color{grisClaro},
 	basicstyle=\ttfamily\small,
@@ -146,7 +165,7 @@
 	% ════════════════════════════════════════════════════════════════════════════
 	\section{Introducción}
 	
-	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el servidor  por excelencia para hacer de mediación en la tarea de distribución de claves de acceso sobre el que realizaremos pruebas de carga con Locust, el cual es un sistema de monitorización que aplica el modelo \textit{pull}, el cual, está apuntando a nuestro \textit{endpoint} y cada 15 segundos anota todo lo que está pasando, estos eventos serán visualizados posteriomente  en Grafana.\\
+	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el servidor  por excelencia para hacer de mediación en la tarea de distribución de claves de acceso sobre el que realizaremos pruebas de carga con Locust, el cual es un sistema de monitorización que aplica el modelo \textit{pull}, el cual, está apuntando a nuestro \textit{endpoint} y cada 15 segundos (según lo definido en su \textit{.yml}) anota todo lo que está pasando, estos eventos serán visualizados posteriomente  en Grafana.\\
 	De tal manera que tenemos 3 objetivos:
 	\begin{enumerate}
 		\item Instrumentación del backend con métricas Prometheus (haremos incapie en esta tecnología en \ref{PO}).
