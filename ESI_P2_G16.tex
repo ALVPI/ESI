@@ -1,5 +1,6 @@
 \documentclass[12pt, a4paper]{article}
-
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 % ── Paquetes ────────────────────────────────────────────────────────────────
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -18,10 +19,10 @@
 
 % ── Geometría de página ──────────────────────────────────────────────────────
 \geometry{
-	top=2.5cm,
-	bottom=2.5cm,
-	left=3cm,
-	right=3cm
+	top=2cm,
+	bottom=2cm,
+	left=1.5cm,
+	right=1.5cm
 }
 
 % ── Colores ──────────────────────────────────────────────────────────────────
@@ -137,21 +138,19 @@
 	% ════════════════════════════════════════════════════════════════════════════
 	\section{Introducción}
 	
-	Esta práctica tiene como objetivo instrumentar un servidor de autenticación OAuth2
-	con métricas de Prometheus, visualizarlas en Grafana y posteriormente realizar
-	pruebas de carga y estrés con Locust. El trabajo se divide en tres grandes bloques:
-	
+	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el servidor  por excelencia para hacer de mediación en la tarea de distribución de claves de acceso sobre el que realizaremos pruebas de carga con Locust, el cual es un sistema de monitorización que aplica el modelo \textit{pull}, el cual, está apuntando a nuestro \textit{endpoint} y cada 15 segundos anota todo lo que está pasando, estos eventos serán visualizados posteriomente  en Grafana.\\
+	De tal manera que tenemos 3 objetivos:
 	\begin{enumerate}
-		\item Instrumentación del backend con métricas Prometheus
-		\item Despliegue y configuración de Prometheus y Grafana
-		\item Pruebas de carga y estrés con Locust
+		\item Instrumentación del backend con métricas Prometheus (haremos incapie en esta tecnología en \ref{PO}).
+		\item Despliegue y configuración de Prometheus y Grafana.
+		\item Pruebas de carga y estrés con Locust.
 	\end{enumerate}
 	
 	\subsection{Descripción del sistema bajo prueba}
 	
 	El backend proporcionado es un servidor de autenticación OAuth2 desarrollado en
 	Python con Flask y SQLite, que implementa los tres flujos principales definidos
-	en el RFC 6749 de la IETF:
+	en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
 	
 	\begin{itemize}
 		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde
@@ -164,13 +163,12 @@
 		caducado sin necesidad de repetir el proceso de autenticación completo.
 	\end{itemize}
 	
-	La aplicación se gestiona con \texttt{uv}, un gestor de paquetes moderno para
-	Python, y se ejecuta en el puerto 5001.
+	La aplicación se gestiona con \texttt{uv}, el cual ya empleamos en nuestra primera práctica y como se explicó en el informe es un gestor de paquetes para Python más moderno que el típico pip, y se ejecuta en el puerto 5001.
 	
 	% ════════════════════════════════════════════════════════════════════════════
 	\section{Estructura del proyecto}
 	
-	El proyecto está compuesto por los siguientes ficheros:
+	Para entender el proyecto vamos a ver qué hacen los ficheros que han sido proporcionados por el profesor y los que hemos tenido que crear para el mismo:
 	
 	\begin{table}[H]
 		\centering
@@ -195,25 +193,21 @@
 		\end{tabular}
 		\caption{Estructura de ficheros del proyecto}
 	\end{table}
-	
+
 	% ════════════════════════════════════════════════════════════════════════════
-	\section{Instrumentación con Prometheus}
-	
-	\subsection{Conceptos previos}
+\section{Prometheus}\label{PO}
 	
 	Prometheus es una base de datos de series temporales de tipo \textit{pull},
-	lo que significa que es la propia base de datos quien periódicamente consulta
-	a las aplicaciones por sus métricas, en lugar de que las aplicaciones las
-	envíen activamente.
+	esto quiere decir que es la propia base de datos quien periódicamente consulta
+	a las aplicaciones por sus métricas, de tal manera que las aplicaciones toman un papel pasivo, donde solo se encagan de realizar sus tareas y sólo tiene que exponer un \textit{enpoint} llamado \textit{/metrics} con los datos en el mismo formato que emplea esta tecnología.\\
+	Para lograr esto vamos a emplear una librería de Python, \texttt{prometheus\_client} la cual  se encarga de gestionar este endpoint y formatear los datos automáticamente. 
+	\begin{lstlisting}[style=bash]
+		uv add prometheus-client
+	\end{lstlisting}
+	Aquí uv juega un papel fundamental, puesto que de \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}
 	
-	Para que Prometheus pueda recoger las métricas, la aplicación debe exponer
-	un endpoint \texttt{/metrics} con los datos en el formato de texto que Prometheus
-	entiende. La librería \texttt{prometheus\_client} para Python se encarga
-	de gestionar este endpoint y formatear los datos automáticamente.
-	
-	Prometheus define cuatro tipos de métricas, de las cuales utilizamos las dos
-	más comunes:
-	
+	\subsubsection{Funciones/Métricas que vamos a emplear en la práctica}
+	Emplearemos 2 de las 4 métricas que nos proporciona la apliación, puesto que son las que más se adaptan al planteamiento que tenemos para la práctica:
 	\begin{itemize}
 		\item \textbf{Counter}: contador de incremento monotónico. Solo puede
 		crecer. Se usa para contar eventos como peticiones recibidas, tokens
@@ -222,22 +216,24 @@
 		\item \textbf{Gauge}: contador que puede crecer y decrecer. Se usa para
 		valores que fluctúan como memoria usada o conexiones activas.
 	\end{itemize}
+	\newpage
 	
-	\subsection{Instalación de la librería}
+\section{Definición de las métricas que vamos a recoger}
 	
-	La librería oficial de Prometheus para Python se instala con:
-	
-	\begin{lstlisting}[style=bash]
-		uv add prometheus-client
-	\end{lstlisting}
-	
-	El comando \texttt{uv add} instala la librería y actualiza automáticamente
-	\texttt{pyproject.toml} y \texttt{uv.lock} para registrar la dependencia.
-	
-	\subsection{Definición de métricas — metrics.py}
-	
-	Se crea un fichero \texttt{metrics.py} centralizado con todos los contadores,
-	evitando así importaciones circulares entre módulos:
+	Hemos creado un fichero \textit{metrics.py} en el que hemos creado todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
+	Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en el último importamos fucniones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
+	\subsection{Sintaxis de los contadores}
+	Antes de mostrar todos los contadores, vamos a explicar un poco la sintaxis de este fichero, puesto que es una tecnología nueva, que al menos en la carrera no hemos tocado mucho:
+	\begin{itemize}
+		
+		\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
+		\item "oauth2\_auth\_flows\_started\_total": nombre de la métrica para su posterior integración con grafana
+		\item "Flujos de autenticacion iniciados", : descripción de la metrica
+		\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
+		)
+	\end{itemize}
+	\vspace{1cm}
+
 	
 	\begin{lstlisting}[style=python, caption=metrics.py]
 		from prometheus_client import Counter
