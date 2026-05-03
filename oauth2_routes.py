@@ -44,9 +44,7 @@ from metrics import (
     refresh_tokens_issued,
     brute_force_attempts,
     user_auth_failed,
-    auth_code_reuse,
-    revoked_token_usage,
-    expired_token_usage
+    auth_code_reuse
 )
 
 oauth2 = Blueprint("oauth2", __name__)
@@ -292,8 +290,8 @@ def _handle_authorization_code():
     )
     #we increment the successful counters
     auth_flows_success.labels(grant_type="authorization_code").inc()
-    tokens_issued.labels(token_type="access", grant_type="authorization_code", client_id=client_id).inc()
-    tokens_issued.labels(token_type="refresh", grant_type="authorization_code", client_id=client_id).inc()
+    tokens_issued.labels(token_type="access", grant_type="authorization_code").inc()
+    tokens_issued.labels(token_type="refresh", grant_type="authorization_code").inc()
     access_tokens_issued.labels(grant_type="authorization_code").inc()
     refresh_tokens_issued.labels(grant_type="authorization_code").inc()
 
@@ -309,11 +307,13 @@ def _handle_client_credentials():
     auth_flows_started.labels(grant_type="client_credentials").inc()
     #client id or an error if there is no user with that credencials
     client_id, err = _authenticate_client()
-
     if err:
         #if there is an error with client credentials we increment the failed login counter
         auth_flows_failed.labels(grant_type="client_credentials").inc()
+        cid_label = request.form.get("client_id", "unknown")
+        brute_force_attempts.labels(client_id=cid_label).inc()
         return _error_response("invalid_client", err, 401) #401=unauthorized access
+
     assert client_id is not None  # guaranteed by _authenticate_client
 
     #We get the client of the cliend_id
@@ -335,8 +335,8 @@ def _handle_client_credentials():
     )
 
     auth_flows_success.labels(grant_type="client_credentials").inc() #increment the valid access count
-    tokens_issued.labels(token_type="access", grant_type="client_credentials",client_id=client_id).inc() #increment the counter of generate tokens
-    access_tokens_issued.labels(grant_type="client_credentials",).inc() #increment the counter of access token (bc we have the distintions on our metrics.py)
+    tokens_issued.labels(token_type="access", grant_type="client_credentials").inc() #increment the counter of generate tokens
+    access_tokens_issued.labels(grant_type="client_credentials").inc() #increment the counter of access token (bc we have the distintions on our metrics.py)
 
     return jsonify(token_response)
 
@@ -353,7 +353,10 @@ def _handle_refresh_token():
     if err:
         #if there is any errors with the authentication of the client we increment the failed counter
         auth_flows_failed.labels(grant_type="refresh_token").inc()
+        cid_label = request.form.get("client_id", "unknown")
+        brute_force_attempts.labels(client_id=cid_label).inc()
         return _error_response("invalid_client", err, 401)
+
     assert client_id is not None  # guaranteed by _authenticate_client
 
     refresh_token_value = request.form.get("refresh_token")
@@ -385,10 +388,10 @@ def _handle_refresh_token():
         user_id=token_data["user_id"],
         include_refresh=True,
     )
-    #if there is any error, we increment the counter of successful token
+    #if there is no error, we increment the counter of successful token
     auth_flows_success.labels(grant_type="refresh_token").inc()
-    tokens_issued.labels(token_type="access", grant_type="refresh_token", client_id=client_id).inc()
-    tokens_issued.labels(token_type="refresh", grant_type="refresh_token", client_id=client_id).inc()
+    tokens_issued.labels(token_type="access", grant_type="refresh_token").inc()
+    tokens_issued.labels(token_type="refresh", grant_type="refresh_token").inc()
     access_tokens_issued.labels(grant_type="refresh_token").inc()
     refresh_tokens_issued.labels(grant_type="refresh_token").inc()
 
