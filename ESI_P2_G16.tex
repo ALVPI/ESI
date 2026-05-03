@@ -16,7 +16,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{float}
-
+\usepackage{textcomp}
 % ── Geometría de página ──────────────────────────────────────────────────────
 \geometry{
 	top=2cm,
@@ -34,6 +34,7 @@
 \definecolor{grisComentario}{RGB}{128, 128, 128}
 
 % ── Estilo de código ─────────────────────────────────────────────────────────
+
 \lstdefinestyle{python}{
 	backgroundcolor=\color{grisClaro},
 	basicstyle=\ttfamily\small,
@@ -49,7 +50,13 @@
 	language=Python,
 	showstringspaces=false,
 	tabsize=4,
-	captionpos=b
+	captionpos=b,
+	extendedchars=true,
+	% Esta sección traduce los caracteres problemáticos de Mac a algo que LaTeX entiende
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1,
+	columns=fullflexible % Ayuda a manejar mejor el espaciado de caracteres UTF-8
 }
 
 \lstdefinestyle{bash}{
@@ -79,6 +86,7 @@
 	showstringspaces=false,
 	captionpos=b
 }
+
 
 % ── Cabecera y pie de página ─────────────────────────────────────────────────
 \pagestyle{fancy}
@@ -233,71 +241,12 @@
 		)
 	\end{itemize}
 	\vspace{1cm}
+	\lstinputlisting[style=python]{./metrics.py}
+	\vspace{1cm}
+	
 
 	
-	\begin{lstlisting}[style=python, caption=metrics.py]
-		from prometheus_client import Counter
-		
-		# Flujos de autenticacion
-		auth_flows_started = Counter(
-		"oauth2_auth_flows_started_total",
-		"Flujos de autenticacion iniciados",
-		["grant_type"]
-		)
-		auth_flows_success = Counter(
-		"oauth2_auth_flows_success_total",
-		"Flujos de autenticacion completados con exito",
-		["grant_type"]
-		)
-		auth_flows_failed = Counter(
-		"oauth2_auth_flows_failed_total",
-		"Flujos de autenticacion fallidos",
-		["grant_type"]
-		)
-		
-		# Tokens emitidos (general)
-		tokens_issued = Counter(
-		"oauth2_tokens_issued_total",
-		"Tokens emitidos",
-		["token_type", "grant_type"]
-		)
-		
-		# Tokens emitidos (separados por tipo)
-		access_tokens_issued = Counter(
-		"oauth2_access_tokens_issued_total",
-		"Access tokens emitidos",
-		["grant_type"]
-		)
-		refresh_tokens_issued = Counter(
-		"oauth2_refresh_tokens_issued_total",
-		"Refresh tokens emitidos",
-		["grant_type"]
-		)
-		
-		# Llamadas HTTP (general)
-		http_requests = Counter(
-		"oauth2_http_requests_total",
-		"Numero de llamadas HTTP",
-		["method", "endpoint", "status_code"]
-		)
-		
-		# Llamadas HTTP (separadas por endpoint)
-		http_requests_token = Counter(
-		"oauth2_http_requests_token_total",
-		"Llamadas al endpoint /token",
-		["method", "status_code"]
-		)
-		http_requests_authorize = Counter(
-		"oauth2_http_requests_authorize_total",
-		"Llamadas al endpoint /authorize",
-		["method", "status_code"]
-		)
-		http_requests_admin = Counter(
-		"oauth2_http_requests_admin_total",
-		"Llamadas a los endpoints /admin",
-		["method", "status_code"]
-		)
-	\end{lstlisting}
+	
 	
 	Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene
 	valores independientes para cada combinación de etiquetas. Por ejemplo,
@@ -315,71 +264,9 @@
 	Se modifica \texttt{app.py} para exponer el endpoint \texttt{/metrics} y
 	registrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
 	
-	\begin{lstlisting}[style=python, caption=Fragmentos añadidos a app.py]
-		from flask import Flask, request, g
-		from prometheus_client import make_wsgi_app
-		from werkzeug.middleware.dispatcher import DispatcherMiddleware
-		from werkzeug.serving import run_simple
-		import time
-		
-		from metrics import (
-		http_requests,
-		http_requests_token,
-		http_requests_admin,
-		http_requests_authorize
-		)
-		
-		def create_app() -> Flask:
-		# ... configuracion existente ...
-		
-		@app.before_request
-		def before_request():
-		# Guardamos el instante de llegada de la peticion
-		g.start_time = time.time()
-		
-		@app.after_request
-		def after_request(response):
-		endpoint = request.path
-		
-		# Counter general de peticiones HTTP
-		http_requests.labels(
-		method=request.method,
-		endpoint=endpoint,
-		status_code=str(response.status_code)
-		).inc()
-		
-		# Counters especificos por endpoint
-		if "/token" in endpoint:
-		http_requests_token.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
-		elif "/authorize" in endpoint:
-		http_requests_authorize.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
-		elif "/admin" in endpoint:
-		http_requests_admin.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
-		
-		return response
-		
-		return app
-		
-		if __name__ == "__main__":
-		flask_app = create_app()
-		
-		# Combinamos Flask con el endpoint /metrics de Prometheus
-		application = DispatcherMiddleware(flask_app, {
-			"/metrics": make_wsgi_app()
-		})
-		
-		run_simple("0.0.0.0", 5001, application,
-		use_reloader=True, use_debugger=True)
-	\end{lstlisting}
+	\vspace{1cm}
+	\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+	\vspace{1cm}
 	
 	Los \textbf{decoradores} \texttt{@before\_request} y \texttt{@after\_request}
 	son hooks de Flask que se ejecutan automáticamente antes y después de cada
@@ -495,25 +382,9 @@
 	Se edita el fichero \texttt{prometheus.yml} para añadir un nuevo job que
 	apunte a nuestra aplicación en el puerto 5001:
 	
-	\begin{lstlisting}[style=yaml, caption=prometheus.yml]
-		global:
-		# Intervalo de busqueda de metricas en localhost:5001
-		scrape_interval: 15s
-		# Intervalo de evaluacion de reglas de alertas
-		# No se usa en esta practica
-		evaluation_interval: 15s
-		
-		scrape_configs:
-		- job_name: "prometheus"
-		static_configs:
-		- targets: ["localhost:9090"]
-		
-		# Job que apunta a nuestra aplicacion OAuth2
-		- job_name: "oauth2"
-		static_configs:
-		- targets: ["localhost:5001"]
-	\end{lstlisting}
-	
+	\vspace{1cm}
+	\lstinputlisting[style=yaml, caption=Configuración de Prometheus]{prometheus.yml}
+	\vspace{1cm}
 	El parámetro \texttt{scrape\_interval} define cada cuánto Prometheus va a
 	buscar métricas a la aplicación. El parámetro \texttt{evaluation\_interval}
 	define cada cuánto evalúa las reglas de alertas, que no se utilizan en
