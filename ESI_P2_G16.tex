@@ -458,6 +458,22 @@
 	
 	Esto confirma que Grafana puede acceder a los datos almacenados en Prometheus
 	y está listo para visualizarlos en dashboards mediante consultas PromQL.
-	
-	% ════════════════════════════════════════════════════════════════════════════
+\section{Locust }
+Una vez que ya teníamos todo configurado vamos a ver como hacemos las pruebas de carga para las métricas.\\
+Planteamos esta primera versión:
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_Fulco.py}
+\vspace{1cm}
+La cuál presentaba esta lista de problemas 
+Problema 1 — brute\_force\_user\_login nunca llegaba a comprobar el usuario
+Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
+Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
+Problema 1 — brute\_force\_use\_login nunca llegaba a comprobar el usuario
+Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
+Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
+Problema 3 — Nunca probabas revoked\_token\_usage
+Esta es una de tus métricas EDR más importantes pero nunca la ejercitabas. Sin una tarea que intente usar un token inválido como refresh token, esa métrica siempre valdría cero en Grafana durante las pruebas de carga.
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+\vspace{1cm}
 \end{document}

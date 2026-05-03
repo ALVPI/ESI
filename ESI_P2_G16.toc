@@ -16,3 +16,4 @@
 \contentsline {section}{\numberline {6}Conexión con Grafana}{12}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Arquitectura del sistema}{12}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Configuración del Data Source}{13}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Locust }{13}{section.7}%
