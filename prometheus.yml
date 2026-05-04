@@ -1,5 +1,5 @@
 global:
-  #intervalo de búsqueda de las metricas en el localhost 5001
+  #intervalo de busqueda de las metricas en el localhost 5001
   scrape_interval: 15s
   #intervalo de evaluacion de las reglas, para que nos llame grafana si se lia
   #no lo vamos a emplear en la practica
