@@ -17,3 +17,26 @@
 \contentsline {subsection}{\numberline {6.1}Arquitectura del sistema}{12}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Configuración del Data Source}{13}{subsection.6.2}%
 \contentsline {section}{\numberline {7}Locust }{13}{section.7}%
+\contentsline {section}{\numberline {8}Enfoque EDR del sistema de métricas}{25}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Motivación}{25}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Métricas adicionales implementadas}{26}{subsection.8.2}%
+\contentsline {subsubsection}{\numberline {8.2.1}Categoría 1 — Rendimiento del sistema}{26}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.2}Categoría 2 — Estado de tokens}{26}{subsubsection.8.2.2}%
+\contentsline {subsubsection}{\numberline {8.2.3}Categoría 3 — Detección de ataques}{27}{subsubsection.8.2.3}%
+\contentsline {section}{\numberline {9}Modificaciones a metrics.py}{27}{section.9}%
+\contentsline {section}{\numberline {10}Modificaciones a models.py}{27}{section.10}%
+\contentsline {subsection}{\numberline {10.1}store\_authorization\_code}{27}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}consume\_authorization\_code}{28}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}issue\_token\_pair}{28}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}validate\_refresh\_token}{28}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}revoke\_refresh\_token}{29}{subsection.10.5}%
+\contentsline {section}{\numberline {11}Modificaciones a app.py}{29}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Exposición del endpoint /metrics}{29}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Registro automático de métricas HTTP}{30}{subsection.11.2}%
+\contentsline {section}{\numberline {12}Pruebas de carga con Locust}{31}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Instalación}{31}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Diseño del locustfile}{31}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Descripción de cada tarea}{32}{subsection.12.3}%
+\contentsline {subsection}{\numberline {12.4}Configuración de las pruebas}{32}{subsection.12.4}%
+\contentsline {subsection}{\numberline {12.5}Protección de la VM durante las pruebas}{32}{subsection.12.5}%
+\contentsline {section}{\numberline {13}Verificación manual de métricas}{33}{section.13}%

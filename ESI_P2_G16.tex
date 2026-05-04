@@ -220,9 +220,9 @@
 		\end{tabular}
 		\caption{Estructura de ficheros del proyecto}
 	\end{table}
-
+	
 	% ════════════════════════════════════════════════════════════════════════════
-\section{Prometheus}\label{PO}
+	\section{Prometheus}\label{PO}
 	
 	Prometheus es una base de datos de series temporales de tipo \textit{pull},
 	esto quiere decir que es la propia base de datos quien periódicamente consulta
@@ -245,7 +245,7 @@
 	\end{itemize}
 	\newpage
 	
-\section{Definición de las métricas que vamos a recoger}
+	\section{Definición de las métricas que vamos a recoger}
 	
 	Hemos creado un fichero \textit{metrics.py} en el que hemos creado todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
 	Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en el último importamos fucniones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
@@ -263,7 +263,7 @@
 	\lstinputlisting[style=python]{./metrics.py}
 	\vspace{1cm}
 	
-
+	
 	
 	
 	
@@ -458,22 +458,519 @@
 	
 	Esto confirma que Grafana puede acceder a los datos almacenados en Prometheus
 	y está listo para visualizarlos en dashboards mediante consultas PromQL.
-\section{Locust }
-Una vez que ya teníamos todo configurado vamos a ver como hacemos las pruebas de carga para las métricas.\\
-Planteamos esta primera versión:
-\vspace{1cm}
-\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_Fulco.py}
-\vspace{1cm}
-La cuál presentaba esta lista de problemas 
-Problema 1 — brute\_force\_user\_login nunca llegaba a comprobar el usuario
-Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
-Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
-Problema 1 — brute\_force\_use\_login nunca llegaba a comprobar el usuario
-Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
-Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
-Problema 3 — Nunca probabas revoked\_token\_usage
-Esta es una de tus métricas EDR más importantes pero nunca la ejercitabas. Sin una tarea que intente usar un token inválido como refresh token, esa métrica siempre valdría cero en Grafana durante las pruebas de carga.
-\vspace{1cm}
-\lstinputlisting[style=python, inputencoding=latin1]{app.py}
-\vspace{1cm}
+	\section{Locust }
+	Una vez que ya teníamos todo configurado vamos a ver como hacemos las pruebas de carga para las métricas.\\
+	Planteamos esta primera versión:
+	\vspace{1cm}
+	\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_Fulco.py}
+	\vspace{1cm}
+	La cuál presentaba esta lista de problemas 
+	Problema 1 — brute\_force\_user\_login nunca llegaba a comprobar el usuario
+	Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
+	Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
+	Problema 1 — brute\_force\_use\_login nunca llegaba a comprobar el usuario
+	Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
+	Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
+	Problema 3 — Nunca probabas revoked\_token\_usage
+	Esta es una de tus métricas EDR más importantes pero nunca la ejercitabas. Sin una tarea que intente usar un token inválido como refresh token, esa métrica siempre valdría cero en Grafana durante las pruebas de carga.
+	\vspace{1cm}
+	\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+	\vspace{1cm}
+	
+	% ── Cabecera del documento ───────────────────────────────────────────────────
+	\begin{center}
+		{\Large\bfseries\color{azulUVa} Práctica 2 — Parte II\par}
+		\vspace{0.3cm}
+		{\large\color{rojoUVa} Instrumentación EDR, Modificaciones y Locust\par}
+		\vspace{0.3cm}
+		\rule{\textwidth}{0.5pt}
+	\end{center}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Enfoque EDR del sistema de métricas}
+	
+	\subsection{Motivación}
+	
+	El enunciado de la práctica señala explícitamente que uno de los objetivos
+	de las pruebas de carga es identificar \textit{``si surgen fallos de seguridad
+		fruto del alto nivel de carga''} y que \textit{``se podrán añadir métricas
+		adicionales''}. Partiendo de este punto, se ha optado por un enfoque orientado
+	a la seguridad, inspirado en los sistemas EDR (\textit{Endpoint Detection and
+		Response}), que permite detectar comportamientos anómalos en tiempo real
+	durante las pruebas de carga.
+	
+	Un sistema EDR monitoriza eventos de seguridad en tiempo real para detectar
+	patrones de ataque como fuerza bruta, reutilización de tokens o intentos de
+	acceso con credenciales comprometidas. Prometheus y Grafana permiten replicar
+	este comportamiento de forma sencilla sobre el servidor OAuth2.
+	
+	\subsection{Métricas adicionales implementadas}
+	
+	Se han añadido tres categorías de métricas adicionales sobre las requeridas
+	por el enunciado:
+	
+	\subsubsection{Categoría 1 — Rendimiento del sistema}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+			\toprule
+			\textbf{Métrica} & \textbf{Descripción} \\
+			\midrule
+			oauth2\_request\_duration\_seconds & Histogram del tiempo de respuesta por
+			endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
+			fija en 250ms como umbral de referencia. \\
+			oauth2\_requests\_in\_progress & Gauge de peticiones HTTP simultáneas en
+			curso en este momento. Útil para detectar ataques DoS bajo pruebas de estrés. \\
+			\bottomrule
+		\end{tabular}
+		\caption{Métricas de rendimiento}
+	\end{table}
+	
+	\subsubsection{Categoría 2 — Estado de tokens}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+			\toprule
+			\textbf{Métrica} & \textbf{Descripción} \\
+			\midrule
+			oauth2\_active\_tokens & Gauge de tokens activos en el sistema por tipo.
+			Sube al emitir tokens y baja al revocarlos. \\
+			oauth2\_tokens\_revoked\_total & Counter de tokens revocados por tipo.
+			Refleja la rotación de tokens en el flujo refresh\_token. \\
+			oauth2\_pending\_auth\_codes & Gauge de códigos de autorización emitidos
+			pero no canjeados todavía. Un valor creciente indica clientes que piden
+			códigos sin completar el flujo. \\
+			oauth2\_revoked\_token\_usage\_total & Counter de intentos de uso de tokens
+			ya revocados. Señal de posible token replay attack. \\
+			oauth2\_expired\_token\_usage\_total & Counter de intentos de uso de tokens
+			expirados. \\
+			oauth2\_auth\_code\_reuse\_total & Counter de intentos de reutilización de
+			códigos de autorización ya consumidos. Señal de authorization code replay
+			attack. \\
+			\bottomrule
+		\end{tabular}
+		\caption{Métricas de estado de tokens}
+	\end{table}
+	
+	\subsubsection{Categoría 3 — Detección de ataques}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+			\toprule
+			\textbf{Métrica} & \textbf{Descripción} \\
+			\midrule
+			oauth2\_brute\_force\_attempts\_total & Counter de intentos fallidos de
+			autenticación por client\_id. Detecta ataques de fuerza bruta M2M. \\
+			oauth2\_user\_auth\_failed\_total & Counter de intentos fallidos de login
+			por username y client\_id. Detecta ataques de fuerza bruta sobre usuarios. \\
+			\bottomrule
+		\end{tabular}
+		\caption{Métricas de detección de ataques}
+	\end{table}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Modificaciones a metrics.py}
+	
+	El fichero \texttt{metrics.py} centraliza la definición de todos los contadores.
+	Se han añadido los tres tipos de métricas de Prometheus: \texttt{Counter},
+	\texttt{Histogram} y \texttt{Gauge}.
+	
+	El \texttt{Histogram} requiere la definición explícita de \textit{buckets},
+	que son los intervalos de tiempo en los que se agrupan las mediciones. Se han
+	elegido buckets optimizados para una aplicación web, incluyendo el valor
+	\texttt{0.25} que corresponde al umbral de 250ms mencionado en el enunciado:
+	
+	\begin{lstlisting}[style=python, caption=Histogram con buckets para web]
+		request_duration = Histogram(
+		"oauth2_request_duration_seconds",
+		"Tiempo de respuesta de cada peticion",
+		["endpoint", "method"],
+		# 0.25 es el umbral de 250ms que marca el enunciado
+		buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+		)
+	\end{lstlisting}
+	
+	Una decisión de diseño importante fue no añadir \texttt{client\_id} como
+	etiqueta en \texttt{tokens\_issued}. Aunque inicialmente se contempló para
+	tener información por cliente, se descartó porque Prometheus crea una serie
+	temporal por cada combinación única de etiquetas. Con una etiqueta de alta
+	cardinalidad como \texttt{client\_id} el número de series crecería
+	proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM
+	podría causar problemas de memoria durante las pruebas de carga.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Modificaciones a models.py}
+	
+	\texttt{models.py} es la capa de acceso a datos. Se ha instrumentado con
+	métricas en cuatro funciones:
+	
+	\subsection{store\_authorization\_code}
+	
+	Se incrementa \texttt{pending\_auth\_codes} cada vez que se genera un código
+	de autorización, reflejando que existe un código emitido pero no canjeado:
+	
+	\begin{lstlisting}[style=python, caption=Instrumentacion de store\_authorization\_code]
+		def store_authorization_code(...) -> str:
+		# ... codigo original ...
+		db.commit()
+		# A new code has been issued but not yet consumed
+		pending_auth_codes.inc()
+		return code
+	\end{lstlisting}
+	
+	\subsection{consume\_authorization\_code}
+	
+	Se decrementa \texttt{pending\_auth\_codes} cuando el código se consume
+	correctamente. Además se detectan dos casos de seguridad relevantes: el
+	intento de reutilización de un código ya usado (\texttt{auth\_code\_reuse})
+	y el intento de uso de un código expirado:
+	
+	\begin{lstlisting}[style=python, caption=Instrumentacion de consume\_authorization\_code]
+		def consume_authorization_code(code: str) -> Optional[dict]:
+		# ... codigo original ...
+		if data["used"]:
+		# Someone is trying to reuse an already consumed code
+		# This is a sign of an authorization code replay attack
+		auth_code_reuse.inc()
+		return None
+		
+		if time.time() > data["expires_at"]:
+		return None
+		
+		db.execute("UPDATE authorization_codes SET used = 1 ...")
+		db.commit()
+		# Code consumed correctly, no longer pending
+		pending_auth_codes.dec()
+		return data
+	\end{lstlisting}
+	
+	\subsection{issue\_token\_pair}
+	
+	Se incrementan los gauges de tokens activos cada vez que se emiten tokens.
+	Se distingue entre access tokens y refresh tokens:
+	
+	\begin{lstlisting}[style=python, caption=Instrumentacion de issue\_token\_pair]
+		def issue_token_pair(...) -> dict:
+		# ... codigo original ...
+		db.commit()
+		# Track active tokens in the system
+		active_tokens.labels(token_type="access").inc()
+		if refresh_token:
+		active_tokens.labels(token_type="refresh").inc()
+		return response
+	\end{lstlisting}
+	
+	\subsection{validate\_refresh\_token}
+	
+	Se detectan los dos casos de fallo relevantes para la seguridad: el intento
+	de uso de un token revocado y el intento de uso de un token expirado. Es
+	importante que estos contadores se incrementen aquí en \texttt{models.py}
+	y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo
+	al motivo exacto del fallo:
+	
+	\begin{lstlisting}[style=python, caption=Instrumentacion de validate\_refresh\_token]
+		def validate_refresh_token(token: str) -> Optional[dict]:
+		# ... codigo original ...
+		if data["revoked"]:
+		# Someone is using a token after it has been revoked
+		# This is a sign of a token replay attack
+		revoked_token_usage.inc()
+		return None
+		
+		if time.time() > data["expires_at"]:
+		# Someone is trying to use an expired token
+		expired_token_usage.inc()
+		return None
+		
+		return data
+	\end{lstlisting}
+	
+	\subsection{revoke\_refresh\_token}
+	
+	Se incrementan los counters de tokens revocados y se decrementan los gauges
+	de tokens activos. La rotación de tokens del flujo \texttt{refresh\_token}
+	revoca tanto el refresh token antiguo como su access token asociado:
+	
+	\begin{lstlisting}[style=python, caption=Instrumentacion de revoke\_refresh\_token]
+		def revoke_refresh_token(token: str) -> None:
+		# ... codigo original ...
+		db.commit()
+		# Both the refresh token and its associated access token are revoked
+		tokens_revoked.labels(token_type="refresh").inc()
+		tokens_revoked.labels(token_type="access").inc()
+		# Decrement active tokens accordingly
+		active_tokens.labels(token_type="refresh").dec()
+		active_tokens.labels(token_type="access").dec()
+	\end{lstlisting}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Modificaciones a app.py}
+	
+	Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante
+	decoradores Flask.
+	
+	\subsection{Exposición del endpoint /metrics}
+	
+	Se utiliza \texttt{DispatcherMiddleware} para combinar la aplicación Flask
+	con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}.
+	Esto permite que Prometheus pueda leer las métricas en
+	\texttt{http://localhost:5001/metrics}:
+	
+	\begin{lstlisting}[style=python, caption=Exposicion del endpoint /metrics]
+		from prometheus_client import make_wsgi_app
+		from werkzeug.middleware.dispatcher import DispatcherMiddleware
+		from werkzeug.serving import run_simple
+		
+		if __name__ == "__main__":
+		flask_app = create_app()
+		# Combine Flask with the Prometheus /metrics endpoint
+		application = DispatcherMiddleware(flask_app, {
+			"/metrics": make_wsgi_app()
+		})
+		run_simple("0.0.0.0", 5001, application,
+		use_reloader=True, use_debugger=True)
+	\end{lstlisting}
+	
+	\subsection{Registro automático de métricas HTTP}
+	
+	Se utilizan los decoradores \texttt{@before\_request} y
+	\texttt{@after\_request} de Flask para registrar automáticamente todas las
+	peticiones HTTP sin modificar cada ruta individualmente. Esto sigue el
+	principio DRY (\textit{Don't Repeat Yourself}):
+	
+	\begin{lstlisting}[style=python, caption=Decoradores before y after request]
+		@app.before_request
+		def before_request():
+		# Store arrival time and increment in-progress counter
+		g.start_time = time.time()
+		requests_in_progress.labels(endpoint=request.path).inc()
+		
+		@app.after_request
+		def after_request(response):
+		endpoint = request.path
+		
+		# General HTTP counter
+		http_requests.labels(
+		method=request.method,
+		endpoint=endpoint,
+		status_code=str(response.status_code)
+		).inc()
+		
+		# Specific counters per endpoint
+		if "/token" in endpoint:
+		http_requests_token.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		elif "/authorize" in endpoint:
+		http_requests_authorize.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		elif "/admin" in endpoint:
+		http_requests_admin.labels(
+		method=request.method,
+		status_code=str(response.status_code)
+		).inc()
+		
+		# Decrement in-progress and record duration
+		requests_in_progress.labels(endpoint=request.path).dec()
+		duration = time.time() - g.start_time
+		request_duration.labels(
+		endpoint=request.path,
+		method=request.method
+		).observe(duration)
+		
+		return response
+	\end{lstlisting}
+	
+	El decorador \texttt{@before\_request} se ejecuta antes de procesar cada
+	petición. Se guarda el instante de llegada en \texttt{g.start\_time} y se
+	incrementa el gauge de peticiones en curso.
+	
+	El decorador \texttt{@after\_request} se ejecuta después de procesar cada
+	petición, cuando ya se conoce el código de respuesta. Se incrementan los
+	counters HTTP, se decrementa el gauge de peticiones en curso y se registra
+	la duración en el Histogram mediante \texttt{observe()}.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Pruebas de carga con Locust}
+	
+	\subsection{Instalación}
+	
+	Locust se instala como una dependencia del proyecto mediante \texttt{uv}:
+	
+	\begin{lstlisting}[style=bash]
+		cd ~/oauth2
+		uv add locust
+	\end{lstlisting}
+	
+	Se arranca con el siguiente comando, que lanza la interfaz web en el
+	puerto 8089:
+	
+	\begin{lstlisting}[style=bash]
+		uv run locust -f locustfile.py --host=http://localhost:5001
+	\end{lstlisting}
+	
+	\subsection{Diseño del locustfile}
+	
+	El fichero \texttt{locustfile.py} define una clase de usuario con cinco tareas
+	con pesos distintos. Los pesos se han elegido para simular un escenario
+	realista donde el 50\% del tráfico es legítimo y el 50\% son ataques:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{llcc}
+			\toprule
+			\textbf{Tarea} & \textbf{Tipo} & \textbf{Peso} & \textbf{Probabilidad} \\
+			\midrule
+			valid\_client\_credentials & Tráfico legítimo M2M    & 4 & 40\% \\
+			brute\_force\_api          & Ataque fuerza bruta M2M & 2 & 20\% \\
+			brute\_force\_user\_login  & Ataque fuerza bruta web & 2 & 20\% \\
+			valid\_user\_login         & Tráfico legítimo web    & 1 & 10\% \\
+			replay\_attack             & Ataque token replay     & 1 & 10\% \\
+			\bottomrule
+		\end{tabular}
+		\caption{Tareas de Locust con sus pesos y probabilidades}
+	\end{table}
+	
+	\subsection{Descripción de cada tarea}
+	
+	\textbf{valid\_client\_credentials} — Simula el tráfico normal de una
+	aplicación M2M que pide tokens correctamente. Es la tarea más frecuente
+	porque en producción la mayoría del tráfico es legítimo. Dispara las métricas
+	de \texttt{auth\_flows\_success} y \texttt{access\_tokens\_issued}.
+	
+	\textbf{brute\_force\_api} — Simula un atacante que intenta adivinar el
+	\texttt{client\_secret} mediante fuerza bruta. Envía credenciales incorrectas
+	intencionadamente y espera un 401 como respuesta. Dispara
+	\texttt{brute\_force\_attempts} y \texttt{auth\_flows\_failed}.
+	
+	\textbf{brute\_force\_user\_login} — Simula un atacante que intenta adivinar
+	la contraseña de un usuario mediante fuerza bruta a través del formulario de
+	login. Dispara \texttt{user\_auth\_failed}. Es importante incluir todos los
+	campos del formulario (\texttt{action}, \texttt{response\_type}, \texttt{scope}
+	y \texttt{state}) para que la app llegue a comprobar las credenciales.
+	
+	\textbf{valid\_user\_login} — Simula un usuario legítimo haciendo login
+	correctamente. Sin esta tarea las métricas de \texttt{authorization\_code}
+	exitoso siempre estarían a cero durante las pruebas, lo que no reflejaría
+	la realidad.
+	
+	\textbf{replay\_attack} — Simula un atacante que intenta reutilizar un token
+	de acceso como si fuera un refresh token. Este escenario replica un ataque
+	de tipo token replay donde el atacante ha robado un token e intenta usarlo
+	fuera de su contexto. Dispara \texttt{revoked\_token\_usage}.
+	
+	\subsection{Configuración de las pruebas}
+	
+	Desde la interfaz web de Locust en
+	\texttt{http://IP-DE-LA-VM:8089} se configuran dos pruebas:
+	
+	\textbf{Prueba de carga} — Evalúa el comportamiento del sistema en condiciones
+	normales:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Parámetro} & \textbf{Valor} \\
+			\midrule
+			Number of users & 50 \\
+			Spawn rate      & 5 usuarios/segundo \\
+			Duración        & 5 minutos \\
+			\bottomrule
+		\end{tabular}
+		\caption{Configuración de la prueba de carga}
+	\end{table}
+	
+	\textbf{Prueba de estrés} — Evalúa el comportamiento del sistema en
+	condiciones extremas para encontrar el límite real:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Parámetro} & \textbf{Valor} \\
+			\midrule
+			Number of users & 200 \\
+			Spawn rate      & 10 usuarios/segundo \\
+			Duración        & 3 minutos \\
+			\bottomrule
+		\end{tabular}
+		\caption{Configuración de la prueba de estrés}
+	\end{table}
+	
+	\subsection{Protección de la VM durante las pruebas}
+	
+	Dado que la VM dispone de recursos limitados (4GB de disco y 2GB de RAM),
+	se han tomado las siguientes medidas para evitar que las pruebas de carga
+	agoten los recursos:
+	
+	Prometheus se arranca con límites explícitos de retención de datos:
+	
+	\begin{lstlisting}[style=bash]
+		./prometheus --config.file=prometheus.yml \
+		--storage.tsdb.retention.time=2h \
+		--storage.tsdb.retention.size=500MB
+	\end{lstlisting}
+	
+	Se monitoriza el uso de recursos en tiempo real durante las pruebas con:
+	
+	\begin{lstlisting}[style=bash]
+		watch -n 2 'echo "=== DISCO ===" && df -h / && \
+		echo "=== RAM ===" && free -h && \
+		echo "=== CPU ===" && top -bn1 | head -5'
+	\end{lstlisting}
+	
+	El orden correcto de arranque es el siguiente para garantizar que todos
+	los componentes están disponibles antes de iniciar las pruebas:
+	
+	\begin{enumerate}
+		\item Terminal 1 — \texttt{uv run python app.py}
+		\item Terminal 2 — \texttt{./prometheus --config.file=prometheus.yml}
+		\item Terminal 3 — \texttt{uv run locust -f locustfile.py --host=http://localhost:5001}
+		\item Terminal 4 — \texttt{watch} para vigilancia de recursos
+	\end{enumerate}
+	
+	Y el orden de parada es el inverso, esperando 30 segundos entre Locust
+	y Prometheus para que este último recoja los últimos datos antes de apagarse.
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Verificación manual de métricas}
+	
+	Antes de ejecutar Locust se ha desarrollado un script de verificación
+	\texttt{test\_metrics.py} que comprueba cada métrica de forma individual y
+	automática. El script ejecuta nueve tests en orden:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{clp{6cm}}
+			\toprule
+			\textbf{Test} & \textbf{Nombre} & \textbf{Métricas verificadas} \\
+			\midrule
+			1 & client\_credentials válido    & auth\_flows\_success, active\_tokens \\
+			2 & Fuerza bruta M2M              & auth\_flows\_failed, brute\_force\_attempts \\
+			3 & Fuerza bruta web              & user\_auth\_failed \\
+			4 & authorization\_code completo  & refresh\_tokens\_issued, pending\_auth\_codes \\
+			5 & refresh\_token válido         & tokens\_revoked, active\_tokens \\
+			6 & Token replay attack           & revoked\_token\_usage \\
+			7 & Auth code reuse               & auth\_code\_reuse \\
+			8 & Peticiones en paralelo        & requests\_in\_progress, request\_duration \\
+			9 & Token falso/expirado          & expired\_token\_usage \\
+			\bottomrule
+		\end{tabular}
+		\caption{Tests del script de verificación manual}
+	\end{table}
+	
+	Se ejecuta con:
+	
+	\begin{lstlisting}[style=bash]
+		cd ~/oauth2
+		uv run python test_metrics.py
+	\end{lstlisting}
+	
 \end{document}
