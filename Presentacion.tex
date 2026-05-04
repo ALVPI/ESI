@@ -7,6 +7,9 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 
+% Colores
+\definecolor{headercolor}{RGB}{45, 62, 80}
+\definecolor{rowcolor1}{RGB}{245, 247, 250}
 % ── Tema de Beamer ──────────────────────────────────────────────────────────
 \usetheme{Madrid}
 \usecolortheme{default}
@@ -20,7 +23,7 @@
 % ── Datos de la Portada ─────────────────────────────────────────────────────
 \title[Práctica 2: Locust y Prometheus]{Práctica 2: Pruebas de carga, Locust y Prometheus}
 \subtitle{Evaluación de Sistemas Informáticos}
-\author[Grupo 16]{Grupo 16]}
+\author[Grupo 16]{Grupo 16}
 \date{\today}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -37,53 +40,63 @@
 	\end{frame}
 	
 	% ════════════════════════════════════════════════════════════════════════════
-	\section{Introducción y Objetivos}
+	\section{Descripción general del entorno}
 	
-	\begin{frame}{Introducción y Objetivos}
-		\textbf{Objetivos principales de la práctica:}
+	\begin{frame}{¿Qué elementos son clave?}
 		\begin{itemize}
-			\item Instrumentación del backend con métricas Prometheus].
-			\item Despliegue y configuración de Prometheus y Grafana].
-			\item Pruebas de carga y estrés con Locust].
-		\end{itemize}
-		\vspace{0.5cm}
-		\textbf{Sistema Bajo Prueba:}
-		\begin{itemize}
-			\item Servidor de autenticación OAuth2 desarrollado en Python (Flask y SQLite)[cite: 8].
-			\item Implementa flujos clave del RFC 6749: \textit{Authorization Code}, \textit{Client Credentials} y \textit{Refresh Token}[cite: 8].
-			\item Ejecutado mediante el gestor \texttt{uv} en el puerto 5001].
+			\item Servidor de autenticación OAuth2 desarrollado en Python (Flask y SQLite)
+			\item Implementa flujos clave del RFC 6749: \textit{Authorization Code}, \textit{Client Credentials} y \textit{Refresh Token}.
+			\item Ejecutado mediante el gestor \texttt{uv} en el puerto 5001.
 		\end{itemize}
 	\end{frame}
 	
-	% ════════════════════════════════════════════════════════════════════════════
-	\section{Monitorización y Enfoque EDR}
+	\section{¿Cómo hemos trabajado?}
 	
-	\begin{frame}{Arquitectura de Monitorización}
-		Implementación del modelo \textit{pull} para la recopilación de métricas]:
-		\vspace{0.3cm}
-		\begin{center}
-			\textbf{App OAuth2 (5001)} $\rightarrow$ \textbf{Prometheus (9090)} $\rightarrow$ \textbf{Grafana (3000)}[cite: 8]
-		\end{center}
-		\vspace{0.3cm}
-		\textbf{Enfoque EDR (Endpoint Detection and Response):}
-		\begin{itemize}
-			\item \textbf{Rendimiento:} Histogramas para evaluar tiempos de respuesta (umbral de 250ms) y control de peticiones simultáneas.
-			\item \textbf{Estado de Tokens:} Monitorización de tokens activos, revocados, códigos pendientes y expirados.
-			\item \textbf{Seguridad:} Detección de ataques de fuerza bruta (M2M y Web) e intentos de \textit{Token Replay}.
-		\end{itemize}
+	\begin{frame}{Distribución del trabajo}
+		\centering
+		\renewcommand{\arraystretch}{1.3}
+		
+		\begin{tabular}{p{3.5cm} p{2.5cm} p{5cm}}
+			\toprule
+			
+			\textcolor{white}{\textbf{Nombre}} & 
+			\textcolor{white}{\textbf{\% Contribución}} & 
+			\textcolor{white}{\textbf{Responsabilidades}} \\
+			
+			\midrule
+			
+			Marcos & 33\% & Desarrollo de scripts del fichero Locust y redacción del cuaderno de bitácora \\
+			
+			Edgar & 33\% & Desarrollo de las metricas y de \textit{models.py},conexión con el Grafana y documentación \\
+			
+			Álvaro & 33\% & Gestión de la VM y del repositorio de \hyperlink{https://github.com/ALVPI/ESI/tree/code}{GitHub}, modificación de \textit{oauth2\_routes}, creación del \textit{test.py} y  documentación \\
+			
+			\bottomrule
+		\end{tabular}
+		
 	\end{frame}
-	
 	% ════════════════════════════════════════════════════════════════════════════
-	\section{Instrumentación del Código}
+	\section{Modificaciones en el código para la práctica}
 	
 	\begin{frame}{Modificaciones en el Backend}
-		La instrumentación se ha integrado siguiendo el principio DRY:
+		La instrumentación se ha integrado siguiendo el principio DRY (intentando evitar los \textit{circular imports}):
 		\vspace{0.3cm}
 		\begin{itemize}
 			\item \textbf{\texttt{metrics.py}:} Centralización de métricas (Counters, Gauges, Histograms) para evitar importaciones circulares. Uso estratégico de etiquetas (ej. \texttt{grant\_type})
-			\item \textbf{\texttt{app.py}:} Exposición del endpoint \texttt{/metrics} vía \texttt{DispatcherMiddleware} y registro automático del tráfico HTTP con decoradores de Flask].
 			\item \textbf{\texttt{models.py}:} Auditoría de la base de datos (códigos generados/consumidos, detección de tokens revocados).
 			\item \textbf{\texttt{oauth2\_routes.py}:} Seguimiento del ciclo de vida de los flujos de autenticación (iniciados, exitosos, fallidos).
+		\end{itemize}
+	\end{frame}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Enfoque del monitoreo}
+	
+	\begin{frame}{Arquitectura de Monitorización}
+		\textbf{Enfoque EDR (\textit{Endpoint Detection and Response}):}
+		\begin{itemize}
+			\item \textbf{Rendimiento:} Histogramas para evaluar tiempos de respuesta y control de peticiones simultáneas.
+			\item \textbf{Estado de Tokens:} Monitorización de tokens activos, revocados, códigos pendientes y expirados.
+			\item \textbf{Seguridad:} Detección de ataques de fuerza bruta (M2M y Web) e intentos de \textit{Token Replay}.
 		\end{itemize}
 	\end{frame}
 	
@@ -91,7 +104,7 @@
 	\section{Pruebas de Carga con Locust}
 	
 	\begin{frame}{Diseño de Escenarios en Locust}
-		El \texttt{locustfile.py} simula un entorno realista mediante probabilidades: \textbf{50\% tráfico legítimo, 50\% tráfico malicioso}.
+		En el \texttt{locustfile.py} hemos intentado simular un comportamiento "real"  \textbf{50\% tráfico legítimo, 50\% tráfico malicioso}.
 		
 		\vspace{0.3cm}
 		\begin{table}[H]
@@ -120,10 +133,16 @@
 		
 		\vspace{0.5cm}
 		\textbf{Garantías del sistema:}
-		\begin{itemize}
-			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
+		\begin{enumerate}
 			\item Uso de script de verificación (\texttt{test\_metrics.py}) para validar manualmente los 9 escenarios de métricas antes del ataque global.
-		\end{itemize}
+			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
+		\end{enumerate}
+	\end{frame}
+\section{Grafana}
+	\begin{frame}
+		\centering
+		\Huge \textbf{\hyperlink{http://virtual.lab.inf.uva.es:31162/d/ad46rtj/esi-p2-16?orgId=1&from=now-5m&to=now&timezone=browser}{Nuestro panel de Grafana}}\\
+		\vspace{1cm}
 	\end{frame}
 	
 	% ── Diapositiva Final ───────────────────────────────────────────────────────
