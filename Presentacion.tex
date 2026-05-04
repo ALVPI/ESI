@@ -1,0 +1,137 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+
+% ── Paquetes ────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+% ── Tema de Beamer ──────────────────────────────────────────────────────────
+\usetheme{Madrid}
+\usecolortheme{default}
+\definecolor{azulUVa}{RGB}{0, 51, 153}
+\definecolor{rojoUVa}{RGB}{193, 0, 60}
+\setbeamercolor{palette primary}{bg=azulUVa,fg=white}
+\setbeamercolor{palette secondary}{bg=rojoUVa,fg=white}
+\setbeamercolor{palette tertiary}{bg=black,fg=white}
+\setbeamercolor{structure}{fg=azulUVa} % Itemize, enumerate, etc
+
+% ── Datos de la Portada ─────────────────────────────────────────────────────
+\title[Práctica 2: Locust y Prometheus]{Práctica 2: Pruebas de carga, Locust y Prometheus}
+\subtitle{Evaluación de Sistemas Informáticos}
+\author[Grupo 16]{Grupo 16]}
+\date{\today}
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+	
+	% ── Diapositiva 1: Portada ──────────────────────────────────────────────────
+	\begin{frame}
+		\titlepage
+	\end{frame}
+	
+	% ── Diapositiva 2: Índice ───────────────────────────────────────────────────
+	\begin{frame}{Índice}
+		\tableofcontents
+	\end{frame}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Introducción y Objetivos}
+	
+	\begin{frame}{Introducción y Objetivos}
+		\textbf{Objetivos principales de la práctica:}
+		\begin{itemize}
+			\item Instrumentación del backend con métricas Prometheus].
+			\item Despliegue y configuración de Prometheus y Grafana].
+			\item Pruebas de carga y estrés con Locust].
+		\end{itemize}
+		\vspace{0.5cm}
+		\textbf{Sistema Bajo Prueba:}
+		\begin{itemize}
+			\item Servidor de autenticación OAuth2 desarrollado en Python (Flask y SQLite)[cite: 8].
+			\item Implementa flujos clave del RFC 6749: \textit{Authorization Code}, \textit{Client Credentials} y \textit{Refresh Token}[cite: 8].
+			\item Ejecutado mediante el gestor \texttt{uv} en el puerto 5001].
+		\end{itemize}
+	\end{frame}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Monitorización y Enfoque EDR}
+	
+	\begin{frame}{Arquitectura de Monitorización}
+		Implementación del modelo \textit{pull} para la recopilación de métricas]:
+		\vspace{0.3cm}
+		\begin{center}
+			\textbf{App OAuth2 (5001)} $\rightarrow$ \textbf{Prometheus (9090)} $\rightarrow$ \textbf{Grafana (3000)}[cite: 8]
+		\end{center}
+		\vspace{0.3cm}
+		\textbf{Enfoque EDR (Endpoint Detection and Response):}
+		\begin{itemize}
+			\item \textbf{Rendimiento:} Histogramas para evaluar tiempos de respuesta (umbral de 250ms) y control de peticiones simultáneas.
+			\item \textbf{Estado de Tokens:} Monitorización de tokens activos, revocados, códigos pendientes y expirados.
+			\item \textbf{Seguridad:} Detección de ataques de fuerza bruta (M2M y Web) e intentos de \textit{Token Replay}.
+		\end{itemize}
+	\end{frame}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Instrumentación del Código}
+	
+	\begin{frame}{Modificaciones en el Backend}
+		La instrumentación se ha integrado siguiendo el principio DRY:
+		\vspace{0.3cm}
+		\begin{itemize}
+			\item \textbf{\texttt{metrics.py}:} Centralización de métricas (Counters, Gauges, Histograms) para evitar importaciones circulares. Uso estratégico de etiquetas (ej. \texttt{grant\_type})
+			\item \textbf{\texttt{app.py}:} Exposición del endpoint \texttt{/metrics} vía \texttt{DispatcherMiddleware} y registro automático del tráfico HTTP con decoradores de Flask].
+			\item \textbf{\texttt{models.py}:} Auditoría de la base de datos (códigos generados/consumidos, detección de tokens revocados).
+			\item \textbf{\texttt{oauth2\_routes.py}:} Seguimiento del ciclo de vida de los flujos de autenticación (iniciados, exitosos, fallidos).
+		\end{itemize}
+	\end{frame}
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Pruebas de Carga con Locust}
+	
+	\begin{frame}{Diseño de Escenarios en Locust}
+		El \texttt{locustfile.py} simula un entorno realista mediante probabilidades: \textbf{50\% tráfico legítimo, 50\% tráfico malicioso}.
+		
+		\vspace{0.3cm}
+		\begin{table}[H]
+			\centering
+			\small
+			\begin{tabular}{llcc}
+				\toprule
+				\textbf{Tarea} & \textbf{Tipo} & \textbf{Peso} & \textbf{Prob.} \\
+				\midrule
+				\texttt{valid\_client\_credentials} & Tráfico legítimo M2M    & 4 & 40\% \\
+				\texttt{brute\_force\_api}          & Ataque fuerza bruta M2M & 2 & 20\% \\
+				\texttt{brute\_force\_user\_login}  & Ataque fuerza bruta web & 2 & 20\% \\
+				\texttt{valid\_user\_login}         & Tráfico legítimo web    & 1 & 10\% \\
+				\texttt{replay\_attack}             & Ataque token replay     & 1 & 10\% \\
+				\bottomrule
+			\end{tabular}
+		\end{table}
+	\end{frame}
+	
+	\begin{frame}{Ejecución y Verificación}
+		\textbf{Configuración de Pruebas:}
+		\begin{itemize}
+			\item \textbf{Carga normal:} 50 usuarios, \textit{spawn rate} 5/s durante 5 min].
+			\item \textbf{Prueba de estrés:} 200 usuarios, \textit{spawn rate} 10/s durante 3 min].
+		\end{itemize}
+		
+		\vspace{0.5cm}
+		\textbf{Garantías del sistema:}
+		\begin{itemize}
+			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
+			\item Uso de script de verificación (\texttt{test\_metrics.py}) para validar manualmente los 9 escenarios de métricas antes del ataque global.
+		\end{itemize}
+	\end{frame}
+	
+	% ── Diapositiva Final ───────────────────────────────────────────────────────
+	\begin{frame}
+		\centering
+		\Huge \textcolor{azulUVa}{\textbf{¡Gracias por su atención!}}\\
+		\vspace{1cm}
+		\Large ¿Preguntas?
+	\end{frame}
+	
+\end{document}
