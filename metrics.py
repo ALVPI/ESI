@@ -163,3 +163,8 @@ clients_listed = Counter(
     "Consultas al listado de clientes"
 )
 
+user_auth_success = Counter(
+    "oauth2_user_auth_success_total",
+    "Inicios de sesion exitosos por usuario",
+    ["username"]
+)
