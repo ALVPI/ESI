@@ -147,5 +147,19 @@ user_auth_failed = Counter(
     ["username", "client_id"]
 )
 
+# Operaciones de gestion de clientes OAuth2
+clients_created = Counter(
+    "oauth2_admin_clients_created_total",
+    "Clientes OAuth2 creados via API admin"
+)
 
+clients_deleted = Counter(
+    "oauth2_admin_clients_deleted_total",
+    "Clientes OAuth2 eliminados via API admin"
+)
+
+clients_listed = Counter(
+    "oauth2_admin_clients_listed_total",
+    "Consultas al listado de clientes"
+)
 
