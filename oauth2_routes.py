@@ -40,6 +40,7 @@ from metrics import (
     auth_flows_success,
     auth_flows_failed,
     tokens_issued,
+    user_auth_success,
     access_tokens_issued,
     refresh_tokens_issued,
     brute_force_attempts,
@@ -198,7 +199,8 @@ def authorize_post():
             state=state,
             error="Invalid username or password.",
         ), 401
-
+    #At this point we have a successful login
+    user_auth_success.labels(username=username).inc()
     # --- Issue authorization code ---
     code = store_authorization_code(
         client_id=client_id,
