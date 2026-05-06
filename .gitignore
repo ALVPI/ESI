@@ -203,6 +203,8 @@ cython_debug/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+*.log.tex
+*.snm
 # Marimo
 marimo/_static/
 marimo/_lsp/
