@@ -975,13 +975,14 @@
 	\begin{figure}[H]
 			\centering
 		\includegraphics[width=\linewidth]{Recursos/EjecucionTodoSistema}
-		\caption{Ejecutamos la \textit{app.py}, el locust y el prometheus}
+		\caption{Ejecutamos la \textit{app.py}, el locust y el prometheus, con el error de ejecución en los puertos erróneos}
 	\end{figure}
 	\newpage
 \section{Grafana}
 	Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación de las métricas que hemos estado recogiendo.\\
 	% insertar un pantallazo del dashboard en general
-	Una vez que ya tenemos una idea de cómo hemos ditribuido el dashboard vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.
+	Una vez que ya tenemos una idea de cómo hemos ditribuido el dashboard vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
+	Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.\\
 	\subsection{Tipos de Respuestas en nuestra app}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
@@ -1000,21 +1001,151 @@
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Tipos de Respuestas en nuestra app}
+		\subsection{Tipos de Respuestas en nuestra app, diagrama de sectores}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RespuestaAPeticones}
+				\includegraphics[width=\linewidth]{Recursos/RatioPeticiones}
 				\caption{Tipos de peticiones que recibe nuestro \textit{endpoint}}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Mostramos una gráfica con las respuesta que devuelve el servidor a las diferentes peticiones que le llegan, recordar que con el fichero de locust estamos haciendo un test sintético de cómo se comportaría el sistema con según que peticiones.\\
-				Además, hemos ejecutado el fichero \textit{test.py} para probar las métricas específicas de nuestro enfoque EDR, por lo que tenemos más peticiones erróneas de las que se pueden esperar en una prueba de carga de carga aluso, pero es un indicador de que nuestro sistema es robusto frente a este tipo de ataques.
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
 			\end{minipage}
 		\end{figure}
+		
+		
+		\subsection{Ratio de Tokens }
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/TokensActivosYTotales}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+		\subsection{Tokens en circulación en nuestro sistema }
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/RatioTokens}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+		\subsection{Tiempos de respuesta del sistema}
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/TiempoDeRespuesta}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+		\subsection{Tiempos de respuesta del sistema}
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/ResponseTime}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		\subsection{Atques de fuerza bruta}
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/RatioRequestsValidasInvalidas}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+		\subsection{MétricasEDR}
+			\subsubsection{Logins Incorrectos}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/loginIncorrecto}
+						\caption{Tipos de tokens que maneja nuestro sistema}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+					\end{minipage}
+				\end{figure}
+		
+		\subsubsection{Atques de fuerza bruta}
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/BruteForceAttempts}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+		\subsubsection{ReplayAttack}
+		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\centering
+			% Columna 1: La Imagen
+			\begin{minipage}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/Tokens}
+				\caption{Tipos de tokens que maneja nuestro sistema}
+			\end{minipage}
+			\hfill % Crea un espacio elástico entre las dos minipages
+			% Columna 2: El Texto
+			\begin{minipage}{0.50\textwidth}
+				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\end{minipage}
+		\end{figure}
+		
+	
 	
 \end{document}

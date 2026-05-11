@@ -42,4 +42,13 @@
 \contentsline {section}{\numberline {13}Verificación manual de métricas}{34}{section.13}%
 \contentsline {section}{\numberline {14}Grafana}{36}{section.14}%
 \contentsline {subsection}{\numberline {14.1}Tipos de Respuestas en nuestra app}{36}{subsection.14.1}%
-\contentsline {subsection}{\numberline {14.2}Tipos de Respuestas en nuestra app}{36}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.2}Tipos de Respuestas en nuestra app, diagrama de sectores}{37}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}Ratio de Tokens }{37}{subsection.14.3}%
+\contentsline {subsection}{\numberline {14.4}Tokens en circulación en nuestro sistema }{38}{subsection.14.4}%
+\contentsline {subsection}{\numberline {14.5}Tiempos de respuesta del sistema}{38}{subsection.14.5}%
+\contentsline {subsection}{\numberline {14.6}Tiempos de respuesta del sistema}{39}{subsection.14.6}%
+\contentsline {subsection}{\numberline {14.7}Atques de fuerza bruta}{39}{subsection.14.7}%
+\contentsline {subsection}{\numberline {14.8}MétricasEDR}{40}{subsection.14.8}%
+\contentsline {subsubsection}{\numberline {14.8.1}Logins Incorrectos}{40}{subsubsection.14.8.1}%
+\contentsline {subsubsection}{\numberline {14.8.2}Atques de fuerza bruta}{40}{subsubsection.14.8.2}%
+\contentsline {subsubsection}{\numberline {14.8.3}ReplayAttack}{41}{subsubsection.14.8.3}%
