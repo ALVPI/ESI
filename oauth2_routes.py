@@ -32,6 +32,7 @@ from models import (
     issue_token_pair,
     validate_refresh_token,
     revoke_refresh_token,
+    login_page_visits
 )
 
 #Import the methods of metrics.py
@@ -45,7 +46,8 @@ from metrics import (
     refresh_tokens_issued,
     brute_force_attempts,
     user_auth_failed,
-    auth_code_reuse
+    auth_code_reuse,
+
 )
 
 oauth2 = Blueprint("oauth2", __name__)
@@ -145,7 +147,8 @@ def authorize_get():
     if redirect_uri not in client["redirect_uris"]:
         # Per RFC 6749 §3.1.2.4: do NOT redirect if the URI is invalid
         return _error_response("invalid_request", "redirect_uri does not match any registered URI")
-
+    #We have a valid user, so we incremment the metric of the click simulation
+    login_page_visits.labels(client_id=client_id).inc()
     # Everything valid — render the login / consent form
     return render_template(
         "login_consent.html",
