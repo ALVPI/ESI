@@ -31,8 +31,7 @@ from models import (
     consume_authorization_code,
     issue_token_pair,
     validate_refresh_token,
-    revoke_refresh_token,
-    login_page_visits
+    revoke_refresh_token
 )
 
 #Import the methods of metrics.py
@@ -47,7 +46,7 @@ from metrics import (
     brute_force_attempts,
     user_auth_failed,
     auth_code_reuse,
-
+    login_page_visits
 )
 
 oauth2 = Blueprint("oauth2", __name__)
