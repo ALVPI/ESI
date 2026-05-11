@@ -11,7 +11,7 @@ from prometheus_client import (
 auth_flows_started = Counter(
     "oauth2_auth_flows_started_total",
     "Flujos de autenticación iniciados",
-    ["grant_type"] #permite almacenar el restulado de cada contador de manera independiente para poder tener una cifra de cada uno.
+    ["grant_type"] #permite almacenar el resultado de cada contador de manera independiente para poder tener una cifra de cada uno.
 )
 
 #Contabiliza los intentos exitosos de autenticacion en el sistema
@@ -105,7 +105,7 @@ tokens_revoked = Counter(
     ["token_type"]
 )
 
-#Nos da inormacion sobre los coidogs emitos pero no empleados
+#Nos da inormacion sobre los codigos emitos pero no empleados
 pending_auth_codes = Gauge(
     "oauth2_pending_auth_codes",
     "Codigos de autorizacion emitidos pero no canjeados"
@@ -167,4 +167,12 @@ user_auth_success = Counter(
     "oauth2_user_auth_success_total",
     "Inicios de sesion exitosos por usuario",
     ["username"]
+)
+
+#Vamos a simular el comportamiento de un usuarios
+#metrica para los clicks del formulario.
+login_page_visits = Counter(
+    "oauth2_login_page_visits_total",
+    "Visitas a la pagina de login por client_id",
+    ["client_id"]
 )
