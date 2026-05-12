@@ -46,8 +46,12 @@ from metrics import (
     brute_force_attempts,
     user_auth_failed,
     auth_code_reuse,
-    login_page_visits
+    login_page_visits,
+    unknown_client_attempts
 )
+# In-memory set to track unique failed usernames
+# Used to detect credential stuffing vs brute force
+_failed_usernames: set = set()
 
 oauth2 = Blueprint("oauth2", __name__)
 
@@ -135,6 +139,7 @@ def authorize_get():
 
     client = get_client(client_id)
     if client is None:
+        unknown_client_attempts.inc()
         return _error_response("invalid_request", "Unknown client_id")
 
     if "authorization_code" not in client["grant_types"]:
@@ -191,6 +196,9 @@ def authorize_post():
         # Re-render the form with an error message
         # Trigger for the auth_fail bc the cliend_id with that username doesnt typed the right password 
         user_auth_failed.labels(username=username, client_id=client_id).inc()
+        # Track unique failed usernames for credential stuffing detection
+        _failed_usernames.add(username)
+        unique_failed_usernames.set(len(_failed_usernames))
         return render_template(
             "login_consent.html",
             client_name=client["client_name"] or client_id,
