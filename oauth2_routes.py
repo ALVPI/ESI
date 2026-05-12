@@ -47,6 +47,7 @@ from metrics import (
     user_auth_failed,
     auth_code_reuse,
     login_page_visits,
+    unknown_client_attempts, 
     unknown_client_attempts
 )
 # In-memory set to track unique failed usernames
