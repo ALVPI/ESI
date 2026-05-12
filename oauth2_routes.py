@@ -48,7 +48,7 @@ from metrics import (
     auth_code_reuse,
     login_page_visits,
     unknown_client_attempts, 
-    unknown_client_attempts
+    unique_failed_usernames
 )
 # In-memory set to track unique failed usernames
 # Used to detect credential stuffing vs brute force
