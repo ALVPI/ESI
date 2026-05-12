@@ -485,3 +485,88 @@ class OAuth2LoadTest(HttpUser):
 
             response.success()
             return code
+
+
+    @task(1)
+    def client_enumeration_attack(self):
+        """
+        Client enumeration attack: tries to access with unknown client_ids.
+        Fires: unknown_client_attempts
+        Probability: ~5% (1 of 20)
+        """
+        import random
+        fake_clients = [
+            "admin", "root", "test", "app", "api",
+            "mobile", "backend", "service", "user", "guest"
+        ]
+        fake_client = random.choice(fake_clients)
+
+        with self.client.post("/token", data={
+            "grant_type":    "client_credentials",
+            "client_id":     fake_client,
+            "client_secret": "any_secret"
+        }, catch_response=True) as response:
+            if response.status_code == 401:
+                response.success()
+            else:
+                response.failure(f"Expected 401 but got {response.status_code}")
+    @task(1)
+    def credential_stuffing_attack(self):
+        """
+        Credential stuffing attack: tries many different usernames
+        with common passwords. Different from brute force which
+        attacks one user with many passwords.
+        Fires: user_auth_failed, unique_failed_usernames
+        Probability: ~5% (1 of 20)
+        """
+        import random
+        # Simulates a list of leaked credentials from other sites
+        leaked_credentials = [
+            ("john.doe", "password123"),
+            ("jane.smith", "qwerty"),
+            ("carlos.garcia", "123456"),
+            ("maria.lopez", "letmein"),
+            ("pedro.martinez", "welcome"),
+            ("ana.rodriguez", "monkey"),
+            ("luis.hernandez", "dragon"),
+            ("sofia.gonzalez", "master"),
+        ]
+        username, password = random.choice(leaked_credentials)
+
+        with self.client.post("/authorize", data={
+            "client_id":     self.WEB_CLIENT_ID,
+            "redirect_uri":  self.WEB_REDIRECT_URI,
+            "response_type": "code",
+            "scope":         "read",
+            "state":         "locust-test",
+            "action":        "approve",
+            "username":      username,
+            "password":      password
+        }, catch_response=True) as response:
+            if response.status_code == 401:
+                response.success()
+            else:
+                response.failure(f"Expected 401 but got {response.status_code}")
+
+    @task(1)
+    def token_harvesting_attack(self):
+        """
+        Token harvesting: requests valid tokens but never uses or
+        revokes them. active_tokens gauge will keep growing.
+        Fires: active_tokens (keeps incrementing without decrementing)
+        Probability: ~5% (1 of 20)
+        """
+        # Just request tokens without ever refreshing or revoking them
+        # This simulates an attacker accumulating valid tokens
+        with self.client.post("/token", data={
+            "grant_type":    "client_credentials",
+            "client_id":     self.VALID_CLIENT_ID,
+            "client_secret": self.VALID_CLIENT_SECRET,
+            "scope":         "read"
+        }, catch_response=True) as response:
+            if response.status_code == 200:
+                # Intentionally do nothing with the token
+                # In a real attack the attacker would store it
+                response.success()
+            else:
+                response.failure(f"Expected 200 but got {response.status_code}")
