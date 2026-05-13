@@ -109,6 +109,11 @@ def _authenticate_client() -> tuple[str, None] | tuple[None, str]:
     client_id = request.form.get("client_id")
     client_secret = request.form.get("client_secret")
     if client_id and client_secret:
+        # Check if client exists before verifying secret
+        # If client does not exist it is an enumeration attempt
+        if get_client(client_id) is None:
+            unknown_client_attempts.labels(client_id=client_id).inc()
+            return None, "Invalid client credentials"
         if not verify_client_secret(client_id, client_secret):
             return None, "Invalid client credentials"
         return client_id, None

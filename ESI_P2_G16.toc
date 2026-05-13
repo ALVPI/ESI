@@ -7,48 +7,48 @@
 \contentsline {section}{\numberline {4}Definición de las métricas que vamos a recoger}{5}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Sintaxis de los contadores}{5}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Exposición del endpoint /metrics — app.py}{9}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Instrumentación de flujos OAuth2 — oauth2\_routes.py}{11}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Verificación del sistema de métricas}{12}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.3}Instrumentación de flujos OAuth2 — oauth2\_routes.py}{12}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Verificación del sistema de métricas}{13}{subsection.4.4}%
 \contentsline {section}{\numberline {5}Despliegue de Prometheus}{13}{section.5}%
 \contentsline {subsection}{\numberline {5.1}Instalación}{13}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}Configuración}{13}{subsection.5.2}%
 \contentsline {subsection}{\numberline {5.3}Arranque}{14}{subsection.5.3}%
 \contentsline {section}{\numberline {6}Conexión con Grafana}{14}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Arquitectura del sistema}{14}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Configuración del Data Source}{14}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.2}Configuración del Data Source}{15}{subsection.6.2}%
 \contentsline {section}{\numberline {7}Locust }{15}{section.7}%
 \contentsline {section}{\numberline {8}Enfoque EDR del sistema de métricas}{27}{section.8}%
 \contentsline {subsection}{\numberline {8.1}Motivación}{27}{subsection.8.1}%
 \contentsline {subsection}{\numberline {8.2}Métricas adicionales implementadas}{27}{subsection.8.2}%
-\contentsline {subsubsection}{\numberline {8.2.1}Categoría 1 — Rendimiento del sistema}{27}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.1}Categoría 1 — Rendimiento del sistema}{28}{subsubsection.8.2.1}%
 \contentsline {subsubsection}{\numberline {8.2.2}Categoría 2 — Estado de tokens}{28}{subsubsection.8.2.2}%
 \contentsline {subsubsection}{\numberline {8.2.3}Categoría 3 — Detección de ataques}{28}{subsubsection.8.2.3}%
-\contentsline {section}{\numberline {9}Modificaciones a metrics.py}{28}{section.9}%
+\contentsline {section}{\numberline {9}Modificaciones a metrics.py}{29}{section.9}%
 \contentsline {section}{\numberline {10}Modificaciones a models.py}{29}{section.10}%
 \contentsline {subsection}{\numberline {10.1}store\_authorization\_code}{29}{subsection.10.1}%
 \contentsline {subsection}{\numberline {10.2}consume\_authorization\_code}{29}{subsection.10.2}%
 \contentsline {subsection}{\numberline {10.3}issue\_token\_pair}{30}{subsection.10.3}%
 \contentsline {subsection}{\numberline {10.4}validate\_refresh\_token}{30}{subsection.10.4}%
-\contentsline {subsection}{\numberline {10.5}revoke\_refresh\_token}{30}{subsection.10.5}%
+\contentsline {subsection}{\numberline {10.5}revoke\_refresh\_token}{31}{subsection.10.5}%
 \contentsline {section}{\numberline {11}Modificaciones a app.py}{31}{section.11}%
 \contentsline {subsection}{\numberline {11.1}Exposición del endpoint /metrics}{31}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Registro automático de métricas HTTP}{31}{subsection.11.2}%
-\contentsline {section}{\numberline {12}Pruebas de carga con Locust}{32}{section.12}%
-\contentsline {subsection}{\numberline {12.1}Instalación}{32}{subsection.12.1}%
+\contentsline {subsection}{\numberline {11.2}Registro automático de métricas HTTP}{32}{subsection.11.2}%
+\contentsline {section}{\numberline {12}Pruebas de carga con Locust}{33}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Instalación}{33}{subsection.12.1}%
 \contentsline {subsection}{\numberline {12.2}Diseño del locustfile}{33}{subsection.12.2}%
 \contentsline {subsection}{\numberline {12.3}Descripción de cada tarea}{33}{subsection.12.3}%
-\contentsline {subsection}{\numberline {12.4}Configuración de las pruebas}{33}{subsection.12.4}%
+\contentsline {subsection}{\numberline {12.4}Configuración de las pruebas}{34}{subsection.12.4}%
 \contentsline {subsection}{\numberline {12.5}Protección de la VM durante las pruebas}{34}{subsection.12.5}%
-\contentsline {section}{\numberline {13}Verificación manual de métricas}{34}{section.13}%
+\contentsline {section}{\numberline {13}Verificación manual de métricas}{35}{section.13}%
 \contentsline {section}{\numberline {14}Grafana}{36}{section.14}%
-\contentsline {subsection}{\numberline {14.1}Tipos de Respuestas en nuestra app}{36}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.1}Ataques de fuerza burta vs \textit {credential stuffing}}{37}{subsection.14.1}%
 \contentsline {subsection}{\numberline {14.2}Tipos de Respuestas en nuestra app, diagrama de sectores}{37}{subsection.14.2}%
 \contentsline {subsection}{\numberline {14.3}Ratio de Tokens }{37}{subsection.14.3}%
 \contentsline {subsection}{\numberline {14.4}Tokens en circulación en nuestro sistema }{38}{subsection.14.4}%
 \contentsline {subsection}{\numberline {14.5}Tiempos de respuesta del sistema}{38}{subsection.14.5}%
-\contentsline {subsection}{\numberline {14.6}Tiempos de respuesta del sistema}{39}{subsection.14.6}%
+\contentsline {subsection}{\numberline {14.6}Tiempos de respuesta del sistema}{38}{subsection.14.6}%
 \contentsline {subsection}{\numberline {14.7}Atques de fuerza bruta}{39}{subsection.14.7}%
-\contentsline {subsection}{\numberline {14.8}MétricasEDR}{40}{subsection.14.8}%
-\contentsline {subsubsection}{\numberline {14.8.1}Logins Incorrectos}{40}{subsubsection.14.8.1}%
-\contentsline {subsubsection}{\numberline {14.8.2}Atques de fuerza bruta}{40}{subsubsection.14.8.2}%
-\contentsline {subsubsection}{\numberline {14.8.3}ReplayAttack}{41}{subsubsection.14.8.3}%
+\contentsline {subsection}{\numberline {14.8}MétricasEDR}{39}{subsection.14.8}%
+\contentsline {subsubsection}{\numberline {14.8.1}Logins Incorrectos}{39}{subsubsection.14.8.1}%
+\contentsline {subsubsection}{\numberline {14.8.2}Atques de fuerza bruta}{39}{subsubsection.14.8.2}%
+\contentsline {subsubsection}{\numberline {14.8.3}ReplayAttack}{39}{subsubsection.14.8.3}%

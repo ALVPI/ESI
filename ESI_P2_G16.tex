@@ -979,41 +979,46 @@
 	\end{figure}
 	\newpage
 \section{Grafana}
-	Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación de las métricas que hemos estado recogiendo.\\
-	% insertar un pantallazo del dashboard en general
-	Una vez que ya tenemos una idea de cómo hemos ditribuido el dashboard vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
+	Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación gráfica de nuestro trabajo en esta práctica\\
+	\begin{figure}[H]
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/VistazoGeneralGrafana}
+			\caption{Nuestro panel de grafana para esta práctica. 	Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
+	\end{figure}
+	Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
 	Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.\\
-	\subsection{Tipos de Respuestas en nuestra app}
+
+	\subsection{Ataques de fuerza burta vs \textit{credential stuffing}}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RespuestaAPeticones}
-				\caption{Tipos de peticiones que recibe nuestro \textit{endpoint}}
+				\includegraphics[width=\linewidth]{Recursos/AtaquesFuerzaBruta}
+				\caption{Con este panel estamos intentando diferenciar entre los errores de un usuario al escribir su contraseña con un posible ataque de fuerza bruta para entrar a la cuenta de un usuario.}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Mostramos una gráfica con las respuesta que devuelve el servidor a las diferentes peticiones que le llegan, recordar que con el fichero de locust estamos haciendo un test sintético de cómo se comportaría el sistema con según que peticiones.\\
-				Además, hemos ejecutado el fichero \textit{test.py} para probar las métricas específicas de nuestro enfoque EDR, por lo que tenemos más peticiones erróneas de las que se pueden esperar en una prueba de carga de carga aluso, pero es un indicador de que nuestro sistema es robusto frente a este tipo de ataques.\\
-				Esta métricas es útil de cara a un adminitrador de la aplicación puesto que de un vistazo podemos ver si estamos bajo algún tipo de ataque o simplemente es que algo no está funcionando en nuestro entorno, ya que mucho errores del tipo 400 son un indicador de que algo por el lado de los usuarios no está bien mientras que los 500 nos indican que algo de nuestro \textit{backend} no funciona como debe.
+					Esta métrica pertenece a nuestro enfoque EDR, pero para entenderla bien, vamos a explicar cuáles son los dos tipos de ataques que estamos midiendo.\\
+					Un \textit{Brute Forze Attack} se trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseña, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
+					Este panel muestra qué usuarios han sido atacados durante las pruebas, aquellos con más intentos fallidos son víctimas de fuerza bruta mientras que la presencia de muchos usuarios distintos con pocos intentos cada uno indica \textit{credential stuffing}.
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Tipos de Respuestas en nuestra app, diagrama de sectores}
+		\subsection{Fallos del login de los usuarios}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RatioPeticiones}
-				\caption{Tipos de peticiones que recibe nuestro \textit{endpoint}}
+				\includegraphics[width=\linewidth]{Recursos/FallosLoginUsuario}
+				\caption{Número de usuarios de nuestro sistema que han tenido fallos en su login}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+				A simple vista, esta métrica parece un poco irrelevante ¿qué información útil aporta el número de usuarios que se han equivocado al introducir sus datos al hacer el \textit{login}?,  y la respuesta a esta pregunta es simple, un alto número de usuarios que fallan en su inicio de sesión es un indicativo de que algo anda mal, de tal manera que unido al panel anterior, nos da la información de que puede que uno de esos usuarios esté sufiendo un ataque y que por ende sea un vector de infección a nuestro sistema.
 			\end{minipage}
 		\end{figure}
 		
