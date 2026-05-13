@@ -52,13 +52,12 @@
 	tabsize=4,
 	captionpos=b,
 	extendedchars=true,
-	% Esta sección traduce los caracteres problemáticos de Mac a algo que LaTeX entiende
-}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
+	% Esta sección traduce los caracteres problemáticos a algo que LaTeX entiende
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
 	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
 	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1,
-	columns=fullflexible % Ayuda a manejar mejor el espaciado de caracteres UTF-8
+	columns=fullflexible 
 }
-
 \lstdefinestyle{yaml}{
 	backgroundcolor=\color{grisClaro},
 	basicstyle=\ttfamily\small,
@@ -231,7 +230,11 @@
 	\begin{lstlisting}[style=bash]
 		uv add prometheus-client
 	\end{lstlisting}
-	Aquí uv juega un papel fundamental, puesto que de \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}
+	Aquí uv juega un papel fundamental, puesto que de \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}.\\
+	Para ello hemos tenido que modificar el fichero de prometheus de la siguiente manera.
+	\vspace{1cm}
+	\lstinputlisting[style=yaml]{./prometheus.yml}
+	\vspace{1cm}
 	
 	\subsubsection{Funciones/Métricas que vamos a emplear en la práctica}
 	Emplearemos 2 de las 4 métricas que nos proporciona la apliación, puesto que son las que más se adaptan al planteamiento que tenemos para la práctica:

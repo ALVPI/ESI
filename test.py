@@ -496,6 +496,25 @@ def test_token_harvesting() -> None:
     wait_for_prometheus()
     check_metric("oauth2_active_tokens")
     check_metric("oauth2_tokens_revoked_total")
+
+def test_client_enumeration() -> None:
+    separator("TEST 10 — Ataque de enumeración de clientes (Sostenido)")
+    print("  Enviando client_ids desconocidos masivamente para Grafana...")
+
+    fake_clients = ["admin", "root", "test", "app", "api", "cliente_falso"]
+
+    # Enviamos 200 peticiones en lugar de 10 para que el 'rate' suba
+    for _ in range(20): 
+        for fake_client in fake_clients:
+            requests.post(f"{BASE_URL}/token", data={
+                "grant_type":    "client_credentials",
+                "client_id":     fake_client,
+                "client_secret": "any_secret"
+            })
+    
+    print("\n  ✓ Tráfico generado. Revisa Grafana ahora.")
+    wait_for_prometheus()
+    check_metric("oauth2_unknown_client_attempts_total")
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -595,13 +614,7 @@ def main():
     test_client_enumeration()
     test_credential_stuffing()
     test_token_harvesting()
-    # Final summary
-    print_full_metrics_summary()
-
-    print("\n" + "="*60)
-    print("  All tests completed.")
-    print("  Check Grafana at http://YOUR-VM-IP:3000 for visual results")
-    print("="*60 + "\n")
+    test_client_enumeration()
 
 
 if __name__ == "__main__":
