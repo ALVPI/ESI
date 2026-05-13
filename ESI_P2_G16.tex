@@ -1006,99 +1006,122 @@
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Fallos del login de los usuarios}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
-				\centering
-				\includegraphics[width=\linewidth]{Recursos/FallosLoginUsuario}
-				\caption{Número de usuarios de nuestro sistema que han tenido fallos en su login}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				A simple vista, esta métrica parece un poco irrelevante ¿qué información útil aporta el número de usuarios que se han equivocado al introducir sus datos al hacer el \textit{login}?,  y la respuesta a esta pregunta es simple, un alto número de usuarios que fallan en su inicio de sesión es un indicativo de que algo anda mal, de tal manera que unido al panel anterior, nos da la información de que puede que uno de esos usuarios esté sufiendo un ataque y que por ende sea un vector de infección a nuestro sistema.
-			\end{minipage}
-		\end{figure}
-		
-		
 		\subsection{Ratio de Tokens }
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/TokensActivosYTotales}
+				\includegraphics[width=\linewidth]{Recursos/TokenReplay}
 				\caption{Tipos de tokens que maneja nuestro sistema}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+				Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un token válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
+				Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (i\textit{ncrease()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Tokens en circulación en nuestro sistema }
+		
+		\subsection{Fallos del login de los usuarios}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/FallosLoginUsuario}
+					\caption{Número de usuarios de nuestro sistema que han tenido fallos en su login}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					A simple vista, esta métrica parece un poco irrelevante ¿qué información útil aporta el número de usuarios que se han equivocado al introducir sus datos al hacer el \textit{login}?,  y la respuesta a esta pregunta es simple, un alto número de usuarios que fallan en su inicio de sesión es un indicativo de que algo anda mal, de tal manera que unido al panel anterior, nos da la información de que puede que uno de esos usuarios esté sufiendo un ataque y que por ende sea un vector de infección a nuestro sistema.
+				\end{minipage}
+			\end{figure}
+		\subsection{Fallos del login de los usuarios}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/IntentosLoginsFallidosPorUser}
+					\caption{Usuarios de nuestro sistema que han tenido fallos en su login}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Métrica complementaria a la anterior, la cuál ya no sólo nos dice los intentos fallidos de \textit{login en el  sistema}, sino que tenemos una visión de qué usuarios están teniendo este comportamiento.\\
+					Decimos que es complementaria puesto que si el adminitrador del sistema detecta en el panel anterior un número grande de errores de login por parte de usuarios, consultado este panel puede ver qué usuario en concreto está teniendo este comportamiento, lo que permite contactar con él para que revise la actividad o en su defecto, cortarle el acceso al sistema por si te trata de un bot o un usuario que ha perdido el acceso a sus credenciales.\\
+					Así como dato extra a gráfica se construye mediante una consulta PromQL que calcula la tasa de fallos (\textit{rate()}) y los agrupa por nombre de usuario (sum(...) by (username)), para poder realizar esta distinción.
+				\end{minipage}
+			\end{figure}
+		
+		\subsection{Logins correctos en el sistema. }
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RatioTokens}
-				\caption{Tipos de tokens que maneja nuestro sistema}
+				\includegraphics[width=\linewidth]{Recursos/loginsCorrectos}
+				\caption{Número de logins correctos en el sistema}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+				Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.\\
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Tiempos de respuesta del sistema}
+		\subsection{Peticiones a los diferentes endpoints de nuestro sistema}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/TiempoDeRespuesta}
-				\caption{Tipos de tokens que maneja nuestro sistema}
+				\includegraphics[width=\linewidth]{Recursos/RequestAEndPoints}
+				\caption{Peticiones que le llegan a los diferentes endpoints al sistema.}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+				En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
+				Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{/authorize})} es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
+				Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
+				Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.\\
+				
 			\end{minipage}
 		\end{figure}
 		
-		\subsection{Tiempos de respuesta del sistema}
+		\subsection{Distribución de las peticiones en nuestro sistema}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/ResponseTime}
-				\caption{Tipos de tokens que maneja nuestro sistema}
+				\includegraphics[width=\linewidth]{Recursos/QuesitoPeticiones}
+				\caption{Distribución de las peticiones en nuestro sistema.}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302.\\
+			Claro, esta distinción es muy vanal a simple vista, el caso es que lo que buscamos es saber el estado del sistema de un simple vistazo, lo normal en un sistema es que haya más peticiones correctas que erróneas, en el caso de nuestro gráfico por nuestro enfoque de EDR estamos testeando justamente lo contrario, queremos ver cómo reacciona el sistema ante nuestros ataques, pero en una situación real, una distribución muy despajera de peticiones correctas incorrectas es un indicativo de que algo dentro del sistema no está funcionando bien.
 			\end{minipage}
 		\end{figure}
-		\subsection{Atques de fuerza bruta}
+		\subsection{Ratio peticiones correctas fallidas por los usuarios}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RatioRequestsValidasInvalidas}
+				\includegraphics[width=\linewidth]{Recursos/RatioPeticones}
 				\caption{Tipos de tokens que maneja nuestro sistema}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+			\textbf{Validación de la Capacidad EDR:} El hecho de que la cifra se mantenga estable (como se observa en la línea de tendencia inferior) confirma que el servidor no está sufriendo "falsos negativos". El sistema es capaz de mantener un flujo constante de autorizaciones válidas mientras mantiene una barrera de contención del 32\% de tráfico malicioso bloqueado, sin que el procesamiento de estos errores degrade la experiencia del usuario legítimo.
 			\end{minipage}
 		\end{figure}
 		

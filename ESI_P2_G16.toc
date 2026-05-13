@@ -42,13 +42,14 @@
 \contentsline {section}{\numberline {13}Verificación manual de métricas}{35}{section.13}%
 \contentsline {section}{\numberline {14}Grafana}{36}{section.14}%
 \contentsline {subsection}{\numberline {14.1}Ataques de fuerza burta vs \textit {credential stuffing}}{37}{subsection.14.1}%
-\contentsline {subsection}{\numberline {14.2}Tipos de Respuestas en nuestra app, diagrama de sectores}{37}{subsection.14.2}%
-\contentsline {subsection}{\numberline {14.3}Ratio de Tokens }{37}{subsection.14.3}%
-\contentsline {subsection}{\numberline {14.4}Tokens en circulación en nuestro sistema }{38}{subsection.14.4}%
-\contentsline {subsection}{\numberline {14.5}Tiempos de respuesta del sistema}{38}{subsection.14.5}%
-\contentsline {subsection}{\numberline {14.6}Tiempos de respuesta del sistema}{38}{subsection.14.6}%
-\contentsline {subsection}{\numberline {14.7}Atques de fuerza bruta}{39}{subsection.14.7}%
-\contentsline {subsection}{\numberline {14.8}MétricasEDR}{39}{subsection.14.8}%
-\contentsline {subsubsection}{\numberline {14.8.1}Logins Incorrectos}{39}{subsubsection.14.8.1}%
-\contentsline {subsubsection}{\numberline {14.8.2}Atques de fuerza bruta}{39}{subsubsection.14.8.2}%
-\contentsline {subsubsection}{\numberline {14.8.3}ReplayAttack}{39}{subsubsection.14.8.3}%
+\contentsline {subsection}{\numberline {14.2}Ratio de Tokens }{37}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}Fallos del login de los usuarios}{38}{subsection.14.3}%
+\contentsline {subsection}{\numberline {14.4}Fallos del login de los usuarios}{38}{subsection.14.4}%
+\contentsline {subsection}{\numberline {14.5}Logins correctos en el sistema. }{39}{subsection.14.5}%
+\contentsline {subsection}{\numberline {14.6}Peticiones a los diferentes endpoints de nuestro sistema}{39}{subsection.14.6}%
+\contentsline {subsection}{\numberline {14.7}Distribución de las peticiones en nuestro sistema}{40}{subsection.14.7}%
+\contentsline {subsection}{\numberline {14.8}Ratio peticiones correctas fallidas por los usuarios}{40}{subsection.14.8}%
+\contentsline {subsection}{\numberline {14.9}MétricasEDR}{41}{subsection.14.9}%
+\contentsline {subsubsection}{\numberline {14.9.1}Logins Incorrectos}{41}{subsubsection.14.9.1}%
+\contentsline {subsubsection}{\numberline {14.9.2}Atques de fuerza bruta}{41}{subsubsection.14.9.2}%
+\contentsline {subsubsection}{\numberline {14.9.3}ReplayAttack}{41}{subsubsection.14.9.3}%
