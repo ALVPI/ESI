@@ -49,7 +49,9 @@
 \contentsline {subsection}{\numberline {14.6}Peticiones a los diferentes endpoints de nuestro sistema}{39}{subsection.14.6}%
 \contentsline {subsection}{\numberline {14.7}Distribución de las peticiones en nuestro sistema}{40}{subsection.14.7}%
 \contentsline {subsection}{\numberline {14.8}Ratio peticiones correctas fallidas por los usuarios}{40}{subsection.14.8}%
-\contentsline {subsection}{\numberline {14.9}MétricasEDR}{41}{subsection.14.9}%
-\contentsline {subsubsection}{\numberline {14.9.1}Logins Incorrectos}{41}{subsubsection.14.9.1}%
-\contentsline {subsubsection}{\numberline {14.9.2}Atques de fuerza bruta}{41}{subsubsection.14.9.2}%
-\contentsline {subsubsection}{\numberline {14.9.3}ReplayAttack}{41}{subsubsection.14.9.3}%
+\contentsline {subsubsection}{\numberline {14.8.1}Tiempo de respuesta a cada \textit {endpint}}{41}{subsubsection.14.8.1}%
+\contentsline {subsubsection}{\numberline {14.8.2}Tipos de \textit {tokens} en nuestro sistema.}{41}{subsubsection.14.8.2}%
+\contentsline {subsubsection}{\numberline {14.8.3}Distribución de \textit {tokens} en el sistema}{42}{subsubsection.14.8.3}%
+\contentsline {subsubsection}{\numberline {14.8.4}Intentos de ataque de fuerza bruta}{42}{subsubsection.14.8.4}%
+\contentsline {subsubsection}{\numberline {14.8.5}ReplayAttack}{43}{subsubsection.14.8.5}%
+\contentsline {subsubsection}{\numberline {14.8.6}ReplayAttack}{43}{subsubsection.14.8.6}%

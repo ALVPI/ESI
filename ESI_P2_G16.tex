@@ -1086,7 +1086,7 @@
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
 				En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
-				Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{/authorize})} es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
+				Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
 				Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
 				Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.\\
 				
@@ -1099,14 +1099,13 @@
 			% Columna 1: La Imagen
 			\begin{minipage}{0.45\textwidth}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/QuesitoPeticiones}
+				\includegraphics[width=\linewidth]{Recursos/RespuestasARequests}
 				\caption{Distribución de las peticiones en nuestro sistema.}
 			\end{minipage}
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-			Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302.\\
-			Claro, esta distinción es muy vanal a simple vista, el caso es que lo que buscamos es saber el estado del sistema de un simple vistazo, lo normal en un sistema es que haya más peticiones correctas que erróneas, en el caso de nuestro gráfico por nuestro enfoque de EDR estamos testeando justamente lo contrario, queremos ver cómo reacciona el sistema ante nuestros ataques, pero en una situación real, una distribución muy despajera de peticiones correctas incorrectas es un indicativo de que algo dentro del sistema no está funcionando bien.
+			Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302., los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
 			\end{minipage}
 		\end{figure}
 		\subsection{Ratio peticiones correctas fallidas por los usuarios}
@@ -1121,58 +1120,104 @@
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-			\textbf{Validación de la Capacidad EDR:} El hecho de que la cifra se mantenga estable (como se observa en la línea de tendencia inferior) confirma que el servidor no está sufriendo "falsos negativos". El sistema es capaz de mantener un flujo constante de autorizaciones válidas mientras mantiene una barrera de contención del 32\% de tráfico malicioso bloqueado, sin que el procesamiento de estos errores degrade la experiencia del usuario legítimo.
+			Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación, como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comproabr la seguridad del sistema por lo que esté gráfico nos dice que el sistema es capaz de mantener un fijo constante de autorizaciones válidas pese a todo el ruido de peticiones malicosas que le estamos haciendo, teniendo un comprotamiento estable por lo que se puede ver en la linea de tendencias y que además, no está dando falsos positivos, es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
 			\end{minipage}
 		\end{figure}
-		
-		\subsection{MétricasEDR}
-			\subsubsection{Logins Incorrectos}
+		\subsubsection{Tiempo de respuesta a cada \textit{endpint}}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/TiempoRespuestaEndPoints}
+					\caption{Gráfico que mietras el tiempo de respuesta a cada endpoint con una leyenda la cual nos da información exacta sobre los valores límite}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Esta gráfica es de vita importancia para saber si los \textit{endpoints} están funcionando como deberían, además de darnos la información de los tiempos de respuesta en función de la carga de trabajo que nosotros le estamos haciendo con el locuts.\\
+					Tenemos los 3 puntos , cada uno de un color, \textit{token} (línea azul) es el punto de máximo trabajo de nuestra aplicación puesto que se encarga de la gestión de token y los registros de audotia, \textit{authorized} (línea amarilla) es en el que se reflejan la respuesta de los usuarios por lo que la respuesta es casi instantánea mientras que el de \textit{admin} al ser un \textit{endpoint} interno tiene un tiempo de respues mínimo ya que no está expuesto a la interacción con los usuarios.
+				\end{minipage}
+			\end{figure}
+			
+			\subsubsection{Tipos de \textit{tokens} en nuestro sistema.}
 				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 					\centering
 					% Columna 1: La Imagen
 					\begin{minipage}{0.45\textwidth}
 						\centering
-						\includegraphics[width=\linewidth]{Recursos/loginIncorrecto}
-						\caption{Tipos de tokens que maneja nuestro sistema}
+						\includegraphics[width=\linewidth]{Recursos/RatioTokens}
+						\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
 					\end{minipage}
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
+					Con este panel estamos registrando los tokens que se están emitiendo/empleando en nuestro sistema, debemos recordar que estamos empleando un servidor oauth2 para la autenticación por lo que esta estadistica es necesaria para comprobar que el sistema funciona bien y que no estamos sufriendo ningún tipo de ataque.\\ 
+					Como tenemos 3 tipos vamos a explicar cada uno de ellos
+					\begin{itemize}
+						\item  \textbf{Query A (\textit{Access Tokens}):} representa el número de sesiones activas que pueden realizar peticiones a recursos protegidos.
+						\item  \textbf{Query B (\textit{Refresh Tokens}):} representa el número de sesiones de larga duración que permiten a los clientes obtener nuevas credenciales sin intervención del usuario.
+						\item \textbf{Query C (\textit{Total Tokens}):} como su nombre indica la suma de las anteriores.
+					\end{itemize}
 					\end{minipage}
 				\end{figure}
-		
-		\subsubsection{Atques de fuerza bruta}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
-				\centering
-				\includegraphics[width=\linewidth]{Recursos/BruteForceAttempts}
-				\caption{Tipos de tokens que maneja nuestro sistema}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
-			\end{minipage}
-		\end{figure}
-		
-		\subsubsection{ReplayAttack}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
-				\centering
-				\includegraphics[width=\linewidth]{Recursos/Tokens}
-				\caption{Tipos de tokens que maneja nuestro sistema}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				Al igual que la metrica anterior, lo que estamos buscando es tener de un vistazo la distribución de peticiones que está recibiendo nuestro sistema, se complementa muy bien con la anterior, ya que son enfoques distintos, esta es un enfoque más genérico, sin entrar en tanto detalle mientras que la primera, nos da una información mucho más precisa.\\
-			\end{minipage}
-		\end{figure}
+				
+				\subsubsection{Distribución de \textit{tokens} en el sistema}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/TokensActivos}
+							\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.50\textwidth}
+							Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador, si nos damos cuanta esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de token y los tipos de cada uno.
+						\end{minipage}
+					\end{figure}
+					
+				\subsubsection{Intentos de ataque de fuerza bruta}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/bruteForze}
+							\caption{Peticiones consideradas de fuerza bruta que está recibiendo el sistema.}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.50\textwidth}
+							Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema. Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos plantamos en el grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aqellos usuarios que son probelmáticos.
+						\end{minipage}
+					\end{figure}
+					
+				\subsubsection{Flujos de autenticació en cada uno de los \textit{endpoints}}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionInvalidos}
+							\caption{Tipos de tokens que maneja nuestro sistema}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionValidos}
+							\caption{Tipos de tokens que maneja nuestro sistema}
+						\end{minipage}
+					\end{figure}
+			
+			Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
+			\begin{itemize}
+				\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
+				\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
+				\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
+			\end{itemize}
 		
 	
 	
