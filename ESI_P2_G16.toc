@@ -53,5 +53,4 @@
 \contentsline {subsubsection}{\numberline {14.8.2}Tipos de \textit {tokens} en nuestro sistema.}{41}{subsubsection.14.8.2}%
 \contentsline {subsubsection}{\numberline {14.8.3}Distribución de \textit {tokens} en el sistema}{42}{subsubsection.14.8.3}%
 \contentsline {subsubsection}{\numberline {14.8.4}Intentos de ataque de fuerza bruta}{42}{subsubsection.14.8.4}%
-\contentsline {subsubsection}{\numberline {14.8.5}ReplayAttack}{43}{subsubsection.14.8.5}%
-\contentsline {subsubsection}{\numberline {14.8.6}ReplayAttack}{43}{subsubsection.14.8.6}%
+\contentsline {subsubsection}{\numberline {14.8.5}Flujos de autenticació en cada uno de los \textit {endpoints}}{43}{subsubsection.14.8.5}%
