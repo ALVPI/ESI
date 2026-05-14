@@ -179,12 +179,13 @@ login_page_visits = Counter(
 #Intentos de login con un usario desconocido
 unknown_client_attempts = Counter(
     "oauth2_unknown_client_attempts_total",
-    "Intentos de acceso con client_id desconocido"
+    "Intentos de acceso con client_id desconocido",
+    ["client_id"]
 )
 
 # Un valor alto indica credential stuffing
 # Un valor bajo con muchos fallos indica fuerza bruta clasica
 unique_failed_usernames = Gauge(
     "oauth2_unique_failed_usernames_active",
-    "Numero de usernames distintos con fallos de login activos"
+    "Numero de usernames distintos con fallos de login activos",
 )

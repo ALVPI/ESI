@@ -15,6 +15,7 @@
 \usepackage{parskip}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage{textcomp}
 % ── Geometría de página ──────────────────────────────────────────────────────
@@ -52,10 +53,11 @@
 	tabsize=4,
 	captionpos=b,
 	extendedchars=true,
-	% Esta sección traduce los caracteres problemáticos a algo que LaTeX entiende
+	% Traducción de caracteres para evitar errores en latin1/UTF-8
 	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
 	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
-	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1,
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1 
+	{¡}{{\textexclamdown}}1 {─}{{-}}1 {━}{{-}}1, % <--- HE AÑADIDO ESTOS DOS
 	columns=fullflexible 
 }
 \lstdefinestyle{yaml}{
@@ -70,13 +72,12 @@
 	rulecolor=\color{gray},
 	showstringspaces=false,
 	captionpos=b,
-	% --- Traducción de caracteres para Mac/UTF-8 ---
 	extendedchars=true,
 	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
 	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
-	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1 
+	{─}{{-}}1 {━}{{-}}1 % <--- TAMBIÉN AQUÍ
 }
-
 \lstdefinestyle{bash}{
 	backgroundcolor=\color{grisClaro},
 	basicstyle=\ttfamily\small,
@@ -191,7 +192,7 @@
 	
 	La aplicación se gestiona con \texttt{uv}, el cual ya empleamos en nuestra primera práctica y como se explicó en el informe es un gestor de paquetes para Python más moderno que el típico pip, y se ejecuta en el puerto 5001.
 	
-	% ════════════════════════════════════════════════════════════════════════════
+
 	\section{Estructura del proyecto}
 	
 	Para entender el proyecto vamos a ver qué hacen los ficheros que han sido proporcionados por el profesor y los que hemos tenido que crear para el mismo:
@@ -217,10 +218,10 @@
 			en la base de datos. \\
 			\bottomrule
 		\end{tabular}
-		\caption{Estructura de ficheros del proyecto}
+		\caption{Estructura de ficheros modificados en el proyecto}
 	\end{table}
 	
-	% ════════════════════════════════════════════════════════════════════════════
+
 	\section{Prometheus}\label{PO}
 	
 	Prometheus es una base de datos de series temporales de tipo \textit{pull},
@@ -251,7 +252,7 @@
 	
 
 	
-\section{Funciones/Métricas que vamos a emplear en la práctica}
+\section{Métricas que vamos a emplear en la práctica}
 	Emplearemos 2 de las 4 métricas que nos proporciona la apliación, puesto que son las que más se adaptan al planteamiento que tenemos para la práctica:
 	\begin{itemize}
 		\item \textbf{Counter}: contador de incremento monotónico. Solo puede
@@ -263,7 +264,7 @@
 	\end{itemize}
 	\newpage
 	
-	\subsection{Definición de las métricas que vamos a recoger}
+{Definición de las métricas que vamos a recoger}
 	
 	Hemos creado un fichero \textit{metrics.py} en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
 	Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en el último importamos fucniones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
@@ -424,7 +425,7 @@
 	que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto
 	lo gestiona Flask.
 	
-	\section{Modificaciones a app.py}
+	\section{Modificaciones a\textit{ app.py}}
 	
 	Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante
 	decoradores Flask.
@@ -557,7 +558,7 @@
 	con \textit{Save \& Test}, obteniendo el mensaje:
 	
 	\begin{center}
-		\textit{``Successfully queried the Prometheus API.''}
+		\textit{"Successfully queried the Prometheus API."}
 	\end{center}
 	
 	
@@ -578,20 +579,6 @@
 	\begin{lstlisting}[style=bash]
 		uv run locust -f locustfile.py --host=http://localhost:5001
 	\end{lstlisting}
-	\\
-	Planteamos esta primera versión:
-	\vspace{1cm}
-	\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_Fulco.py}
-	\vspace{1cm}
-	La cuál presentaba 2 problemas:
-	\begin{enumerate}
-		\item brute\_force\_user\_login nunca llegaba a comprobar el usuario
-		Cuando Locust mandaba la petición al POST /authorize, la app miraba primero si venían todos los campos del formulario. Como faltaban action, scope, state y response\_type, la app fallaba antes de llegar a comprobar el usuario y la contraseña. Por eso user\_auth\_failed nunca se incrementaba.
-		Es como si intentaras entrar a un edificio pero antes de llegar a la puerta te para un guardia porque te falta el pase de visitante. Nunca llegas a intentar abrir la puerta.
-		\item  Nunca probababamoss revoked\_token\_usage
-		Esta es una de tus métricas EDR más importantes pero nunca la ejercitabas. Sin una tarea que intente usar un token inválido como refresh token, esa métrica siempre valdría cero en Grafana durante las pruebas de carga.
-	\end{enumerate}
-	Así que volvimos a hacer otra iteración para que funcionase de manera correcta 
 	\vspace{1cm}
 	\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
 	\vspace{1cm}
@@ -640,9 +627,7 @@
 	
 	\subsection{Protección de la VM durante las pruebas}
 	
-	Debido a los recursos de nuestra VM, nos vemos con un problema similar al de la práctica 1, no podemos lanzar peticiones como locos, sin preocuparnos de las consecuencias para nuestro sistema, por ello hemos decidido tomar una ciertas precauciones:\\
-	
-	Prometheus se arranca con límites explícitos de retención de datos:
+	Debido a los recursos de nuestra VM, nos vemos con un problema similar al de la práctica 1, no podemos lanzar peticiones como locos, sin preocuparnos de las consecuencias para nuestro sistema, por ello hemos decidido tomar una ciertas precauciones por lo que arrancamos prometheus con unos  límites explícitos de retención de datos:
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml \
 		--storage.tsdb.retention.time=2h \
@@ -656,22 +641,67 @@
 		echo "=== RAM ===" && free -h && \
 		echo "=== CPU ===" && top -bn1 | head -5'
 	\end{lstlisting}
+
+	\subsection{Comportamientos del sistema frente  a los dos escenarios de prueba}
+		En este apartado mostraremos una captura general del grafana en el que podremos comprobar cómo se ha comportado nuestro sistema ante las prubeas que hemos considerado adecuadas para sus dos escenarios.\\
+		Explicaremos en detalle cada uno de los paneles más adelante en este informe pero es una representación visual de cómo se está comportando el sistema
+		\subsubsection{Condiciones normales}
+			\begin{figure}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/CargaNormal}
+				\caption{Como podemos observar con los parámetros del locust del cuadro 2 obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
+			\end{figure}
+		\subsubsection{Condiciones de estrés}
+		\begin{figure}[H]
+			\centering
+			% --- Primera imagen ---
+			\begin{subfigure}[b]{0.3\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/Estrés200}
+				\caption{200 ususarios totales.}
+				\label{fig:imagen_a}
+			\end{subfigure}
+			\hfill % Espacio elástico entre imágenes
+			% --- Segunda imagen ---
+			\begin{subfigure}[b]{0.3\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/Estrés150}
+				\caption{150 usuarios totales.}
+				\label{fig:imagen_b}
+			\end{subfigure}
+			\hfill % Espacio elástico entre imágenes
+			% --- Tercera imagen ---
+			\begin{subfigure}[b]{0.3\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/Estrés125}
+				\caption{125 usuarios totales.}
+				\label{fig:imagen_c}
+			\end{subfigure}
+			
+			\caption{Pruebas de carga con diferentes usuarios totales}
+		\end{figure}
+		
+		Si nos fijamos hemos hecho pruebas de estres con diferentes números de usuarios totales la cuestión es que manteniendo constantes los números de usuarios concurrentes por segundo, nuestra vm no puede con ellos, debido a las limitaciones de memoria RAM y de CPU, con esto demostramos que tenemos un cuello de botella en la concurrencia, por lo que modificamos el número de usuarios concurrentes para que la prueba de estrés se acerque al límite del sistema, tomaremos como referente 150 usuarios, ya que es un número realista, pero reduciremos el número de usuarios concurrentes para que nuestro sistema pueda atender dichas peticiones.\\
+		
+		
+		
+	
 	\subsubsection{Flujo de ejecición de las aplicaciones}
 	\begin{enumerate}
-		\item Terminal 1 — \texttt{uv run python app.py}
-		\item Terminal 2 — \texttt{./prometheus --config.file=prometheus.yml}
-		\item Terminal 3 — \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
-		\item (opcional, sólo si tenemos pocos recursos en la VM)Terminal 4 — \texttt{watch} para vigilancia de recursos
+		\item Terminal 1  \texttt{uv run python app.py}
+		\item Terminal 2  \texttt{./prometheus --config.file=prometheus.yml}
+		\item Terminal 3  \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
+		\item Terminal 4  (opcional, sólo si tenemos pocos recursos en la VM)\texttt{watch} para vigilancia de recursos
 	\end{enumerate}
+	
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\linewidth]{Recursos/EjecucionTodoSistema}
 		\caption{Ejecutamos la \textit{app.py}, el locust y el prometheus, con el error de ejecución en los puertos erróneos}
-	\end{figure}\\
+	\end{figure}
 	Y el orden de parada es el inverso, esperando 30 segundos entre Locust y Prometheus para que este último recoja los últimos datos antes de apagarse.
 	
-	% ════════════════════════════════════════════════════════════════════════════
-	\section{Verificación manual de métricas}
+	\section{Verificación manual de métricas EDR}
 	En el punto anterior, hemos mencionado el 
 	\texttt{test.py}, el cual es un script que comprueba cada alguna métrica de manera individual, en concreto comprobamos las siguientes:
 	
@@ -788,7 +818,7 @@ por el enunciado:
 			\caption{Nuestro panel de grafana para esta práctica. 	Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
 	\end{figure}
 	Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
-	Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.\\
+	Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.
 
 	\subsection{Ataques de fuerza burta vs \textit{credential stuffing}}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
@@ -803,7 +833,7 @@ por el enunciado:
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
 					Esta métrica pertenece a nuestro enfoque EDR, pero para entenderla bien, vamos a explicar cuáles son los dos tipos de ataques que estamos midiendo.\\
-					Un \textit{Brute Forze Attack} se trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseña, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
+					Un \textit{Brute Forze Attack}  trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseña, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
 					Este panel muestra qué usuarios han sido atacados durante las pruebas, aquellos con más intentos fallidos son víctimas de fuerza bruta mientras que la presencia de muchos usuarios distintos con pocos intentos cada uno indica \textit{credential stuffing}.
 			\end{minipage}
 		\end{figure}
@@ -859,7 +889,7 @@ por el enunciado:
 				\end{minipage}
 			\end{figure}
 		
-		\subsection{Logins correctos en el sistema. }
+		\subsection{Logins correctos en el sistema}
 		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 			\centering
 			% Columna 1: La Imagen
@@ -871,7 +901,7 @@ por el enunciado:
 			\hfill % Crea un espacio elástico entre las dos minipages
 			% Columna 2: El Texto
 			\begin{minipage}{0.50\textwidth}
-				Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.\\
+				Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
 			\end{minipage}
 		\end{figure}
 		
@@ -890,7 +920,7 @@ por el enunciado:
 				En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
 				Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
 				Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
-				Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.\\
+				Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.
 				
 			\end{minipage}
 		\end{figure}
@@ -1014,13 +1044,27 @@ por el enunciado:
 						\end{minipage}
 					\end{figure}
 			
-			Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
-			\begin{itemize}
-				\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
-				\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
-				\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
-			\end{itemize}
-		
+					Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
+					\begin{itemize}
+						\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
+						\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
+						\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
+					\end{itemize}
+				\subsection{Intento de login por parte de usuarios desconocidos}
+						\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/IntentosUsuariosDesconocidos}
+							\caption{Peticiones de inicio de sesión de usuarios desconocidos para nuestro sistema.}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.50\textwidth}
+							Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos, en caso de detectar algún incremento en esta métrica, podríamos deducir que el sistema se ha visto comprometido, adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
+						\end{minipage}
+					\end{figure}
 	
 	
 \end{document}
