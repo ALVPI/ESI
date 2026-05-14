@@ -33,6 +33,10 @@
 \definecolor{verdeCodigo}{RGB}{0, 128, 0}
 \definecolor{azulCodigo}{RGB}{0, 0, 255}
 \definecolor{grisComentario}{RGB}{128, 128, 128}
+\definecolor{grisClaro}{RGB}{245,245,245}
+\definecolor{grisComentario}{RGB}{120,120,120}
+\definecolor{azulCodigo}{RGB}{0,0,200}
+\definecolor{rojoUVa}{RGB}{186,12,47} % Color corporativo UVa
 
 % ── Estilo de código ─────────────────────────────────────────────────────────
 
@@ -53,13 +57,13 @@
 	tabsize=4,
 	captionpos=b,
 	extendedchars=true,
-	% Traducción de caracteres para evitar errores en latin1/UTF-8
-	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
-	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
-	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1 
-	{¡}{{\textexclamdown}}1 {─}{{-}}1 {━}{{-}}1, % <--- HE AÑADIDO ESTOS DOS
-	columns=fullflexible 
+	columns=fullflexible,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1
+	{¡}{{\textexclamdown}}1 {─}{{-}}1 {━}{{-}}1
 }
+
 \lstdefinestyle{yaml}{
 	backgroundcolor=\color{grisClaro},
 	basicstyle=\ttfamily\small,
@@ -71,12 +75,12 @@
 	frame=single,
 	rulecolor=\color{gray},
 	showstringspaces=false,
-	captionpos=b,
-	extendedchars=true,
-	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 
-	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 
-	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1 
-	{─}{{-}}1 {━}{{-}}1 % <--- TAMBIÉN AQUÍ
+	captionpos=b,	extendedchars=true,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
+	{─}{{-}}1 {━}{{-}}1
+	
 }
 \lstdefinestyle{bash}{
 	backgroundcolor=\color{grisClaro},
@@ -682,8 +686,13 @@
 		\end{figure}
 		
 		Si nos fijamos hemos hecho pruebas de estres con diferentes números de usuarios totales la cuestión es que manteniendo constantes los números de usuarios concurrentes por segundo, nuestra vm no puede con ellos, debido a las limitaciones de memoria RAM y de CPU, con esto demostramos que tenemos un cuello de botella en la concurrencia, por lo que modificamos el número de usuarios concurrentes para que la prueba de estrés se acerque al límite del sistema, tomaremos como referente 150 usuarios, ya que es un número realista, pero reduciremos el número de usuarios concurrentes para que nuestro sistema pueda atender dichas peticiones.\\
-		
-		
+		Hemos probado con 6 usuarios y nos damos cuenta, de que el límte del sistema está en 5 usuarios concurrentes por segundo, ya que a partir a partir de los 5 primeros segundos, el sistema no puede procesar más de estos usuarios por segundos.
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=\textwidth]{Recursos/6concurrentes}
+			\caption{Observamos el pico máximo de usuarios concurrentes.}
+		\end{figure}		
+		Por qué sabemos estos, por el panel de usuarios con intentos fallidos de login, en nuestras pruebas lo que hacemos es realizar intentos de inicio de sesión con fallos, como el sistema tiene tantísimos usuarios concurrentes, sólo registra los 5 primeros, es decir el límite está en 5 usuarios concurrentes lanzando peticiones cada segundo.
 		
 	
 	\subsubsection{Flujo de ejecición de las aplicaciones}
@@ -725,6 +734,10 @@
 		\caption{Tests del script de verificación manual}
 	\end{table}
 	
+	Esto lo testeamos con un \textit{script} en python el cual mostramos a continuación:
+	\vspace{1cm}
+	\lstinputlisting[style=python, inputencoding=latin1]{test.py}
+	\vspace{1cm}
 	
 	
 

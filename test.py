@@ -53,16 +53,16 @@ def check_metric(metric_name: str) -> None:
         if metric_name in line and not line.startswith("#")
     ]
     if lines:
-        print(f"  ✓ {metric_name}:")
+        print(f"  todo correcto con {metric_name}:")
         for line in lines:
             print(f"      {line}")
     else:
-        print(f"  ✗ {metric_name}: no value yet (metric not incremented)")
+        print(f"  fallo en  {metric_name}: no value yet (metric not incremented)")
 
 
 def wait_for_prometheus(seconds: int = 2) -> None:
     """Wait for Prometheus to scrape the latest metrics."""
-    print(f"  ⏳ Waiting {seconds}s for Prometheus to scrape...")
+    print(f"  Waiting {seconds}s for Prometheus to scrape...")
     time.sleep(seconds)
 
 
@@ -512,7 +512,7 @@ def test_client_enumeration() -> None:
                 "client_secret": "any_secret"
             })
     
-    print("\n  ✓ Tráfico generado. Revisa Grafana ahora.")
+    print("\n Tráfico generado. Revisa Grafana ahora.")
     wait_for_prometheus()
     check_metric("oauth2_unknown_client_attempts_total")
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -526,9 +526,9 @@ def main():
     # Verify the app is reachable before starting
     try:
         requests.get(METRICS_URL, timeout=3)
-        print("\n  ✓ App is reachable at localhost:5001")
+        print("\n   App is reachable at localhost:5001")
     except requests.exceptions.ConnectionError:
-        print("\n  ✗ ERROR: Cannot connect to localhost:5001")
+        print("\n   ERROR: Cannot connect to localhost:5001")
         print("  Make sure app.py is running with: uv run python app.py")
         return
 
