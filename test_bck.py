@@ -6,7 +6,6 @@ This script tests every metric defined in metrics.py by simulating:
     - Brute force attacks (wrong credentials, wrong passwords)
     - Security attacks (token replay, auth code reuse)
     - Parallel requests (to trigger requests_in_progress)
-    - Unknown client attacks (cliente_falso)
 
 Usage:
     uv run python test_metrics.py
@@ -54,16 +53,16 @@ def check_metric(metric_name: str) -> None:
         if metric_name in line and not line.startswith("#")
     ]
     if lines:
-        print(f"  ✓ {metric_name}:")
+        print(f"  todo correcto con {metric_name}:")
         for line in lines:
             print(f"      {line}")
     else:
-        print(f"  ✗ {metric_name}: no value yet (metric not incremented)")
+        print(f"  fallo en  {metric_name}: no value yet (metric not incremented)")
 
 
 def wait_for_prometheus(seconds: int = 2) -> None:
     """Wait for Prometheus to scrape the latest metrics."""
-    print(f"  ⏳ Waiting {seconds}s for Prometheus to scrape...")
+    print(f"  Waiting {seconds}s for Prometheus to scrape...")
     time.sleep(seconds)
 
 
@@ -401,30 +400,6 @@ def test_expired_token() -> None:
     check_metric("oauth2_auth_flows_failed_total")
 
 
-def test_unknown_client_login() -> None:
-    """
-    Simula un ataque M2M desde un cliente que no existe en la base de datos.
-    Esto es el equivalente en Python a tu comando curl con 'cliente_falso'.
-    """
-    separator("TEST 10 — Intento de acceso de cliente DESCONOCIDO")
-    print("  Enviando client_id falso ('cliente_falso') a /token 10 veces...")
-
-    for i in range(10):
-        response = requests.post(f"{BASE_URL}/token", data={
-            "grant_type":    "client_credentials",
-            "client_id":     "cliente_falso",
-            "client_secret": "cualquier_cosa"
-        })
-        print(f"  Intento {i+1}: status {response.status_code} (se espera 401)")
-
-    print("  Expected metrics incremented: auth_flows_failed x10, brute_force_attempts x10")
-    wait_for_prometheus()
-    
-    # Comprobamos si las métricas han registrado a este cliente en particular
-    check_metric("oauth2_auth_flows_failed_total")
-    check_metric('client_id="cliente_falso"')
-
-
 def print_full_metrics_summary() -> None:
     """Print all oauth2 metrics with their current values."""
     separator("FULL METRICS SUMMARY")
@@ -442,7 +417,104 @@ def print_full_metrics_summary() -> None:
     else:
         print("  No oauth2 metrics found. Is the app running?")
 
+def test_client_enumeration() -> None:
+    separator("TEST 10 — Client enumeration attack")
+    print("  Trying to access with unknown client_ids...")
 
+    fake_clients = [
+        "admin", "root", "test", "app", "api",
+        "mobile", "backend", "service", "user", "guest"
+    ]
+
+    for fake_client in fake_clients:
+        response = requests.post(f"{BASE_URL}/token", data={
+            "grant_type":    "client_credentials",
+            "client_id":     fake_client,
+            "client_secret": "any_secret"
+        })
+        print(f"  client_id={fake_client}: status {response.status_code} (expected 401)")
+
+    print("\n  Expected: unknown_client_attempts incremented 10 times")
+    wait_for_prometheus()
+    check_metric("oauth2_unknown_client_attempts_total")
+
+def test_credential_stuffing() -> None:
+    separator("TEST 11 — Credential stuffing attack")
+    print("  Trying leaked credentials with different usernames...\n")
+
+    leaked_credentials = [
+        ("john.doe",       "password123"),
+        ("jane.smith",     "qwerty"),
+        ("carlos.garcia",  "123456"),
+        ("maria.lopez",    "letmein"),
+        ("pedro.martinez", "welcome"),
+        ("ana.rodriguez",  "monkey"),
+        ("luis.hernandez", "dragon"),
+        ("sofia.gonzalez", "master"),
+        ]
+
+    for username, password in leaked_credentials:
+        response = requests.post(f"{BASE_URL}/authorize", data={
+            "client_id":     WEB_APP_ID,
+            "redirect_uri":  "http://localhost:8080/callback",
+            "response_type": "code",
+            "scope":         "read",
+            "state":         "test123",
+            "action":        "approve",
+            "username":      username,
+            "password":      password
+        })
+    print(f"  username={username}: status {response.status_code} (expected 401)")
+
+    print("\n  Expected: user_auth_failed x8 con usernames distintos")
+    print("  Expected: unique_failed_usernames_active sube a 8+")
+    wait_for_prometheus()
+    check_metric("oauth2_user_auth_failed_total")
+    check_metric("oauth2_unique_failed_usernames_active")
+
+def test_token_harvesting() -> None:
+    separator("TEST 12 — Token harvesting attack")
+    print("  Requesting 10 tokens without revoking any...\n")
+
+    print("  active_tokens BEFORE harvesting:")
+    check_metric("oauth2_active_tokens")
+    print()
+
+    for i in range(10):
+        response = requests.post(f"{BASE_URL}/token", data={
+            "grant_type":    "client_credentials",
+            "client_id":     SERVICE_ACCOUNT_ID,
+            "client_secret": SERVICE_ACCOUNT_SECRET,
+            "scope":         "read"
+        })
+        if response.status_code == 200:
+            print(f"  Token {i+1} acquired and stored (not revoked)")
+        else:
+            print(f"  Token {i+1} FAILED: {response.status_code}")
+
+    print("\n  active_tokens AFTER harvesting:")
+    wait_for_prometheus()
+    check_metric("oauth2_active_tokens")
+    check_metric("oauth2_tokens_revoked_total")
+
+def test_client_enumeration() -> None:
+    separator("TEST 10 — Ataque de enumeración de clientes (Sostenido)")
+    print("  Enviando client_ids desconocidos masivamente para Grafana...")
+
+    fake_clients = ["admin", "root", "test", "app", "api", "cliente_falso"]
+
+    # Enviamos 200 peticiones en lugar de 10 para que el 'rate' suba
+    for _ in range(20): 
+        for fake_client in fake_clients:
+            requests.post(f"{BASE_URL}/token", data={
+                "grant_type":    "client_credentials",
+                "client_id":     fake_client,
+                "client_secret": "any_secret"
+            })
+    
+    print("\n Tráfico generado. Revisa Grafana ahora.")
+    wait_for_prometheus()
+    check_metric("oauth2_unknown_client_attempts_total")
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -454,9 +526,9 @@ def main():
     # Verify the app is reachable before starting
     try:
         requests.get(METRICS_URL, timeout=3)
-        print("\n  ✓ App is reachable at localhost:5001")
+        print("\n   App is reachable at localhost:5001")
     except requests.exceptions.ConnectionError:
-        print("\n  ✗ ERROR: Cannot connect to localhost:5001")
+        print("\n   ERROR: Cannot connect to localhost:5001")
         print("  Make sure app.py is running with: uv run python app.py")
         return
 
@@ -538,16 +610,11 @@ def main():
     # Test 9 — fake token
     test_expired_token()
 
-    # Test 10 — unknown client (Ataque M2M con cliente_falso)
-    test_unknown_client_login()
-
-    # Final summary
-    print_full_metrics_summary()
-
-    print("\n" + "="*60)
-    print("  All tests completed.")
-    print("  Check Grafana at http://YOUR-VM-IP:3000 for visual results")
-    print("="*60 + "\n")
+    # Test 10 - usuarios this_is_a_completely_fake_token_that_does_not_exist
+    test_client_enumeration()
+    test_credential_stuffing()
+    test_token_harvesting()
+    test_client_enumeration()
 
 
 if __name__ == "__main__":

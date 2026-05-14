@@ -14,7 +14,7 @@ Requirements:
     - app.py must be running on localhost:5001
     - seed.py must have been executed previously
 
-Author: ESI Practice 2
+Author: Grupo 16 
 """
 
 import requests
