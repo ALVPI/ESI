@@ -205,6 +205,9 @@ cython_debug/
 *.fdb_latexmk
 *.log.tex
 *.snm
+_minted-ESI_P2_G16
+*.nav
+*.toc
 # Marimo
 marimo/_static/
 marimo/_lsp/
