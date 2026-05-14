@@ -105,7 +105,7 @@ tokens_revoked = Counter(
     ["token_type"]
 )
 
-#Nos da inormacion sobre los codigos emitos pero no empleados
+#Nos da inormacion sobre los codigos emitidos pero no empleados
 pending_auth_codes = Gauge(
     "oauth2_pending_auth_codes",
     "Codigos de autorizacion emitidos pero no canjeados"
@@ -169,7 +169,7 @@ user_auth_success = Counter(
     ["username"]
 )
 
-#Vamos a simular el comportamiento de un usuarios
+#Vamos a simular el comportamiento de un usuario
 #metrica para los clicks del formulario.
 login_page_visits = Counter(
     "oauth2_login_page_visits_total",

@@ -80,7 +80,6 @@
 	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
 	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
 	{─}{{-}}1 {━}{{-}}1
-	
 }
 \lstdefinestyle{bash}{
 	backgroundcolor=\color{grisClaro},
@@ -172,7 +171,7 @@
 	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el servidor  por excelencia para hacer de mediación en la tarea de distribución de claves de acceso sobre el que realizaremos pruebas de carga con Locust, el cual es un sistema de monitorización que aplica el modelo \textit{pull}, el cual, está apuntando a nuestro \textit{endpoint} y cada 15 segundos (según lo definido en su \textit{.yml}) anota todo lo que está pasando, estos eventos serán visualizados posteriomente  en Grafana.\\
 	De tal manera que tenemos 3 objetivos:
 	\begin{enumerate}
-		\item Instrumentación del backend con métricas Prometheus (haremos incapie en esta tecnología en \ref{PO}).
+		\item Instrumentación del backend con métricas Prometheus (haremos incapie en esta tecnología en el punto \ref{PO}).
 		\item Despliegue y configuración de Prometheus y Grafana.
 		\item Pruebas de carga y estrés con Locust.
 	\end{enumerate}
@@ -228,9 +227,7 @@
 
 	\section{Prometheus}\label{PO}
 	
-	Prometheus es una base de datos de series temporales de tipo \textit{pull},
-	esto quiere decir que es la propia base de datos quien periódicamente consulta
-	a las aplicaciones por sus métricas, de tal manera que las aplicaciones toman un papel pasivo, donde solo se encagan de realizar sus tareas y sólo tiene que exponer un \textit{enpoint} llamado \textit{/metrics} con los datos en el mismo formato que emplea esta tecnología.\\
+	Prometheus es una base de datos de series temporales de tipo \textit{pull}, esto quiere decir que es la propia base de datos quien periódicamente consultaa las aplicaciones por sus métricas, de tal manera que las aplicaciones toman un papel pasivo, donde solo se encagan de realizar sus tareas y sólo tiene que exponer un \textit{enpoint} llamado \textit{/metrics} con los datos en el mismo formato que emplea esta tecnología.
 	\subsection{Instalación}
 	
 	Descargamos el binario de github y lo dejamos descomprimido en la VM
@@ -243,12 +240,12 @@
 	\begin{lstlisting}[style=bash]
 		uv add prometheus-client
 	\end{lstlisting}
-	Aquí uv juega un papel fundamental, puesto que de \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}.\\
+	Aquí uv juega un papel fundamental, puesto que  \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}. \\
 	Para ello hemos tenido que modificar el fichero de prometheus de la siguiente manera.
 	\vspace{1cm}
 	\lstinputlisting[style=yaml]{./prometheus.yml}
 	\vspace{1cm}
-	En este fichero lo que estamos haciendo es definir el comportamiento del monitoreo, en el cual estableceos que recoja méticas cada 15 segundos, del la aplicaicón que está corriendo en el 5001 y del  enpoint \textit{/metrics}.\\
+	En este fichero lo que estamos haciendo es definir el comportamiento del monitoreo, en el cual establecemos que recoja méticas cada 15 segundos, de la aplicación que está corriendo en el 5001 y del  enpoint \textit{/metrics}.\\
 	Ahora que lo tenemos todo configurado, para ejecutar el prometheus en nuestro sistema simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es es el que hemos hecho antes.
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml
@@ -268,7 +265,7 @@
 	\end{itemize}
 	\newpage
 	
-{Definición de las métricas que vamos a recoger}
+	\subsection{Definición de las métricas que vamos a recoger}
 	
 	Hemos creado un fichero \textit{metrics.py} en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
 	Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en el último importamos fucniones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
@@ -277,8 +274,8 @@
 	\begin{itemize}
 		
 		\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
-		\item "oauth2\_auth\_flows\_started\_total": nombre de la métrica para su posterior integración con grafana
-		\item "Flujos de autenticacion iniciados", : descripción de la metrica
+		\item \"oauth2\_auth\_flows\_started\_total\": nombre de la métrica para su posterior integración con grafana
+		\item "Flujos de autenticacion iniciados": descripción de la metrica
 		\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
 		)
 	\end{itemize}

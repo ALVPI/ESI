@@ -9,7 +9,7 @@ Run with:  uv run python app.py
 #request had the request info 
 #g will be use to store the request live time
 from flask import Flask, request, g
-#wsi will be the way promethus get their data
+#wsi will be the way prometheus gets their data
 from prometheus_client import make_wsgi_app
 #use for the comunication btw the wsgi and metrics.py 
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -67,10 +67,10 @@ def create_app() -> Flask:
     #This force that every request must execute this methods 
     @app.after_request
     def after_request(response):
-        # get the request endpoint
+        # Get the request endpoint
         endpoint = request.path
 
-        # we increment the general counter 
+        # We increment the general counter 
         http_requests.labels(
             method=request.method,
             endpoint=endpoint,
