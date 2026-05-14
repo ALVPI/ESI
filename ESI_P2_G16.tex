@@ -193,7 +193,8 @@
 		caducado sin necesidad de repetir el proceso de autenticación completo.
 	\end{itemize}
 	
-	La aplicación se gestiona con \texttt{uv}, el cual ya empleamos en nuestra primera práctica y como se explicó en el informe es un gestor de paquetes para Python más moderno que el típico pip, y se ejecuta en el puerto 5001.
+	La aplicación se gestiona con \texttt{uv}, el cual ya empleamos en nuestra primera práctica y como se explicó en su informe es un gestor de paquetes para Python( más moderno que el típico pip).\\
+	Aquí uv juega un papel fundamental, puesto que con la instrucción \textit{add} de manera automática instalará las librerías y actualiza el .toml del proyecto para registra la dependencia en el \textit{uv.lock}. \\
 	
 
 	\section{Estructura del proyecto}
@@ -227,7 +228,8 @@
 
 	\section{Prometheus}\label{PO}
 	
-	Prometheus es una base de datos de series temporales de tipo \textit{pull}, esto quiere decir que es la propia base de datos quien periódicamente consultaa las aplicaciones por sus métricas, de tal manera que las aplicaciones toman un papel pasivo, donde solo se encagan de realizar sus tareas y sólo tiene que exponer un \textit{enpoint} llamado \textit{/metrics} con los datos en el mismo formato que emplea esta tecnología.
+	Prometheus es una base de datos de series temporales de tipo \textit{pull}, esto quiere decir que es la propia base de datos quien periódicamente consulta las aplicaciones para conseguir las métricas.\\
+	Es decir nuestra aplicación (\textit{app.py}) toma  un papel pasivo, donde  se encagan de realizar sus tareas y de exponer un \textit{enpoint} llamado \textit{/metrics} para que sea Prometheus el que coja los datos.
 	\subsection{Instalación}
 	
 	Descargamos el binario de github y lo dejamos descomprimido en la VM
@@ -240,13 +242,12 @@
 	\begin{lstlisting}[style=bash]
 		uv add prometheus-client
 	\end{lstlisting}
-	Aquí uv juega un papel fundamental, puesto que  \textit{add} de manera automática instala la librería, actualiza el .toml del proeycto y registra la dependencia en el \textit{uv.lock}. \\
-	Para ello hemos tenido que modificar el fichero de prometheus de la siguiente manera.
+	Para adaptarnos a las especificaciones de la práctica, hemos tenido que modificar el fichero \textit{prometheus.yml} como mostramos a continuación.
 	\vspace{1cm}
 	\lstinputlisting[style=yaml]{./prometheus.yml}
 	\vspace{1cm}
-	En este fichero lo que estamos haciendo es definir el comportamiento del monitoreo, en el cual establecemos que recoja méticas cada 15 segundos, de la aplicación que está corriendo en el 5001 y del  enpoint \textit{/metrics}.\\
-	Ahora que lo tenemos todo configurado, para ejecutar el prometheus en nuestro sistema simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es es el que hemos hecho antes.
+	Lo que hemos hecho es definir el comportamiento del monitoreo, en el cual establecemos que se recojan méticas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su enpoint \textit{/metrics}.\\
+	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es el que acabamos de modificar..
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml
 	\end{lstlisting}
@@ -254,14 +255,10 @@
 
 	
 \section{Métricas que vamos a emplear en la práctica}
-	Emplearemos 2 de las 4 métricas que nos proporciona la apliación, puesto que son las que más se adaptan al planteamiento que tenemos para la práctica:
+	Para esta sección, emplearemos 2 de los 4 tipos de métricas que nos proporciona la apliación:
 	\begin{itemize}
-		\item \textbf{Counter}: contador de incremento monotónico. Solo puede
-		crecer. Se usa para contar eventos como peticiones recibidas, tokens
-		emitidos o errores producidos. Por convención, los counters tienen el
-		sufijo \texttt{\_total}.
-		\item \textbf{Gauge}: contador que puede crecer y decrecer. Se usa para
-		valores que fluctúan como memoria usada o conexiones activas.
+		\item \textbf{Counter}: contador de incremento monotónico, esto quiere decir que sólo va a ir aumentando, lo  usaremos para contar eventos como peticiones recibidas, tokens emitidos o errores producidos.\\Por convención, los counters tienen el sufijo \texttt{\_total}.
+		\item \textbf{Gauge}: contador clásico,  lo usaremos para valores que fluctúan como memoria usada o conexiones activas.
 	\end{itemize}
 	\newpage
 	
@@ -275,7 +272,7 @@
 		
 		\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
 		\item \"oauth2\_auth\_flows\_started\_total\": nombre de la métrica para su posterior integración con grafana
-		\item "Flujos de autenticacion iniciados": descripción de la metrica
+		\item "Flujos de autenticacion iniciados":  descripción de la metrica
 		\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
 		)
 	\end{itemize}
@@ -296,17 +293,10 @@
 	\end{lstlisting}
 	\subsection {Deciciones importantes sobre \textit{metrics.py}}
 	
-	Una decisión de diseño importante fue no añadir \texttt{client\_id} como
-	etiqueta en \texttt{tokens\_issued}. Aunque inicialmente se contempló para
-	tener información por cliente, se descartó porque Prometheus crea una serie
-	temporal por cada combinación única de etiquetas. Con una etiqueta de alta
-	cardinalidad como \texttt{client\_id} el número de series crecería
-	proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM
-	podría causar problemas de memoria durante las pruebas de carga.
+	Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}. Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
 
 	\section{Modificaciones a \textit{models.py}}
-	texttt{models.py} es la capa de acceso a datos. Se ha instrumentado con
-	métricas en cuatro funciones:
+	\textit{models.py} es la capa de acceso a datos. Se ha instrumentado con métricas en las siguientes funciones:
 	
 	\subsection{store\_authorization\_code}
 	
@@ -366,11 +356,7 @@
 	
 	\subsection{validate\_refresh\_token}
 	
-	Se detectan los dos casos de fallo relevantes para la seguridad: el intento
-	de uso de un token revocado y el intento de uso de un token expirado. Es
-	importante que estos contadores se incrementen aquí en \texttt{models.py}
-	y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo
-	al motivo exacto del fallo:
+	Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un token revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
 	
 	\begin{lstlisting}[style=python, caption=Instrumentacion de validate\_refresh\_token]
 		def validate_refresh_token(token: str) -> Optional[dict]:
@@ -391,9 +377,7 @@
 	
 	\subsection{revoke\_refresh\_token}
 	
-	Se incrementan los counters de tokens revocados y se decrementan los gauges
-	de tokens activos. La rotación de tokens del flujo \texttt{refresh\_token}
-	revoca tanto el refresh token antiguo como su access token asociado:
+	Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el refresh token antiguo como su access token asociado:
 	
 	\begin{lstlisting}[style=python, caption=Instrumentacion de revoke\_refresh\_token]
 		def revoke_refresh_token(token: str) -> None:
@@ -409,27 +393,18 @@
 	
 	\subsection{Exposición del endpoint /metrics — app.py}
 	
-	Se modifica \texttt{app.py} para exponer el endpoint \texttt{/metrics} y
-	registrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
+	Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} yregistrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
 	
 	\vspace{1cm}
 	\lstinputlisting[style=python, inputencoding=latin1]{app.py}
 	\vspace{1cm}
 	
-	Los \textbf{decoradores} \texttt{@before\_request} y \texttt{@after\_request}
-	son hooks de Flask que se ejecutan automáticamente antes y después de cada
-	petición HTTP respectivamente, obligando a cada uno de las peticiones a pasar por ellos, haciendo que nuestras métricas recojan los datos, además de que nos permite registrar todas las peticiones
-	en un único lugar sin modificar cada ruta individualmente, siguiendo el
-	principio DRY (\textit{Don't Repeat Yourself}).\\
-	Por otra parte  el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini
-	aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo
-	que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto
-	lo gestiona Flask.
+	Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP respectivamente, obligando a cada uno de las peticiones a pasar por ellos, haciendo que nuestras métricas recojan los datos, además, nos permite registrar todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
+	Por otra parte  el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
 	
 	\section{Modificaciones a\textit{ app.py}}
 	
-	Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante
-	decoradores Flask.
+	Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.
 	
 	\subsection{Exposición del endpoint /metrics}
 	
@@ -455,9 +430,7 @@
 	
 	\subsection{Registro automático de métricas HTTP}
 	
-	Hemos usado los decoradores \texttt{@before\_request} y
-	\texttt{@after\_request} de Flask para registrar automáticamente todas las
-	peticiones HTTP sin modificar cada ruta individualmente, para así seguir el patrón DRY (\textit{Don't Repeat Yourself}):
+	Hemos usado los decoradores \texttt{@before\_request} y \texttt{@after\_request} de Flask para registrar automáticamente todas las peticiones HTTP sin modificar cada ruta individualmente, para así seguir el patrón DRY (\textit{Don't Repeat Yourself}):
 	
 	\begin{lstlisting}[style=python, caption=Decoradores before y after request]
 		@app.before_request
@@ -507,9 +480,7 @@
 	
 	
 	\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
-	Hemos tenido que modificar este fichero puesto que nuestras métricas afectan a los 3  flujos de nuestra aplicación, siguiendo siempre la misma lógica   se incrementa \texttt{started} al entrar en la función,
-	\texttt{failed} en cada punto de fallo y \texttt{success} junto con los
-	contadores de tokens al completarse con éxito.\\
+	Hemos tenido que modificar este fichero puesto que nuestras métricas afectan a los 3  flujos de nuestra aplicación, siguiendo siempre la misma lógica   se incrementa \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
 	Esto se entiende mejor con un ejemplo:
 	\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
 		def _handle_client_credentials():
