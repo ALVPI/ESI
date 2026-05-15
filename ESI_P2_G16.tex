@@ -13,6 +13,7 @@
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage{parskip}
+\usepackage{tabularx}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{subcaption}
@@ -765,9 +766,9 @@
 		El enunciado de la práctica señala explícitamente que uno de los objetivos
 		de las pruebas de carga es identificar \textit{``si surgen fallos de seguridad
 			fruto del alto nivel de carga''} y que \textit{``se podrán añadir métricas
-			adicionales''}. Partiendo de este punto, hemos optado por un enfoque orientado
-		a la ciberseguridad, intentando emular un  EDR (\textit{Endpoint Detection and
-			Response}), que permite detectar comportamientos anómalos en tiempo real
+			adicionales''}. Partiendo de este punto, hemos añadido un enfoque orientado
+		a la ciberseguridad intentando emular un  EDR (\textit{Endpoint Detection and
+			Response}), permitiendo detectar comportamientos anómalos en tiempo real
 		durante las pruebas de carga.
 		
 		Un sistema EDR monitoriza eventos de seguridad en tiempo real para detectar
@@ -788,7 +789,7 @@
 					\toprule
 					\textbf{Métrica} & \textbf{Descripción} \\
 					\midrule
-					oauth2\_request\_duration\_seconds & Histogram del tiempo de respuesta por
+					oauth2\_request\_duration\_seconds & \textit{Histogram} del tiempo de respuesta por
 					endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
 					fija en 250ms como umbral de referencia. \\
 					oauth2\_requests\_in\_progress & \textit{Gauge} de peticiones HTTP simultáneas en
@@ -841,15 +842,16 @@
 				\caption{Métricas de detección de ataques}
 			\end{table}
 	
+	\newpage
 	\section{Paneles de grafana}
-		Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación gráfica de nuestro trabajo en esta práctica\\
+		Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación gráfica de nuestro trabajo en esta práctica.\\
 		\begin{figure}[H]
 				\centering
 				\includegraphics[width=\linewidth]{Recursos/VistazoGeneralGrafana}
 				\caption{Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
 		\end{figure}
-		Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
-		Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.
+		Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicando un poco la intención y alguna peculiaridad de la representación.\\
+		Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrarse a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.
 	
 		\subsection{Ataques de fuerza burta vs \textit{credential stuffing}}
 			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
@@ -864,7 +866,7 @@
 				% Columna 2: El Texto
 				\begin{minipage}{0.50\textwidth}
 						Esta métrica pertenece a nuestro enfoque EDR, pero para entenderla bien, vamos a explicar cuáles son los dos tipos de ataques que estamos midiendo.\\
-						Un \textit{Brute Forze Attack}  trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseña, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
+						Un \textit{Brute Forze Attack}  trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseñas, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
 						Este panel muestra qué usuarios han sido atacados durante las pruebas, aquellos con más intentos fallidos son víctimas de fuerza bruta mientras que la presencia de muchos usuarios distintos con pocos intentos cada uno indica \textit{credential stuffing}.
 				\end{minipage}
 			\end{figure}
@@ -882,7 +884,7 @@
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
 						Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un token válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
-						Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (i\textit{ncrease()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
+						Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (\textit{increase()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
 					\end{minipage}
 				\end{figure}
 			
@@ -916,7 +918,7 @@
 					\begin{minipage}{0.50\textwidth}
 						Métrica complementaria a la anterior, la cuál ya no sólo nos dice los intentos fallidos de \textit{login en el  sistema}, sino que tenemos una visión de qué usuarios están teniendo este comportamiento.\\
 						Decimos que es complementaria puesto que si el adminitrador del sistema detecta en el panel anterior un número grande de errores de login por parte de usuarios, consultado este panel puede ver qué usuario en concreto está teniendo este comportamiento, lo que permite contactar con él para que revise la actividad o en su defecto, cortarle el acceso al sistema por si te trata de un bot o un usuario que ha perdido el acceso a sus credenciales.\\
-						Así como dato extra a gráfica se construye mediante una consulta PromQL que calcula la tasa de fallos (\textit{rate()}) y los agrupa por nombre de usuario (sum(...) by (username)), para poder realizar esta distinción.
+						Así como dato extra la gráfica se construye mediante una consulta PromQL que calcula la tasa de fallos (\textit{rate()}) y los agrupa por nombre de usuario (\textit{sum(...) by (username)}), para poder realizar esta distinción.
 					\end{minipage}
 				\end{figure}
 			
@@ -932,7 +934,7 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
+						Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga. Con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
 					\end{minipage}
 				\end{figure}
 			\subsection{Intento de login por parte de usuarios desconocidos}
@@ -947,7 +949,7 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos, en caso de detectar algún incremento en esta métrica, podríamos deducir que el sistema se ha visto comprometido, adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
+						Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos y en caso de detectar algún incremento en esta métrica podríamos deducir que el sistema se ha visto comprometido. Adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
 					\end{minipage}
 				\end{figure}
 			\subsection{Peticiones a los diferentes endpoints de nuestro sistema}
@@ -963,7 +965,7 @@
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
 						En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
-						Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
+						Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo lo más cercana a la realidad para ello.\\
 						Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
 						Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.
 					\end{minipage}
@@ -981,11 +983,12 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-					Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302., los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
+					Panel que sirve para ver el estado de sistemas\\
+					El 200 es el código para las peticiones correctas, representado de color verde, mientras que las peticiones en el sector de color rojo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302, los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
 					\end{minipage}
 				\end{figure}
 			
-			\subsection{ Ratio peticiones correctas fallidas por los usuarios}
+			\subsection{ Ratio peticiones correctas/fallidas por los usuarios}
 				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 					\centering
 					% Columna 1: La Imagen
@@ -997,24 +1000,25 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación, como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comproabr la seguridad del sistema por lo que esté gráfico nos dice que el sistema es capaz de mantener un fijo constante de autorizaciones válidas pese a todo el ruido de peticiones malicosas que le estamos haciendo, teniendo un comprotamiento estable por lo que se puede ver en la linea de tendencias y que además, no está dando falsos positivos, es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
+						Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación. \\
+						Como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comprobar la seguridad del sistema, por lo que este gráfico nos dice que el sistema es capaz de mantener un flujo constante de autorizaciones válidas pese a todo el ruido de peticiones maliciosas que le estamos haciendo, teniendo un comportamiento estable por lo que se puede ver en la linea de tendencias y que, además, no está dando falsos positivos. Es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
 					\end{minipage}
 				\end{figure}
 			
-			\subsection{ Tiempo de respuesta a cada \textit{endpint}}
+			\subsection{ Tiempo de respuesta a cada \textit{endpoint}}
 				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 					\centering
 					% Columna 1: La Imagen
 					\begin{minipage}{0.45\textwidth}
 						\centering
 						\includegraphics[width=\linewidth]{Recursos/TiempoRespuestaEndPoints}
-						\caption{Gráfico que mietras el tiempo de respuesta a cada endpoint con una leyenda la cual nos da información exacta sobre los valores límite}
+						\caption{Gráfico que muestra el tiempo de respuesta a cada endpoint con una leyenda la cual nos da información exacta sobre los valores límite}
 					\end{minipage}
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Esta gráfica es de vita importancia para saber si los \textit{endpoints} están funcionando como deberían, además de darnos la información de los tiempos de respuesta en función de la carga de trabajo que nosotros le estamos haciendo con el locuts.\\
-						Tenemos los 3 puntos , cada uno de un color, \textit{token} (línea azul) es el punto de máximo trabajo de nuestra aplicación puesto que se encarga de la gestión de token y los registros de audotia, \textit{authorized} (línea amarilla) es en el que se reflejan la respuesta de los usuarios por lo que la respuesta es casi instantánea mientras que el de \textit{admin} al ser un \textit{endpoint} interno tiene un tiempo de respues mínimo ya que no está expuesto a la interacción con los usuarios.
+						Esta gráfica es de vital importancia para saber si los \textit{endpoints} están funcionando como deberían, además de darnos la información de los tiempos de respuesta en función de la carga de trabajo que nosotros le estamos haciendo con el locust.\\
+						Tenemos los 3 puntos, cada uno de un color. \textit{token} (línea azul) es el punto de máximo trabajo de nuestra aplicación puesto que se encarga de la gestión de tokens y los registros de auditoría, \textit{authorized} (línea amarilla) es en el que se reflejan la respuesta de los usuarios por lo que la respuesta es casi instantánea mientras que el de \textit{admin} al ser un \textit{endpoint} interno tiene un tiempo de respuesta mínimo ya que no está expuesto a la interacción con los usuarios.
 					\end{minipage}
 				\end{figure}
 				
@@ -1030,12 +1034,13 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Con este panel estamos registrando los tokens que se están emitiendo/empleando en nuestro sistema, debemos recordar que estamos empleando un servidor oauth2 para la autenticación por lo que esta estadistica es necesaria para comprobar que el sistema funciona bien y que no estamos sufriendo ningún tipo de ataque.\\ 
-						Como tenemos 3 tipos vamos a explicar cada uno de ellos
+						Con este panel estamos registrando los tokens que se están emitiendo/empleando en nuestro sistema. \\
+						Debemos recordar que estamos empleando un servidor oauth2 para la autenticación, por lo que esta estadística es necesaria para comprobar que el sistema funciona bien y que no estamos sufriendo ningún tipo de ataque.\\ 
+						Como tenemos 3 tipos vamos a explicar cada uno de ellos:
 						\begin{itemize}
 							\item  \textbf{Query A (\textit{Access Tokens}):} representa el número de sesiones activas que pueden realizar peticiones a recursos protegidos.
 							\item  \textbf{Query B (\textit{Refresh Tokens}):} representa el número de sesiones de larga duración que permiten a los clientes obtener nuevas credenciales sin intervención del usuario.
-							\item \textbf{Query C (\textit{Total Tokens}):} como su nombre indica la suma de las anteriores.
+							\item \textbf{Query C (\textit{Total Tokens}):} como su nombre indica, la suma de las anteriores.
 						\end{itemize}
 					\end{minipage}
 				\end{figure}
@@ -1052,7 +1057,8 @@
 						\hfill % Crea un espacio elástico entre las dos minipages
 						% Columna 2: El Texto
 						\begin{minipage}{0.50\textwidth}
-							Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador, si nos damos cuanta esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de token y los tipos de cada uno.
+							Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador\\
+							Si nos damos cuenta, esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de tokens y los tipos de cada uno.
 						\end{minipage}
 					\end{figure}
 					
@@ -1068,11 +1074,12 @@
 						\hfill % Crea un espacio elástico entre las dos minipages
 						% Columna 2: El Texto
 						\begin{minipage}{0.50\textwidth}
-							Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema. Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos plantamos en el grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aqellos usuarios que son probelmáticos.
+							Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema.\\
+							Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, y debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos dirigimos al grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aquellos usuarios que son problemáticos.
 						\end{minipage}
 					\end{figure}
 					
-				\subsection{Flujos de autenticació en cada uno de los \textit{endpoints}}
+				\subsection{Flujos de autenticación en cada uno de los \textit{endpoints}}
 					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 						\centering
 						% Columna 1: La Imagen
@@ -1089,10 +1096,29 @@
 							\caption{Tipos de tokens que maneja nuestro sistema}
 						\end{minipage}
 					\end{figure}
-					Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
+					Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints} de nuestro sistema.
 					\begin{itemize}
 						\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
-						\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
-						\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
+						\item \textbf{Amarillo}: representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
+						\item \textbf{Azul:} contabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
 					\end{itemize}
+					
+	\newpage		
+	\section{Distribución del trabajo}
+		Para la realización de esta práctica, nos hemos distribuido el trabajo encargándonos cada integrante de diferentes responsabilidades:
+		\begin{table}[h!] % <-- Añadido el entorno contenedor
+			\centering    % <-- Para que la tabla quede centrada en el folio
+			\begin{tabularx}{\textwidth}{llX} 
+				\toprule
+				\textbf{Nombre} & \textbf{Porcentaje} & \textbf{Responsabilidad principal} \\
+				\midrule
+				ÁLVAREZ FULCONIS, MARCOS P. & 33\% & LocustFile, redacción de dicha parte en el documento y revisión de los esquemas de colores en el grafana \\
+				\midrule
+				SANTIESTEBAN MENDO, EDGAR   & 33\% & Edicion del prometheus, de oauth\_routes, models.py, redacción del documento \\
+				\midrule
+				LOPEZ PRIMO, ÁLVARO         & 33\% & Creación de las métricas, modificación del app.py, enfoque EDR, dashboard grafana. \\
+				\bottomrule
+			\end{tabularx}
+			\caption{Distribución de Responsabilidades por Equipo y Miembro}
+		\end{table} % <-- Comprueba que cierra bien con el de arriba
 \end{document}
