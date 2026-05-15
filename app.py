@@ -18,7 +18,7 @@ import time
 from database import close_db, init_db
 from oauth2_routes import oauth2
 from admin_routes import admin
-#we need this lib for the metrics that we've allready defined on metrics.py
+#we need this lib for the metrics that we've already defined on metrics.py
 from metrics import (
         http_requests,
         http_requests_token,

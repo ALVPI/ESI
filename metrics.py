@@ -21,7 +21,7 @@ auth_flows_success = Counter(
     ["grant_type"]
 )
 
-#Contabiliza los intentos fallidos de autenticacion en el sistem
+#Contabiliza los intentos fallidos de autenticacion en el sistema
 auth_flows_failed = Counter(
     "oauth2_auth_flows_failed_total",
     "Flujos de autenticación fallidos",
@@ -105,7 +105,7 @@ tokens_revoked = Counter(
     ["token_type"]
 )
 
-#Nos da inormacion sobre los codigos emitidos pero no empleados
+#Nos da informacion sobre los codigos emitidos pero no empleados
 pending_auth_codes = Gauge(
     "oauth2_pending_auth_codes",
     "Codigos de autorizacion emitidos pero no canjeados"

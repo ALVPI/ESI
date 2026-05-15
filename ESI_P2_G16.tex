@@ -18,6 +18,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{textcomp}
+\usepackage{csquotes}
 % ── Geometría de página ──────────────────────────────────────────────────────
 \geometry{
 	top=2cm,
@@ -182,7 +183,7 @@
 	El backend proporcionado por el profesor está desarrollado en Python con Flask y SQLite, implementando los tres flujos principales definidos en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
 	\begin{itemize}
 		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde un usuario humano se autentica mediante un formulario de login. El servidor emite un código temporal que posteriormente se canjea por un par de tokens.
-		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina donde no hay un usuarios humanos. La aplicación se autentica directamente con sus credenciales y obtiene un token de acceso.
+		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina. La aplicación se autentica directamente con sus credenciales y obtiene un token de acceso.
 		\item \textbf{Refresh Token}: flujo que permite renovar un token de acceso caducado sin necesidad de repetir el proceso de autenticación completo.
 	\end{itemize}
 	
@@ -217,8 +218,8 @@
 	\newpage
 	\section{Prometheus}\label{PO}
 	
-	Prometheus es una base de datos de series temporales de tipo \textit{pull}, esto quiere decir que es la propia base de datos quien periódicamente consulta las aplicaciones para conseguir las métricas.\\
-	Es decir nuestra aplicación (\textit{app.py}) toma  un papel pasivo, donde  se encagan de realizar sus tareas y de exponer un \textit{enpoint} llamado \textit{/metrics} para que sea Prometheus el que coja los datos.
+	Prometheus es una base de datos de series temporales de tipo \textit{pull}, es decir, es la propia base de datos quien periódicamente consulta las aplicaciones para conseguir las métricas.\\
+	Nuestra aplicación (\textit{app.py}) toma  un papel pasivo, donde  se encarga de realizar sus tareas y de exponer un \textit{endpoint} llamado \textit{/metrics} para que sea Prometheus el que coja los datos.
 	\subsection{Instalación}
 	
 	Descargamos el binario de github y lo dejamos descomprimido en la VM
@@ -235,8 +236,8 @@
 	\vspace{1cm}
 	\lstinputlisting[style=yaml]{./prometheus.yml}
 	\vspace{1cm}
-	Hemos definido el comportamiento del monitoreo, en el cual establecemos que se recojan méticas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su enpoint \textit{/metrics}.\\
-	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es el que acabamos de modificar.
+	Hemos definido el comportamiento del monitoreo, en el cual establecemos que se recojan métricas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su endpoint \textit{/metrics}.\\
+	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando su fichero de configuración.
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml
 	\end{lstlisting}
@@ -244,10 +245,10 @@
 
 	
 \section{Métricas que vamos a emplear en la práctica}
-	Para esta sección, emplearemos 2 de los 4 tipos de métricas que nos proporciona la apliación:
+	Para esta sección, emplearemos 2 de los 4 tipos de métricas que nos proporciona la aplicación:
 	\begin{itemize}
-		\item \textbf{Counter}: contador de incremento monotónico, esto quiere decir que sólo va a ir aumentando, lo  usaremos para contar eventos como peticiones recibidas, tokens emitidos o errores producidos.\\Por convención, los counters tienen el sufijo \texttt{\_total}.
-		\item \textbf{Gauge}: contador clásico,  lo usaremos para valores que fluctúan como memoria usada o conexiones activas.
+		\item \textbf{\textit{Counter}}: contador de incremento monotónico, esto quiere decir que sólo va a ir aumentando, lo  usaremos para contar eventos como peticiones recibidas, tokens emitidos o errores producidos.\\Por convención, los counters tienen el sufijo \texttt{\_total}.
+		\item \textbf{\textit{Gauge}}: contador clásico,  lo usaremos para valores que fluctúan como memoria usada o conexiones activas.
 	\end{itemize}
 	
 	\subsection{Definición de las métricas que vamos a recoger}
@@ -258,7 +259,7 @@
 		Antes de mostrar todos nuestro trabajo en \textit{metrics}, vamos a explicar un poco la sintaxis de este fichero, puesto que es una tecnología nueva, que al menos en la carrera no hemos tocado mucho:
 		\begin{itemize}
 			\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
-			\item \"oauth2\_auth\_flows\_started\_total\": nombre de la métrica para su posterior integración con grafana
+			\item \enquote{oauth2\_auth\_flows\_started\_total}: nombre de la métrica para su posterior integración con grafana
 			\item "Flujos de autenticacion iniciados":  descripción de la metrica
 			\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
 			)
@@ -269,11 +270,11 @@
 		\vspace{1cm}
 		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
 		un contador separado para cada tipo de flujo:
-		\begin{lstlisting}[style=bash]
-			oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
-			oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
-			oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
-		\end{lstlisting}
+\begin{lstlisting}[style=bash]
+	oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
+	oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
+	oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
+\end{lstlisting}
 		Esta información nos fue útil en fases tempranas de la práctica ya que con un\textit{ curl } íbamos testeando las métricas para cerciorarnos de que realmente se estaban incrementando cuando deberían.
 		\subsection {Deciciones importantes sobre \textit{metrics.py}}
 			Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}.\\ Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
@@ -286,7 +287,7 @@
 			Se incrementa \texttt{pending\_auth\_codes} cada vez que se genera un código
 			de autorización, reflejando que existe un código emitido pero no canjeado:
 			
-			\begin{lstlisting}[style=python, caption=Instrumentacion de store\_authorization\_code]
+			\begin{lstlisting}[style=python, caption=Instrumentación de store\_authorization\_code]
 				def store_authorization_code(...) -> str:
 				# ... codigo original ...
 				db.commit()
@@ -299,7 +300,7 @@
 		
 			Se decrementa \texttt{pending\_auth\_codes} cuando el código se consume correctamente. Además detectamos dos casos de seguridad relevantes: el intento de reutilización de un código ya usado (\texttt{auth\_code\_reuse}) y el intento de uso de uno ya  expirado:
 			
-			\begin{lstlisting}[style=python, caption=Instrumentacion de consume\_authorization\_code]
+			\begin{lstlisting}[style=python, caption=Instrumentación de consume\_authorization\_code]
 				def consume_authorization_code(code: str) -> Optional[dict]:
 				# ... codigo original ...
 				if data["used"]:
@@ -320,9 +321,9 @@
 			
 		\subsection{issue\_token\_pair}
 		
-			Se incrementan los gauges de tokens activos cada vez que se emiten, distinguiendo entre access y refresh tokens:
+			Se incrementan los gauges de tokens activos cada vez que se emiten, distinguiendo entre \textit{access }y \textit{refresh tokens:}
 			
-			\begin{lstlisting}[style=python, caption=Instrumentacion de issue\_token\_pair]
+			\begin{lstlisting}[style=python, caption=Instrumentación de issue\_token\_pair]
 				def issue_token_pair(...) -> dict:
 				# ... codigo original ...
 				db.commit()
@@ -337,7 +338,7 @@
 		
 			Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un token revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
 			
-			\begin{lstlisting}[style=python, caption=Instrumentacion de validate\_refresh\_token]
+			\begin{lstlisting}[style=python, caption=Instrumentación de validate\_refresh\_token]
 				def validate_refresh_token(token: str) -> Optional[dict]:
 				# ... codigo original ...
 				if data["revoked"]:
@@ -356,9 +357,9 @@
 		
 		\subsection{revoke\_refresh\_token}
 		
-			Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el refresh token antiguo como su access token asociado:
+			Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el \textit{refresh token }antiguo como su \textit{access token} asociado:
 			
-			\begin{lstlisting}[style=python, caption=Instrumentacion de revoke\_refresh\_token]
+			\begin{lstlisting}[style=python, caption=Instrumentación de revoke\_refresh\_token]
 				def revoke_refresh_token(token: str) -> None:
 				# ... codigo original ...
 				db.commit()
@@ -372,14 +373,15 @@
 			
 		\subsection{Exposición del endpoint /metrics — app.py}
 		
-			Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} yregistrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
+			Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} y registrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
 			
 			\vspace{1cm}
 			\lstinputlisting[style=python, inputencoding=latin1]{app.py}
 			\vspace{1cm}
 			
-			Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP respectivamente, obligando a cada uno de las peticiones a pasar por ellos, haciendo que nuestras métricas recojan los datos, además, nos permite registrar todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
-			Por otra parte  el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
+			Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP,  obligando a cada uno de las peticiones a pasar por ellos.\\
+			Esto es lo que permite que nuestras métricas recojan los datos y todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
+			Además el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
 	\newpage
 	\section{Modificaciones a\textit{ app.py}}
 	
@@ -457,7 +459,8 @@
 		
 		
 		\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
-			Hemos tenido que modificar este fichero puesto que nuestras métricas afectan a los 3  flujos de nuestra aplicación, para ello hemos seguido siempre la misma lógica, incrementamos, \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
+			Hemos tenido que modificar este fichero puesto que, nuestras métricas afectan a los 3  flujos de nuestra aplicación.\\
+			De cara a esta modificación hemos seguido siempre la siguiente lógica: incrementamos, \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
 			Esto se entiende mejor con un ejemplo:
 			\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
 				def _handle_client_credentials():
@@ -514,25 +517,24 @@
 		
 		Locust se instala como una dependencia del proyecto mediante \texttt{uv}:
 		
-		\begin{lstlisting}[style=bash]
-			cd ~/oauth2
-			uv add locust
-		\end{lstlisting}
+	\begin{lstlisting}[style=bash]
+		cd ~/oauth2
+		uv add locust
+	\end{lstlisting}
 		
 		Se arranca con el siguiente comando, que lanza la interfaz web en el
 		puerto 8089:
 		
-		\begin{lstlisting}[style=bash]
-			uv run locust -f locustfile.py --host=http://localhost:5001
-		\end{lstlisting}
+	\begin{lstlisting}[style=bash]
+		uv run locust -f locustfile.py --host=http://localhost:5001
+	\end{lstlisting}
 		\vspace{1cm}
 		\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
 		\vspace{1cm}
 	
 		
 		\subsection{Diseño del fichero de pruebas de carga}
-		
-		En esta parte hemos dedicado mucho tembiendo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.\\
+		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.\\
 		\subsubsection{Distribución del tráfico}
 			\begin{table}[H]
 				\centering
@@ -566,28 +568,30 @@
 			siendo las tareas de administración las que menos peso tienen debido a que en un escenario real, un administrador de una web no se autentica varias veces ni hace un uso similar al de un usuario.
 		
 			\subsubsection{Tareas de tráfico legítimo}
-			
-				\textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.\\
-				\textbf{\texttt{valid\_authorization\_code\_flow} (peso 3)} implementa el flujo completo de autorización en dos pasos: primero realiza el login en \texttt{/authorize} obteniendo un código de autorización de la cabecera \texttt{Location} de la redirección 302, y después canjea ese código en \texttt{/token} por un par de tokens. Ojo esto es clave, ya que sin ella \texttt{pending\_auth\_codes} crecería indefinidamente al emitirse códigos que nunca se consumen.\\
-				\textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh token. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.\\
-				\textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admins.
-			
+				\begin{itemize}
+						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
+						\item \textbf{\texttt{valid\_authorization\_code\_flow} (peso 3)} implementa el flujo completo de autorización en dos pasos: primero realiza el login en \texttt{/authorize} obteniendo un código de autorización de la cabecera \texttt{Location} de la redirección 302, y después canjea ese código en \texttt{/token} por un par de tokens. Ojo esto es clave, ya que sin ella \texttt{pending\_auth\_codes} crecería indefinidamente al emitirse códigos que nunca se consumen.
+						\item \textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh token. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.
+						\item \textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admins.
+				\end{itemize}
+		
 			\subsubsection{Tareas de ataque}
-			
-				\textbf{\texttt{brute\_force\_api} (peso 2)} simula un ataque de fuerza bruta M2M enviando credenciales incorrectas contra el endpoint \texttt{/token}. Siempre usa el mismo \texttt{client\_id} con \textit{secrets} distintos.\\
-				\textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempreusa el mismo username, lo que lo distingue del credential stuffing y dispara.\\
-				\textbf{\texttt{auth\_code\_replay\_attack} (peso 1)} canjea el mismo código de autorización dos veces. La primera petición tiene éxito (200) y la segunda falla( 400) porque el código ya está marcado como usado en la base de datos, disparando la métrica \texttt{auth\_code\_reuse}.\\
-				\textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el token ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.\\
-				\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un refresh token completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.\\
+				\begin{itemize}
+						\item \textbf{\texttt{brute\_force\_api} (peso 2)} simula un ataque de fuerza bruta M2M enviando credenciales incorrectas contra el endpoint \texttt{/token}. Siempre usa el mismo \texttt{client\_id} con \textit{secrets} distintos.
+						\item \textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempreusa el mismo username, lo que lo distingue del credential stuffing y dispara.
+						\item \textbf{\texttt{auth\_code\_replay\_attack} (peso 1)} canjea el mismo código de autorización dos veces. La primera petición tiene éxito (200) y la segunda falla( 400) porque el código ya está marcado como usado en la base de datos, disparando la métrica \texttt{auth\_code\_reuse}.
+						\item \textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el token ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.
+						\item 	\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un refresh token completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.
+				\end{itemize}
 			
 			\subsubsection{Tareas de ataque EDR}
-			
-				Estas tres tareas las hemos añadido específicamente para el enfoque EDR para detectar patrones de ataque:\\
-				\textbf{\texttt{client\_enumeration\_attack} (peso 1)} prueba \texttt{client\_id} comunes como \texttt{admin}, \texttt{root} o \texttt{test} seleccionados aleatoriamente de una lista de diez valores. Simula a un atacante escaneando qué
-				clientes OAuth2 están registrados en el servidor, disparando la métrica	\texttt{unknown\_client\_attempts}.\\
-				\textbf{\texttt{credential\_stuffing\_attack} (peso 1)} selecciona aleatoriamente entre ocho pares de credenciales filtradas de otras plataformas y las prueba contra el endpoint \texttt{/authorize}. A diferencia de la fuerza bruta, cada intento usa un username distinto, lo que hace subir el gauge \texttt{unique\_failed\_usernames\_active} y permite distinguir los dos tipos de ataque en el dashboard EDR.\\
-				\textbf{\texttt{token\_harvesting\_attack} (peso 1)} solicita tokens válidos sin revocarlos ni renovarlos nunca. Hace que \texttt{active\_tokens} suba sin que\texttt{tokens\_revoked} lo acompañe proporcionalmente.\\
-			
+			Estas tres tareas las hemos añadido específicamente para el enfoque EDR para detectar patrones de ataque:
+				\begin{itemize}
+						\item \textbf{\texttt{client\_enumeration\_attack} (peso 1)} prueba \texttt{client\_id} comunes como \texttt{admin}, \texttt{root} o \texttt{test} seleccionados aleatoriamente de una lista de diez valores. Simula a un atacante escaneando qué clientes OAuth2 están registrados en el servidor, disparando la métrica	\texttt{unknown\_client\_attempts}.
+						\item \textbf{\texttt{credential\_stuffing\_attack} (peso 1)} selecciona aleatoriamente entre ocho pares de credenciales filtradas de otras plataformas y las prueba contra el endpoint \texttt{/authorize}. A diferencia de la fuerza bruta, cada intento usa un username distinto, lo que hace subir el \textit{gauge}\texttt{unique\_failed\_usernames\_active} y permite distinguir los dos tipos de ataque en el dashboard EDR.
+						\item \textbf{\texttt{token\_harvesting\_attack} (peso 1)} solicita tokens válidos sin revocarlos ni renovarlos nunca. Hace que \texttt{active\_tokens} suba sin que\texttt{tokens\_revoked} lo acompañe proporcionalmente.
+				\end{itemize}
+				
 	
 		
 		\subsection{Decisiones de diseño relevantes}
@@ -781,7 +785,7 @@
 					oauth2\_request\_duration\_seconds & Histogram del tiempo de respuesta por
 					endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
 					fija en 250ms como umbral de referencia. \\
-					oauth2\_requests\_in\_progress & Gauge de peticiones HTTP simultáneas en
+					oauth2\_requests\_in\_progress & \textit{Gauge} de peticiones HTTP simultáneas en
 					curso en este momento. Útil para detectar ataques DoS bajo pruebas de estrés. \\
 					\bottomrule
 				\end{tabular}
@@ -795,18 +799,18 @@
 					\toprule
 					\textbf{Métrica} & \textbf{Descripción} \\
 					\midrule
-					oauth2\_active\_tokens & Gauge de tokens activos en el sistema por tipo.
+					oauth2\_active\_tokens & \textit{Gauge }de tokens activos en el sistema por tipo.
 					Sube al emitir tokens y baja al revocarlos. \\
-					oauth2\_tokens\_revoked\_total & Counter de tokens revocados por tipo.
+					oauth2\_tokens\_revoked\_total & \textit{Counter} de tokens revocados por tipo.
 					Refleja la rotación de tokens en el flujo refresh\_token. \\
-					oauth2\_pending\_auth\_codes & Gauge de códigos de autorización emitidos
+					oauth2\_pending\_auth\_codes & \textit{Gauge} de códigos de autorización emitidos
 					pero no canjeados todavía. Un valor creciente indica clientes que piden
 					códigos sin completar el flujo. \\
-					oauth2\_revoked\_token\_usage\_total & Counter de intentos de uso de tokens
+					oauth2\_revoked\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
 					ya revocados. Señal de posible token replay attack. \\
-					oauth2\_expired\_token\_usage\_total & Counter de intentos de uso de tokens
+					oauth2\_expired\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
 					expirados. \\
-					oauth2\_auth\_code\_reuse\_total & Counter de intentos de reutilización de
+					oauth2\_auth\_code\_reuse\_total & \textit{Counter }de intentos de reutilización de
 					códigos de autorización ya consumidos. Señal de authorization code replay
 					attack. \\
 					\bottomrule
