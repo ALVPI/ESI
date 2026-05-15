@@ -64,7 +64,7 @@ class OAuth2LoadTest(HttpUser):
     @task(3)
     def valid_authorization_code_flow(self):
         """
-        Complete authorization_code flow: login -> get code -> exchange for tokens.
+        Complete authorization_code flow: load login page -> login -> get code -> exchange for tokens.
         Without this task, pending_auth_codes would grow indefinitely during
         load tests because codes would be issued but never consumed.
 
@@ -78,7 +78,21 @@ class OAuth2LoadTest(HttpUser):
 
         Probability: 16% (3 of 19)
         """
-        # Step 1: POST /authorize with valid credentials -> get the auth code
+        # Step 1: GET /authorize to simulate a real user loading the login HTML page
+        with self.client.get("/authorize", params={
+            "client_id":     self.WEB_CLIENT_ID,
+            "redirect_uri":  self.WEB_REDIRECT_URI,
+            "response_type": "code",
+            "scope":         "read",
+            "state":         "locust-test"
+        }, catch_response=True) as get_response:
+
+            if get_response.status_code != 200:
+                get_response.failure(f"GET /authorize failed with {get_response.status_code}")
+                return
+            get_response.success()
+
+        # Step 2: POST /authorize with valid credentials -> get the auth code
         with self.client.post("/authorize", data={
             "client_id":     self.WEB_CLIENT_ID,
             "redirect_uri":  self.WEB_REDIRECT_URI,
@@ -96,7 +110,6 @@ class OAuth2LoadTest(HttpUser):
                     f"Valid authorize failed with {auth_response.status_code}"
                 )
                 return
-
             # Extract the code from the Location header
             code = None
             location = auth_response.headers.get("Location", "")
@@ -106,10 +119,8 @@ class OAuth2LoadTest(HttpUser):
             if not code:
                 auth_response.success()
                 return
-
             auth_response.success()
-
-        # Step 2: POST /token exchanging the code -> get access + refresh token
+        # Step 3: POST /token exchanging the code -> get access + refresh token
         with self.client.post("/token", data={
             "grant_type":   "authorization_code",
             "client_id":     self.WEB_CLIENT_ID,
@@ -117,15 +128,12 @@ class OAuth2LoadTest(HttpUser):
             "code":          code,
             "redirect_uri":  self.WEB_REDIRECT_URI
         }, catch_response=True) as token_response:
-
             if token_response.status_code != 200:
                 token_response.failure(
                     f"Code exchange failed with {token_response.status_code}"
                 )
                 return
-
             token_response.success()
-
     @task(2)
     def valid_refresh_token_flow(self):
         """
@@ -424,10 +432,10 @@ class OAuth2LoadTest(HttpUser):
         Probability: 5% (1 of 19)
         """
         with self.client.get("/admin/clients", catch_response=True) as response:
-        if response.status_code == 200:
-            response.success()
-        else:
-            response.failure(f"/admin/clients GET failed with {response.status_code}
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"/admin/clients GET failed with {response.status_code}")
 
     # =========================================================================
     # PRIVATE HELPER METHOD
