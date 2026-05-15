@@ -268,7 +268,7 @@
 		\vspace{1cm}
 		\lstinputlisting[style=python]{./metrics.py}
 		\vspace{1cm}
-		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
+		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo \textit{counter} almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
 		un contador separado para cada tipo de flujo:
 \begin{lstlisting}[style=bash]
 	oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
@@ -392,7 +392,7 @@
 			Se utiliza \texttt{DispatcherMiddleware} para combinar la aplicación Flask con Prometheus que genera el endpoint \texttt{/metrics}. Esto permite que pueda leer las métricas en
 			\texttt{http://localhost:5001/metrics}:
 			
-			\begin{lstlisting}[style=python, caption=Exposicion del endpoint /metrics]
+			\begin{lstlisting}[style=python, caption=Exposición del endpoint /metrics]
 				from prometheus_client import make_wsgi_app
 				from werkzeug.middleware.dispatcher import DispatcherMiddleware
 				from werkzeug.serving import run_simple
@@ -460,7 +460,7 @@
 		
 		\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
 			Hemos tenido que modificar este fichero puesto que, nuestras métricas afectan a los 3  flujos de nuestra aplicación.\\
-			De cara a esta modificación hemos seguido siempre la siguiente lógica: incrementamos, \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
+			De cara a esta modificación hemos seguido siempre la siguiente lógica: incrementamos \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
 			Esto se entiende mejor con un ejemplo:
 			\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
 				def _handle_client_credentials():
@@ -558,52 +558,53 @@
 				\end{tabular}
 				\caption{Distribución de tareas del fichero Locust}
 			\end{table}
-			Al querer hacer un diseño realista del trafico que soportaría un sistema como el nuestro hemos decidido emplear esta distribución teniendo en cuenta que cada usuario espera entre 1 y 3 segundosentre tareas mediante \texttt{wait\_time = between(1, 3)}, para tener en cuenta ese "tiempo de pensar" que tienen los usuarios.\\
-			De tal manera que todo el tráfico de nuestra aplicación se dibide en estas 3 categorías
+			Al querer hacer un diseño realista del trafico que soportaría un sistema como el nuestro hemos decidido emplear esta distribución teniendo en cuenta que cada usuario espera entre 1 y 3 segundos entre tareas mediante \texttt{wait\_time = between(1, 3)}, para tener en cuenta ese "tiempo de pensar" que tienen los usuarios.\\
+			De tal manera que todo el tráfico de nuestra aplicación se divide en estas 3 categorías:
 			\begin{itemize}
 				\item \textbf{Tráfico legítimo}: 11/22 tareas = 50\%
 				\item \textbf{Ataques}: 9/22 tareas = 41\%
 				\item \textbf{Monitorización}: 1/22 tareas = 5\%
 			\end{itemize}
-			siendo las tareas de administración las que menos peso tienen debido a que en un escenario real, un administrador de una web no se autentica varias veces ni hace un uso similar al de un usuario.
+			Siendo las tareas de administración las que menos peso tienen debido a que en un escenario real, un administrador de una web no se autentica varias veces ni hace un uso similar al de un usuario.
 		
 			\subsubsection{Tareas de tráfico legítimo}
 				\begin{itemize}
-						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
+						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo, puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
 						\item \textbf{\texttt{valid\_authorization\_code\_flow} (peso 3)} implementa el flujo completo de autorización en dos pasos: primero realiza el login en \texttt{/authorize} obteniendo un código de autorización de la cabecera \texttt{Location} de la redirección 302, y después canjea ese código en \texttt{/token} por un par de tokens. Ojo esto es clave, ya que sin ella \texttt{pending\_auth\_codes} crecería indefinidamente al emitirse códigos que nunca se consumen.
 						\item \textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh token. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.
-						\item \textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admins.
+						\item \textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admin.
 				\end{itemize}
 		
 			\subsubsection{Tareas de ataque}
 				\begin{itemize}
 						\item \textbf{\texttt{brute\_force\_api} (peso 2)} simula un ataque de fuerza bruta M2M enviando credenciales incorrectas contra el endpoint \texttt{/token}. Siempre usa el mismo \texttt{client\_id} con \textit{secrets} distintos.
-						\item \textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempreusa el mismo username, lo que lo distingue del credential stuffing y dispara.
+						\item \textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempre usa el mismo username, lo que lo distingue del \textit{credential stuffing} y dispara.
 						\item \textbf{\texttt{auth\_code\_replay\_attack} (peso 1)} canjea el mismo código de autorización dos veces. La primera petición tiene éxito (200) y la segunda falla( 400) porque el código ya está marcado como usado en la base de datos, disparando la métrica \texttt{auth\_code\_reuse}.
 						\item \textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el token ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.
 						\item 	\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un refresh token completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.
 				\end{itemize}
 			
 			\subsubsection{Tareas de ataque EDR}
-			Estas tres tareas las hemos añadido específicamente para el enfoque EDR para detectar patrones de ataque:
+			Estas tres tareas las hemos añadido específicamente para el enfoque EDR y detectar patrones de ataque:
 				\begin{itemize}
 						\item \textbf{\texttt{client\_enumeration\_attack} (peso 1)} prueba \texttt{client\_id} comunes como \texttt{admin}, \texttt{root} o \texttt{test} seleccionados aleatoriamente de una lista de diez valores. Simula a un atacante escaneando qué clientes OAuth2 están registrados en el servidor, disparando la métrica	\texttt{unknown\_client\_attempts}.
-						\item \textbf{\texttt{credential\_stuffing\_attack} (peso 1)} selecciona aleatoriamente entre ocho pares de credenciales filtradas de otras plataformas y las prueba contra el endpoint \texttt{/authorize}. A diferencia de la fuerza bruta, cada intento usa un username distinto, lo que hace subir el \textit{gauge}\texttt{unique\_failed\_usernames\_active} y permite distinguir los dos tipos de ataque en el dashboard EDR.
-						\item \textbf{\texttt{token\_harvesting\_attack} (peso 1)} solicita tokens válidos sin revocarlos ni renovarlos nunca. Hace que \texttt{active\_tokens} suba sin que\texttt{tokens\_revoked} lo acompañe proporcionalmente.
+						\item \textbf{\texttt{credential\_stuffing\_attack} (peso 1)} selecciona aleatoriamente entre ocho pares de credenciales filtradas de otras plataformas y las prueba contra el endpoint \texttt{/authorize}. A diferencia de la fuerza bruta, cada intento usa un username distinto, lo que hace subir el \textit{gauge} \texttt{unique\_failed\_usernames\_active} y permite distinguir los dos tipos de ataque en el dashboard EDR.
+						\item \textbf{\texttt{token\_harvesting\_attack} (peso 1)} solicita tokens válidos sin revocarlos ni renovarlos nunca. Hace que \texttt{active\_tokens} suba sin que \texttt{tokens\_revoked} lo acompañe proporcionalmente.
 				\end{itemize}
 				
 	
 		
 		\subsection{Decisiones de diseño relevantes}
 		
-			\textbf{\texttt{catch\_response=True}} se usa en todas las tareas de ataque para indicar a Locust que una respuesta 401 o 400 es el comportamiento esperado y no debe contabilizarse como fallo en las estadísticas de rendimiento. Sin esto Locust
-			marcaría todos los ataques como errores y distorsionaría las métricas de la prueba.
+			\begin{itemize}
+				\item \textbf{\texttt{catch\_response=True}} se usa en todas las tareas de ataque para indicar a Locust que una respuesta 401 o 400 es el comportamiento esperado y no debe contabilizarse como fallo en las estadísticas de rendimiento. Sin esto Locust
+				marcaría todos los ataques como errores y distorsionaría las métricas de la prueba.
+				\item \textbf{\texttt{allow\_redirects=False}} se usa en las peticiones a \texttt{/authorize} para capturar el código de autorización de la cabecera \texttt{Location} antes de que Locust siga la redirección automáticamente. Sin esto el código se perdería y el flujo \texttt{authorization\_code} no podría completarse.
+				\item \textbf{Método auxiliar \texttt{\_get\_authorization\_code()}} encapsula el proceso de login y extracción del código de autorización. Es reutilizado por \texttt{valid\_refresh\_token\_flow}, \texttt{auth\_code\_replay\_attack} y \texttt{revoked\_token\_replay\_attack}, siguiendo el principio DRY y facilitando el mantenimiento del código.
+				\item \textbf{Importaciones dentro de las tareas} (\texttt{import random}) se usan en los ataques de enumeración y credential \textit{stuffing }para seleccionar aleatoriamente	entre listas de valores, simulando comportamiento real de atacante y generando variedad en las etiquetas de las métricas de Prometheus.
+			\end{itemize}
 			
-			\textbf{\texttt{allow\_redirects=False}} se usa en las peticiones a \texttt{/authorize} para capturar el código de autorización de la cabecera \texttt{Location} antes de que Locust siga la redirección automáticamente. Sin esto el código se perdería y el flujo \texttt{authorization\_code} no podría completarse.
 			
-			\textbf{Método auxiliar \texttt{\_get\_authorization\_code()}} encapsula el proceso de login y extracción del código de autorización. Es reutilizado por \texttt{valid\_refresh\_token\_flow}, \texttt{auth\_code\_replay\_attack} y \texttt{revoked\_token\_replay\_attack}, siguiendo el principio DRY y facilitando el mantenimiento del código.
-			
-			\textbf{Importaciones dentro de las tareas} (\texttt{import random}) se usan en los ataques de enumeración y credential \textit{stuffing }para seleccionar aleatoriamente	entre listas de valores, simulando comportamiento real de atacante y generando variedad en las etiquetas de las métricas de Prometheus.
 		
 		\subsection{Configuración de las pruebas} 
 		
@@ -647,29 +648,29 @@
 		
 		\subsection{Protección de la VM durante las pruebas}
 		
-		Debido a los recursos de nuestra VM, nos vemos con un problema similar al de la práctica 1, no podemos lanzar peticiones como locos, sin preocuparnos de las consecuencias para nuestro sistema, por ello hemos decidido tomar una ciertas precauciones por lo que arrancamos prometheus con unos  límites explícitos de retención de datos:
-		\begin{lstlisting}[style=bash]
-			./prometheus --config.file=prometheus.yml \
-			--storage.tsdb.retention.time=2h \
-			--storage.tsdb.retention.size=500MB
-		\end{lstlisting}
+		Debido a los recursos de nuestra VM, nos vemos con un problema similar al de la práctica 1, no podemos lanzar peticiones como locos sin preocuparnos de las consecuencias para nuestro sistema. Por ello hemos decidido tomar ciertas precauciones por lo que arrancamos prometheus con unos  límites explícitos de retención de datos:
+\begin{lstlisting}[style=bash]
+	./prometheus --config.file=prometheus.yml \
+	--storage.tsdb.retention.time=2h \
+	--storage.tsdb.retention.size=500MB
+\end{lstlisting}
 		
 		Si el otro \textit{dashboard} de grafana nos indica que estamos muy cerca de los límites, podemos llegar a lanzar estos comandos para tener un control a tiempo real sin necesidad de estar cambiando de panel constantemente:
 		
-		\begin{lstlisting}[style=bash]
-			watch -n 2 'echo "=== DISCO ===" && df -h / && \
-			echo "=== RAM ===" && free -h && \
-			echo "=== CPU ===" && top -bn1 | head -5'
-		\end{lstlisting}
+\begin{lstlisting}[style=bash]
+	watch -n 2 'echo "=== DISCO ===" && df -h / && \
+	echo "=== RAM ===" && free -h && \
+	echo "=== CPU ===" && top -bn1 | head -5'
+\end{lstlisting}
 	
 		\subsection{Comportamientos del sistema frente  a los dos escenarios de prueba}
 			En este apartado mostraremos una captura general del grafana en el que podremos comprobar cómo se ha comportado nuestro sistema ante las prubeas que hemos considerado adecuadas para sus dos escenarios.\\
-			Explicaremos en detalle cada uno de los paneles más adelante en este informe pero es una representación visual de cómo se está comportando el sistema
+			Explicaremos en detalle cada uno de los paneles más adelante en este informe pero es una representación visual de cómo se está comportando el sistema.
 			\subsubsection{Condiciones normales}
-				\begin{figure}
+				\begin{figure}[H]
 					\centering
 					\includegraphics[width=\linewidth]{Recursos/CargaNormal}
-					\caption{Como podemos observar con los parámetros del locust del cuadro 2(\ref{Normal}) obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
+					\caption{Como podemos observar con los parámetros del locust del cuadro (\ref{Normal}) obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
 				\end{figure}
 			\subsubsection{Condiciones de estrés}
 			\begin{figure}[H]
@@ -677,7 +678,7 @@
 				% --- Primera imagen ---
 				\begin{subfigure}[b]{0.3\textwidth}
 					\centering
-					\includegraphics[width=\textwidth]{Recursos/Estrés200}
+					\includegraphics[width=\textwidth]{Recursos/Estrés200.png}
 					\caption{200 ususarios totales.}
 					\label{fig:imagen_a}
 				\end{subfigure}
@@ -685,7 +686,7 @@
 				% --- Segunda imagen ---
 				\begin{subfigure}[b]{0.3\textwidth}
 					\centering
-					\includegraphics[width=\textwidth]{Recursos/Estrés150}
+					\includegraphics[width=\textwidth]{Recursos/Estrés150.png}
 					\caption{150 usuarios totales.}
 					\label{fig:imagen_b}
 				\end{subfigure}
@@ -693,31 +694,36 @@
 				% --- Tercera imagen ---
 				\begin{subfigure}[b]{0.3\textwidth}
 					\centering
-					\includegraphics[width=\textwidth]{Recursos/Estrés125}
+					\includegraphics[width=\textwidth]{Recursos/Estrés125.png}
 					\caption{125 usuarios totales.}
 					\label{fig:imagen_c}
 				\end{subfigure}
 				
-				\caption{Pruebas de carga con diferentes usuarios totales partiendo del caso inical del cuadro 3 \ref{estrés}}
+				\caption{Pruebas de carga con diferentes usuarios totales partiendo del caso inical del cuadro \ref{estrés}}
 			\end{figure}
 			
-			Como se puede observar en los paneles de grafana, ninguno de los intentos anteriores llegaba a recibir información, o si lo hacía era por un breve periodo de tiempo, esto se debe a que nuestra VM no puede soportar la carga que supone tener a  10 usuarios concurrentes , debido a las limitaciones de memoria RAM y de CPU.\\
-			Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.\\ Sabiendo que con 10 usuarios concurrentes saturamos el sistema y que con 5, no hubo problemas procedemos a modificar este parámetro pero manteniendo como referencia 150 usuarios totales , puesto que  es un número realista de ellos .\\
+			Como se puede observar en los paneles de grafana, ninguno de los intentos anteriores llegaba a recibir información, o si lo hacía era por un breve periodo de tiempo. Esto se debe a que nuestra VM no puede soportar la carga que supone tener a  10 usuarios concurrentes debido a las limitaciones de memoria RAM y de CPU.\\
+			Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.\\ 
+			Sabiendo que con 10 usuarios concurrentes saturamos el sistema y que con 5 no hubo problemas, procedemos a modificar este parámetro pero manteniendo como referencia 150 usuarios totales, puesto que  es un número realista de ellos.\\
 			Al hacer la prueba con 6 usuarios vemos que el sistema tampoco reacciona, por lo que deducimos de que el límte del sistema está en 5 usuarios concurrentes por segundo.
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=\textwidth]{Recursos/6concurrentes}
 				\caption{Observamos el pico máximo de usuarios concurrentes.}
 			\end{figure}		
-			Por qué sabemos estos, por el panel de usuarios con intentos fallidos de login, en nuestras pruebas lo que hacemos es realizar intentos de inicio de sesión con fallos, como el sistema tiene tantísimos usuarios concurrentes, sólo registra los 5 primeros, es decir el límite está en 5 usuarios concurrentes lanzando peticiones cada segundo.
+			Sabemos esto por el panel de usuarios con intentos fallidos de login. En nuestras pruebas lo que hacemos es realizar intentos de inicio de sesión con fallos y como el sistema tiene tantísimos usuarios concurrentes, sólo registra los 5 primeros, es decir, el límite está en 5 usuarios concurrentes lanzando peticiones cada segundo.
 			
 		
-		\subsubsection{Flujo de ejecición de las aplicaciones}
+		\subsubsection{Flujo de ejecución de las aplicaciones}
 		\begin{enumerate}
-			\item Terminal 1  \texttt{uv run python app.py}
-			\item Terminal 2  \texttt{./prometheus --config.file=prometheus.yml}
-			\item Terminal 3  \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
-			\item Terminal 4  (opcional, sólo si tenemos pocos recursos en la VM)\texttt{watch} para vigilancia de recursos
+			\item Terminal 1:\\
+			  \texttt{uv run python app.py}
+			\item Terminal 2:\\
+			  \texttt{./prometheus --config.file=prometheus.yml}
+			\item Terminal 3:\\
+			  \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
+			\item Terminal 4  (opcional, sólo si tenemos pocos recursos en la VM):\\
+			 \texttt{watch} para vigilancia de recursos
 		\end{enumerate}
 		\begin{figure}[H]
 			\centering
@@ -727,7 +733,7 @@
 		Y el orden de parada es el inverso, esperando 30 segundos entre Locust y Prometheus para que este último recoja los últimos datos antes de apagarse.
 		
 		\section{Verificación manual de métricas EDR}
-		En el punto anterior, hemos mencionado el \texttt{test.py}, el cual es un script que comprueba cada alguna métrica de manera individual, en concreto comprobamos las siguientes:
+		En el punto anterior hemos mencionado el \texttt{test.py}, el cual es un script que comprueba cada métrica de manera individual, en concreto comprobamos las siguientes:
 		\begin{table}[H]
 			\centering
 			\begin{tabular}{clp{6cm}}
