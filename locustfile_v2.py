@@ -48,33 +48,18 @@ class OAuth2LoadTest(HttpUser):
     # =========================================================================
     # LEGITIMATE TRAFFIC
     # =========================================================================
-
     @task(6)
     def valid_client_credentials(self):
-        """
-        Legitimate M2M traffic: requests a token with correct credentials.
-        This is the most frequent task because in production most traffic
-        comes from machine-to-machine applications.
-
-        Metrics fired:
-            - auth_flows_started / auth_flows_success {grant_type="client_credentials"}
-            - tokens_issued{token_type="access", grant_type="client_credentials"}
-            - access_tokens_issued{grant_type="client_credentials"}
-            - active_tokens{token_type="access"}
-            - http_requests / http_requests_token with status 200
-            - requests_in_progress / request_duration
-
-        Probability: 32% (6 of 19)
-        """
-        response = self.client.post("/token", data={
+        with self.client.post("/token", data={
             "grant_type":    "client_credentials",
             "client_id":     self.VALID_CLIENT_ID,
             "client_secret": self.VALID_CLIENT_SECRET,
             "scope":         "read"
-        })
-
-        if response.status_code != 200:
-            response.failure(f"Valid client_credentials failed with {response.status_code}")
+        }, catch_response=True) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Valid client_credentials failed with {response.status_code}")
 
     @task(3)
     def valid_authorization_code_flow(self):
@@ -438,10 +423,11 @@ class OAuth2LoadTest(HttpUser):
 
         Probability: 5% (1 of 19)
         """
-        response = self.client.get("/admin/clients")
-
-        if response.status_code != 200:
-            response.failure(f"/admin/clients GET failed with {response.status_code}")
+        with self.client.get("/admin/clients", catch_response=True) as response:
+        if response.status_code == 200:
+            response.success()
+        else:
+            response.failure(f"/admin/clients GET failed with {response.status_code}
 
     # =========================================================================
     # PRIVATE HELPER METHOD

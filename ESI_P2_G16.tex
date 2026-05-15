@@ -184,8 +184,8 @@
 	El backend proporcionado por el profesor está desarrollado en Python con Flask y SQLite, implementando los tres flujos principales definidos en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
 	\begin{itemize}
 		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde un usuario humano se autentica mediante un formulario de login. El servidor emite un código temporal que posteriormente se canjea por un par de tokens.
-		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina. La aplicación se autentica directamente con sus credenciales y obtiene un token de acceso.
-		\item \textbf{Refresh Token}: flujo que permite renovar un token de acceso caducado sin necesidad de repetir el proceso de autenticación completo.
+		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina. La aplicación se autentica directamente con sus credenciales y obtiene un \textit{token} de acceso.
+		\item \textbf{Refresh Token}: flujo que permite renovar un \textit{token} de acceso caducado sin necesidad de repetir el proceso de autenticación completo.
 	\end{itemize}
 	
 	La aplicación se gestiona con \texttt{uv}, el cual nosotros ya empleamos en nuestra primera práctica y como se explicó en su  respectivo informe es un gestor de paquetes para Python (más moderno que el típico pip).\\
@@ -337,7 +337,7 @@
 			
 		\subsection{validate\_refresh\_token}
 		
-			Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un token revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
+			Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un \textit{token} revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
 			
 			\begin{lstlisting}[style=python, caption=Instrumentación de validate\_refresh\_token]
 				def validate_refresh_token(token: str) -> Optional[dict]:
@@ -535,7 +535,7 @@
 	
 		
 		\subsection{Diseño del fichero de pruebas de carga}
-		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.\\
+		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.
 		\subsubsection{Distribución del tráfico}
 			\begin{table}[H]
 				\centering
@@ -550,7 +550,7 @@
 					\texttt{brute\_force\_user\_login}        & Ataque fuerza bruta  & 2 & 9\%  \\
 					\texttt{auth\_code\_replay\_attack}       & Ataque replay        & 1 & 5\%  \\
 					\texttt{revoked\_token\_replay\_attack}   & Ataque replay        & 1 & 5\%  \\
-					\texttt{invalid\_refresh\_token}          & Token inválido       & 1 & 5\%  \\
+					\texttt{invalid\_refresh\_token}          & \textit{Token }inválido       & 1 & 5\%  \\
 					\texttt{client\_enumeration\_attack}      & Ataque EDR           & 1 & 5\%  \\
 					\texttt{credential\_stuffing\_attack}     & Ataque EDR           & 1 & 5\%  \\
 					\texttt{token\_harvesting\_attack}        & Ataque EDR           & 1 & 5\%  \\
@@ -572,7 +572,7 @@
 				\begin{itemize}
 						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo, puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
 						\item \textbf{\texttt{valid\_authorization\_code\_flow} (peso 3)} implementa el flujo completo de autorización en dos pasos: primero realiza el login en \texttt{/authorize} obteniendo un código de autorización de la cabecera \texttt{Location} de la redirección 302, y después canjea ese código en \texttt{/token} por un par de tokens. Ojo esto es clave, ya que sin ella \texttt{pending\_auth\_codes} crecería indefinidamente al emitirse códigos que nunca se consumen.
-						\item \textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh token. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.
+						\item \textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh \textit{token}. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.
 						\item \textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admin.
 				\end{itemize}
 		
@@ -581,8 +581,8 @@
 						\item \textbf{\texttt{brute\_force\_api} (peso 2)} simula un ataque de fuerza bruta M2M enviando credenciales incorrectas contra el endpoint \texttt{/token}. Siempre usa el mismo \texttt{client\_id} con \textit{secrets} distintos.
 						\item \textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempre usa el mismo username, lo que lo distingue del \textit{credential stuffing} y dispara.
 						\item \textbf{\texttt{auth\_code\_replay\_attack} (peso 1)} canjea el mismo código de autorización dos veces. La primera petición tiene éxito (200) y la segunda falla( 400) porque el código ya está marcado como usado en la base de datos, disparando la métrica \texttt{auth\_code\_reuse}.
-						\item \textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el token ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.
-						\item 	\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un refresh token completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.
+						\item \textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el\textit{ token} ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.
+						\item 	\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un\textit{ refresh token} completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.
 				\end{itemize}
 			
 			\subsubsection{Tareas de ataque EDR}
@@ -746,10 +746,10 @@
 				3 & Fuerza bruta web              & user\_auth\_failed \\
 				4 & authorization\_code completo  & refresh\_tokens\_issued, pending\_auth\_codes \\
 				5 & refresh\_token válido         & tokens\_revoked, active\_tokens \\
-				6 & Token replay attack           & revoked\_token\_usage \\
+				6 & \textit{Token} replay attack           & revoked\_token\_usage \\
 				7 & Auth code reuse               & auth\_code\_reuse \\
 				8 & Peticiones en paralelo        & requests\_in\_progress, request\_duration \\
-				9 & Token falso/expirado          & expired\_token\_usage \\
+				9 & \textit{Token }falso/expirado          & expired\_token\_usage \\
 				\bottomrule
 			\end{tabular}
 			\caption{Tests del script de verificación manual}
@@ -814,7 +814,7 @@
 					pero no canjeados todavía. Un valor creciente indica clientes que piden
 					códigos sin completar el flujo. \\
 					oauth2\_revoked\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
-					ya revocados. Señal de posible token replay attack. \\
+					ya revocados. Señal de posible \textit{token replay attack}. \\
 					oauth2\_expired\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
 					expirados. \\
 					oauth2\_auth\_code\_reuse\_total & \textit{Counter }de intentos de reutilización de
@@ -883,7 +883,7 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un token válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
+						Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un \textit{token} válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
 						Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (\textit{increase()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
 					\end{minipage}
 				\end{figure}
@@ -949,7 +949,7 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos y en caso de detectar algún incremento en esta métrica podríamos deducir que el sistema se ha visto comprometido. Adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
+						Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos y en caso de detectar algún incremento en esta métrica podríamos deducir que el sistema se ha visto comprometido o está siendo atacado desde un usuario del que no tenemos conocimiento. Adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande.
 					\end{minipage}
 				\end{figure}
 			\subsection{Peticiones a los diferentes endpoints de nuestro sistema}
@@ -1029,7 +1029,7 @@
 					\begin{minipage}{0.45\textwidth}
 						\centering
 						\includegraphics[width=\linewidth]{Recursos/RatioTokens}
-						\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
+						\caption{Información sobre todos los \textit{tokens} que hay  en nuestro sistema.}
 					\end{minipage}
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
@@ -1102,8 +1102,6 @@
 						\item \textbf{Amarillo}: representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
 						\item \textbf{Azul:} contabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
 					\end{itemize}
-					
-	\newpage		
 	\section{Distribución del trabajo}
 		Para la realización de esta práctica, nos hemos distribuido el trabajo encargándonos cada integrante de diferentes responsabilidades:
 		\begin{table}[h!] % <-- Añadido el entorno contenedor

@@ -87,7 +87,18 @@ request_duration = Histogram(
     "Tiempo de respuesta de cada peticion",
     ["endpoint", "method"],
     # 0.25 es el umbral de 250ms que marca el enunciado como referencia
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+    buckets=[ 0.001,  # 1ms   ← nuevo
+        0.005,  # 5ms   ← nuevo
+        0.01,   # 10ms
+        0.025,  # 25ms  ← nuevo
+        0.05,   # 50ms
+        0.1,    # 100ms
+        0.25,   # 250ms (tu umbral EDR)
+        0.5,
+        1.0,
+        2.5,
+        5.0,    # techo para cubrir lo que ve Locust
+        10.0]
 )
 
 #Con esto intentamos ver si esta pasando algo raro con los tokens 
