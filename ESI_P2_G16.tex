@@ -19,7 +19,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{textcomp}
-\usepackage{csquotes}
+\usepackage[style=english]{csquotes}
 % ── Geometría de página ──────────────────────────────────────────────────────
 \geometry{
 	top=2cm,
@@ -190,8 +190,8 @@
 	
 	La aplicación se gestiona con \texttt{uv}, el cual nosotros ya empleamos en nuestra primera práctica y como se explicó en su  respectivo informe es un gestor de paquetes para Python (más moderno que el típico pip).\\
 	Aquí uv juega un papel fundamental, puesto que con el comando  \textit{uv add} instalará de manera automática las librerías y actualiza el .toml del proyecto para registra la dependencia en el \textit{uv.lock}. \\
+	
 	\newpage
-
 	\section{Estructura del proyecto}
 	Para entender el proyecto vamos a ver qué hacen los ficheros que han sido proporcionados por el profesor y los que hemos tenido que crear para el mismo:
 	\begin{table}[H]
@@ -242,9 +242,8 @@
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml
 	\end{lstlisting}
-	\newpage
-
 	
+\newpage
 \section{Métricas que vamos a emplear en la práctica}
 	Para esta sección, emplearemos 2 de los 4 tipos de métricas que nos proporciona la aplicación:
 	\begin{itemize}
@@ -253,7 +252,7 @@
 	\end{itemize}
 	
 	\subsection{Definición de las métricas que vamos a recoger}
-		Hemos creado un fichero \textit{metrics.py} en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
+		Hemos creado un fichero \textit{metrics.py}, detallado en el anexo \ref{anexo:metrics.py} \nameref{anexo:metrics.py}, en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
 		Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en este último hacemos el \textit{import} de funciones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.
 		
 	\subsection{Sintaxis de los contadores}
@@ -265,10 +264,11 @@
 			\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
 			)
 		\end{itemize}
-		Una vez que sabemos la sintaxis básica, pasamos a mostrar todo el fichero.
-		\vspace{1cm}
-		\lstinputlisting[style=python]{./metrics.py}
-		\vspace{1cm}
+		
+		%\vspace{1cm}
+		%\lstinputlisting[style=python]{./metrics.py}
+		%\vspace{1cm}
+		
 		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo \textit{counter} almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
 		un contador separado para cada tipo de flujo:
 \begin{lstlisting}[style=bash]
@@ -279,8 +279,9 @@
 		Esta información nos fue útil en fases tempranas de la práctica ya que con un\textit{ curl } íbamos testeando las métricas para cerciorarnos de que realmente se estaban incrementando cuando deberían.
 		\subsection {Deciciones importantes sobre \textit{metrics.py}}
 			Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}.\\ Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
+
 \newpage
-	\section{Modificaciones a \textit{models.py}}
+\section{Modificaciones a \textit{models.py}}
 		\textit{models.py} es la capa de acceso a datos. Se ha instrumentado con métricas en las siguientes funciones:
 		
 		\subsection{store\_authorization\_code}
@@ -372,21 +373,17 @@
 				active_tokens.labels(token_type="access").dec()
 			\end{lstlisting}
 			
-		\subsection{Exposición del endpoint /metrics — app.py}
-		
-			Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} y registrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
 			
-			\vspace{1cm}
-			\lstinputlisting[style=python, inputencoding=latin1]{app.py}
-			\vspace{1cm}
-			
-			Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP,  obligando a cada uno de las peticiones a pasar por ellos.\\
-			Esto es lo que permite que nuestras métricas recojan los datos y todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
-			Además el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
 	\newpage
 	\section{Modificaciones a\textit{ app.py}}
 	
-		Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.
+		% LEGACY - Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.\\
+	
+		Modificamos \texttt{app.py} (código con las modificaciones detallado en el anexo \ref{anexo:app.py} \nameref{anexo:app.py}) para exponer el endpoint \texttt{/metrics} y registrar automáticamente todas las peticiones HTTP mediante decoradores Flask.
+		
+		Los \textbf{decoradores} aplicados (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP,  obligando a cada uno de las peticiones a pasar por ellos.\\
+		Esto es lo que permite que nuestras métricas recojan los datos y todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
+		Además el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
 		
 		\subsection{Exposición del endpoint /metrics}
 		
@@ -529,13 +526,23 @@
 	\begin{lstlisting}[style=bash]
 		uv run locust -f locustfile.py --host=http://localhost:5001
 	\end{lstlisting}
-		\vspace{1cm}
-		\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
-		\vspace{1cm}
+		
+		
+		%\vspace{1cm}
+		%\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
+		%\vspace{1cm}
 	
 		
 		\subsection{Diseño del fichero de pruebas de carga}
-		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.
+		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.\\
+		El fichero locust finalmente implementado se encuentra detallado en el anexo \ref{anexo:locust.py} \nameref{anexo:locust.py}
+		
+		\subsubsection{Endpoints objetivo del Locust}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\textwidth]{Recursos/EndPointsLocust.png}
+			\caption{Puntos objetivo de nuestras pruebas con el fichero de Locust}
+		\end{figure}
 		\subsubsection{Distribución del tráfico}
 			\begin{table}[H]
 				\centering
@@ -567,7 +574,7 @@
 				\item \textbf{Monitorización}: 1/22 tareas = 5\%
 			\end{itemize}
 			Siendo las tareas de administración las que menos peso tienen debido a que en un escenario real, un administrador de una web no se autentica varias veces ni hace un uso similar al de un usuario.
-		
+			
 			\subsubsection{Tareas de tráfico legítimo}
 				\begin{itemize}
 						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo, puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
@@ -625,7 +632,7 @@
 				Duración        & 5 minutos \\
 				\bottomrule
 			\end{tabular}
-			\caption{Configuración de la prueba de carga}
+			\caption{Configuración de la prueba de carga normal dentro de un sistema de autenticación}
 			\label{Normal}
 		\end{table}
 		
@@ -665,13 +672,13 @@
 \end{lstlisting}
 	
 		\subsection{Comportamientos del sistema frente  a los dos escenarios de prueba}
-			En este apartado mostraremos una captura general del grafana en el que podremos comprobar cómo se ha comportado nuestro sistema ante las prubeas que hemos considerado adecuadas para sus dos escenarios.\\
+			En este apartado mostraremos una captura general del locust en el que podremos comprobar cómo se ha comportado nuestro sistema ante las pruebas que hemos considerado adecuadas para sus dos escenarios.\\
 			Explicaremos en detalle cada uno de los paneles más adelante en este informe pero es una representación visual de cómo se está comportando el sistema.
 			\subsubsection{Condiciones normales}
 				\begin{figure}[H]
 					\centering
 					\includegraphics[width=\linewidth]{Recursos/CargaNormal}
-					\caption{Como podemos observar con los parámetros del locust del cuadro (\ref{Normal}) obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
+					\caption{Como podemos observar con los parámetros del locust del cuadro (\ref{Normal}) obtenemos una resultados muy malos en el tiempo de respuesta, debido a las limitaciones de nuestra VM y diversos factores que explicaremos a continuación.}
 				\end{figure}
 			\subsubsection{Condiciones de estrés}
 			\begin{figure}[H]
@@ -703,16 +710,19 @@
 				\caption{Pruebas de carga con diferentes usuarios totales partiendo del caso inical del cuadro \ref{estrés}}
 			\end{figure}
 			
-			Como se puede observar en los paneles de grafana, ninguno de los intentos anteriores llegaba a recibir información, o si lo hacía era por un breve periodo de tiempo. Esto se debe a que nuestra VM no puede soportar la carga que supone tener a  10 usuarios concurrentes debido a las limitaciones de memoria RAM y de CPU.\\
-			Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.\\ 
-			Sabiendo que con 10 usuarios concurrentes saturamos el sistema y que con 5 no hubo problemas, procedemos a modificar este parámetro pero manteniendo como referencia 150 usuarios totales, puesto que  es un número realista de ellos.\\
-			Al hacer la prueba con 6 usuarios vemos que el sistema tampoco reacciona, por lo que deducimos de que el límte del sistema está en 5 usuarios concurrentes por segundo.
+			Como se puede observar en el panel de locust, ninguno de los intentos anteriores llegaba a tener un tiempo de respuesta razonable, con valores muy alejados de los 250ms que nos indicaban en el enunciado.\\
+			Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=\textwidth]{Recursos/6concurrentes}
-				\caption{Observamos el pico máximo de usuarios concurrentes.}
+				\caption{Pruebas con 10 y 9 usuarios,siendo el primer valor el límite de nuestro sistema sin que el tiempo de usuario tome valores inceptables. Estas métricas se han tomado el viernes, por lo que debido a la cantidad de peronas conectadas a las VM pueden arrojar un rendimiento ligeramente peor del real. }
 			\end{figure}		
-			Sabemos esto por el panel de usuarios con intentos fallidos de login. En nuestras pruebas lo que hacemos es realizar intentos de inicio de sesión con fallos y como el sistema tiene tantísimos usuarios concurrentes, sólo registra los 5 primeros, es decir, el límite está en 5 usuarios concurrentes lanzando peticiones cada segundo.
+			En lo referente a la carga máxima del sistema, nos hemos percatado de dos problemas para llegar a ello, la primera de ellas es la nula paralelización de la máquina, contamos con dos cores, pero la aplicación no está preparada para emplearlos, de tal manera que toda la ejecución se realiza sobre un único hilo y un core generando un cuello de botella importante para nuestro servidor y como atiende las peticiones, teniendo un límite de 12 rps lo que lastra el rendimiento de todo el sistema.\\
+			El segundo impedimento es nuestro \textit{locustfile}, el cual está enfocado en peticiones muy pesadas debido a nuestro enfoque de EDR, por ello, es imposible llegar a las 250 ms de tiempo de respuesta que se nos marca como tiempo aceptable en el enunciado, debido a que ya con 2 usuarios, al tener que pasar por el proceso de cifrado para la obtención de los \textit{tokens} el usuario que esté en ese proceso "secuestra" la CPU generando una cola de espera enorme.\\
+			En versiones anteriores de nuestro fichero de locust, podemos obtener \textit{fail fast}, omitiendo algunas de estas peticiones más pesadas, puesto que realmente estos ficheros de pruebas no estaban tan bien diseñados como el que finalmente hemos empleado en nuestra entrega.\\
+			Debido a esto, hemos decidido cambiar el tiempo entre peticiones para ver si eso ayudaba en algo, debido a que modificar la probabilidad de cada una de las tareas arruinaría por completo nuestra práctica y falsearía los resultados.\\
+			Por ello y tras realizar pruebas con 100, 25, 15, 10 usuarios, hemos llegado a la conclusión de que este último valor es el límite de nuestro sistema por lo puntos mencionados anteriormente.\\
+			El la captura del locust que adjuntamos, vemos la evolución del tiempo de respuesta con 10 y con 9 usuarios durante 3 minutos, tiempo más que suficiente para que ese número de usuarios se mantenga estable en el sistema y las métricas que nos arroja Locust sean realmente significativas.\\
 			
 		
 		\subsubsection{Flujo de ejecución de las aplicaciones}
@@ -754,10 +764,11 @@
 			\end{tabular}
 			\caption{Tests del script de verificación manual}
 		\end{table}
+		La comprobación se describe en detalle en el anexo, \ref{anexo:test.py} \nameref{anexo:test.py}
 		
-		\vspace{1cm}
-		\lstinputlisting[style=python, inputencoding=latin1]{test.py}
-		\vspace{1cm}
+		%\vspace{1cm}
+		%\lstinputlisting[style=python, inputencoding=latin1]{test.py}
+		%\vspace{1cm}
 		
 		
 	
@@ -1017,8 +1028,11 @@
 					\hfill % Crea un espacio elástico entre las dos minipages
 					% Columna 2: El Texto
 					\begin{minipage}{0.50\textwidth}
-						Esta gráfica es de vital importancia para saber si los \textit{endpoints} están funcionando como deberían, además de darnos la información de los tiempos de respuesta en función de la carga de trabajo que nosotros le estamos haciendo con el locust.\\
-						Tenemos los 3 puntos, cada uno de un color. \textit{token} (línea azul) es el punto de máximo trabajo de nuestra aplicación puesto que se encarga de la gestión de tokens y los registros de auditoría, \textit{authorized} (línea amarilla) es en el que se reflejan la respuesta de los usuarios por lo que la respuesta es casi instantánea mientras que el de \textit{admin} al ser un \textit{endpoint} interno tiene un tiempo de respuesta mínimo ya que no está expuesto a la interacción con los usuarios.
+						Para entender la utilidad del panel tenemos que entender en la situación en la que estamos ejecutando este código.\\
+						Nuestro código se está ejecutando sobre el servidor de desarrollo integrado de Flask, y el entorno opera bajo un modelo de procesamiento síncrono. Cuando Locust inyecta un volumen de peticiones superior a la capacidad de despacho del servidor, el sistema operativo se ve obligado a encolar las peticiones entrantes en sus \textit{buffers} de red (cola TCP), por este motivo, hay una discrepancia de tiempo entre lo que nos muestra el locust y lo mostrado en la gráfica, nosotros sólo estamos midiendo el tiempo de procesamiento de la petición mientras que locust nos da una visión más cercana al tiempo de usuario, desde que hace click y la web le devuelve el resultado de su petición.\\
+						La métrica \texttt{oauth2\_request\_duration\_seconds} instrumentada en la aplicación Flask evalúa estrictamente el \textbf{tiempo de procesamiento interno}. Es decir, el sistema comienza a cronometrar en el milisegundo exacto en el que el servidor web acepta la conexión y entrega la petición al código Python, deteniéndose al emitir la respuesta. El código de la aplicación es inherentemente \enquote{ciego} al tiempo que la petición ha pasado esperando en etapas previas.\\
+						De hecho para ser más precisos estamos empleando un percentil 95 para tener en cuenta el máximo rango posible de cara a la representación.
+						
 					\end{minipage}
 				\end{figure}
 				
@@ -1119,4 +1133,41 @@
 			\end{tabularx}
 			\caption{Distribución de Responsabilidades por Equipo y Miembro}
 		\end{table} % <-- Comprueba que cierra bien con el de arriba
+
+% ─────────────────────────────────────────────────────────────────────────────
+%  ANEXOS / APÉNDICES
+% ─────────────────────────────────────────────────────────────────────────────
+\clearpage % Fuerza a que el anexo empiece en una página nueva limpia
+
+% ─── ESTA LÍNEA INYECTA EL SEPARADOR EN EL ÍNDICE ────────────────────────
+\addtocontents{toc}{\protect\vspace{1em}\textbf{\large Apéndices}\par\protect\nopagebreak}
+% ─────────────────────────────────────────────────────────────────────────
+
+
+\appendix  % Cambia la numeración de secciones a letras (A, B, C...)
+\section{Métricas del sistema en metrics.py} \label{anexo:metrics.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=utf8]{./metrics.py}
+\vspace{1cm}
+
+\newpage
+\section{app.py modificado} \label{anexo:app.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+\vspace{1cm}
+
+\newpage
+\section{Verificación manual con test.py} \label{anexo:test.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{test.py}
+\vspace{1cm}
+
+\newpage
+\section{Locust} \label{anexo:locust.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
+\vspace{1cm}
+
 \end{document}
+
+
