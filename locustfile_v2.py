@@ -28,9 +28,9 @@ class OAuth2LoadTest(HttpUser):
         Monitoring:  1/19 = 5% of traffic
     """
 
-    # Each virtual user waits between 1 and 3 seconds before the next task
+    # Each virtual user waits between 3 and 7 seconds before the next task
     # This simulates real user think time between actions
-    wait_time = between(1, 3)
+    wait_time = between(3, 7)
 
     # ── Client credentials (M2M flow) ─────────────────────────────────────
     VALID_CLIENT_ID     = "service-account"
