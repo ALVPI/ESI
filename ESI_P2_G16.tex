@@ -168,7 +168,8 @@
 	% ════════════════════════════════════════════════════════════════════════════
 	\section{Introducción}
 	
-	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el servidor  por excelencia para hacer de mediación en la tarea de distribución de claves de acceso sobre el que realizaremos pruebas de carga con Locust, el cual es un sistema de monitorización que aplica el modelo \textit{pull}, el cual, está apuntando a nuestro \textit{endpoint} y cada 15 segundos (según lo definido en su \textit{.yml}) anota todo lo que está pasando, estos eventos serán visualizados posteriomente  en Grafana.\\
+	Para esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el cual es el estándar por excelencia para hacer de mediación en la tarea de distribución de claves de acceso.\\
+	Sobre él, realizaremos pruebas de carga con Locust y recogeremos los resultados con Prometheus.\\
 	De tal manera que tenemos 3 objetivos:
 	\begin{enumerate}
 		\item Instrumentación del backend con métricas Prometheus (haremos incapie en esta tecnología en el punto \ref{PO}).
@@ -178,23 +179,15 @@
 	
 	\subsection{Descripción del sistema bajo prueba}
 	
-	El backend proporcionado es un servidor de autenticación OAuth2 desarrollado en
-	Python con Flask y SQLite, que implementa los tres flujos principales definidos
-	en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
-	
+	El backend proporcionado por el profesor está desarrollado en Python con Flask y SQLite, implementando los tres flujos principales definidos en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
 	\begin{itemize}
-		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde
-		un usuario humano se autentica mediante un formulario de login. El servidor
-		emite un código temporal que posteriormente se canjea por un par de tokens.
-		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a
-		máquina donde no hay un usuario humano. La aplicación se autentica
-		directamente con sus credenciales y obtiene un token de acceso.
-		\item \textbf{Refresh Token}: flujo que permite renovar un token de acceso
-		caducado sin necesidad de repetir el proceso de autenticación completo.
+		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde un usuario humano se autentica mediante un formulario de login. El servidor emite un código temporal que posteriormente se canjea por un par de tokens.
+		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina donde no hay un usuarios humanos. La aplicación se autentica directamente con sus credenciales y obtiene un token de acceso.
+		\item \textbf{Refresh Token}: flujo que permite renovar un token de acceso caducado sin necesidad de repetir el proceso de autenticación completo.
 	\end{itemize}
 	
-	La aplicación se gestiona con \texttt{uv}, el cual ya empleamos en nuestra primera práctica y como se explicó en su informe es un gestor de paquetes para Python( más moderno que el típico pip).\\
-	Aquí uv juega un papel fundamental, puesto que con la instrucción \textit{add} de manera automática instalará las librerías y actualiza el .toml del proyecto para registra la dependencia en el \textit{uv.lock}. \\
+	La aplicación se gestiona con \texttt{uv}, el cual nosotros ya empleamos en nuestra primera práctica y como se explicó en su  respectivo informe es un gestor de paquetes para Python (más moderno que el típico pip).\\
+	Aquí uv juega un papel fundamental, puesto que con el comando  \textit{uv add} instalará de manera automática las librerías y actualiza el .toml del proyecto para registra la dependencia en el \textit{uv.lock}. \\
 	
 
 	\section{Estructura del proyecto}
@@ -207,24 +200,22 @@
 			\toprule
 			\textbf{Fichero} & \textbf{Descripción} \\
 			\midrule
-			app.py & Punto de entrada de la aplicación Flask. Registra blueprints,
-			configura la base de datos y expone el endpoint \texttt{/metrics}. \\
-			oauth2\_routes.py & Implementación de los endpoints OAuth2:
-			\texttt{/authorize} y \texttt{/token}. \\
-			admin\_routes.py & Endpoints de administración bajo \texttt{/admin/clients}
-			para gestionar clientes OAuth2. \\
-			models.py & Capa de acceso a datos: clientes, códigos de autorización
-			y tokens. \\
+			app.py & Punto de entrada de la aplicación Flask. Registra blueprints, configura la base de datos y expone el endpoint \texttt{/metrics}. \\
+			oauth2\_routes.py & Implementación de los endpoints \textit{OAuth2}: \texttt{/authorize} y \texttt{/token}. \\
+			admin\_routes.py & Endpoints de administración bajo \texttt{/admin/clients} para gestionar clientes OAuth2. \\
+			models.py & Capa de acceso a datos: clientes, códigos de autorización y tokens. \\
 			database.py & Gestión de la conexión SQLite y definición del esquema. \\
-			metrics.py & Definición centralizada de todas las métricas Prometheus
-			(fichero creado en esta práctica). \\
-			seed.py & Script de inicialización que crea dos clientes de prueba
-			en la base de datos. \\
+			metrics.py & Definición centralizada de todas las métricas Prometheus (fichero creado en esta práctica). \\
+			seed.py & Script de inicialización que crea dos clientes de prueba en la base de datos. \\
 			\bottomrule
 		\end{tabular}
 		\caption{Estructura de ficheros modificados en el proyecto}
 	\end{table}
 	
+	De tal manera que  el flujo de trabajo es el siguiente
+	\begin{center}
+		\texttt{App OAuth2 (5001)} $\rightarrow$ \texttt{Prometheus (9090)} $\rightarrow$ \texttt{Grafana (3000)}
+	\end{center}
 
 	\section{Prometheus}\label{PO}
 	
@@ -246,8 +237,8 @@
 	\vspace{1cm}
 	\lstinputlisting[style=yaml]{./prometheus.yml}
 	\vspace{1cm}
-	Lo que hemos hecho es definir el comportamiento del monitoreo, en el cual establecemos que se recojan méticas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su enpoint \textit{/metrics}.\\
-	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es el que acabamos de modificar..
+	Hemos definido el comportamiento del monitoreo, en el cual establecemos que se recojan méticas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su enpoint \textit{/metrics}.\\
+	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando que su fichero de configuración es el que acabamos de modificar.
 	\begin{lstlisting}[style=bash]
 		./prometheus --config.file=prometheus.yml
 	\end{lstlisting}
@@ -263,275 +254,263 @@
 	\newpage
 	
 	\subsection{Definición de las métricas que vamos a recoger}
-	
-	Hemos creado un fichero \textit{metrics.py} en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
-	Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en el último importamos fucniones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
-	\subsection{Sintaxis de los contadores}
-	Antes de mostrar todos los contadores, vamos a explicar un poco la sintaxis de este fichero, puesto que es una tecnología nueva, que al menos en la carrera no hemos tocado mucho:
-	\begin{itemize}
+		Hemos creado un fichero \textit{metrics.py} en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
+		Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en este último hacemos el \textit{import} de funciones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.\\
 		
-		\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
-		\item \"oauth2\_auth\_flows\_started\_total\": nombre de la métrica para su posterior integración con grafana
-		\item "Flujos de autenticacion iniciados":  descripción de la metrica
-		\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
-		)
-	\end{itemize}
-	\vspace{1cm}
-	\lstinputlisting[style=python]{./metrics.py}
-	\vspace{1cm}
+	\subsection{Sintaxis de los contadores}
+		Antes de mostrar todos nuestro trabajo en \textit{metrics}, vamos a explicar un poco la sintaxis de este fichero, puesto que es una tecnología nueva, que al menos en la carrera no hemos tocado mucho:
+		\begin{itemize}
+			
+			\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
+			\item \"oauth2\_auth\_flows\_started\_total\": nombre de la métrica para su posterior integración con grafana
+			\item "Flujos de autenticacion iniciados":  descripción de la metrica
+			\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
+			)
+		\end{itemize}
+		Una vez que sabemos la sintaxis básica, pasamos a mostrar todo el fichero.
+		\vspace{1cm}
+		\lstinputlisting[style=python]{./metrics.py}
+		\vspace{1cm}
+		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
+		un contador separado para cada tipo de flujo:
+		\begin{lstlisting}[style=bash]
+			oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
+			oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
+			oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
+		\end{lstlisting}
+		Esta información nos fue útil en fases tempranas de la práctica ya que con un\textit{ curl } íbamos testeando las métricas para cerciorarnos de que realmente se estaban incrementando cuando deberían.
+		\subsection {Deciciones importantes sobre \textit{metrics.py}}
 	
-	
-	Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo counter almacene
-	valores independientes para cada combinación de etiquetas. Por ejemplo,
-	\texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
-	un contador separado para cada tipo de flujo:
-	
-	\begin{lstlisting}[style=bash]
-		oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
-		oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
-		oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
-	\end{lstlisting}
-	\subsection {Deciciones importantes sobre \textit{metrics.py}}
-	
-	Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}. Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
+			Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}.\\ Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
 
 	\section{Modificaciones a \textit{models.py}}
-	\textit{models.py} es la capa de acceso a datos. Se ha instrumentado con métricas en las siguientes funciones:
-	
-	\subsection{store\_authorization\_code}
-	
-	Se incrementa \texttt{pending\_auth\_codes} cada vez que se genera un código
-	de autorización, reflejando que existe un código emitido pero no canjeado:
-	
-	\begin{lstlisting}[style=python, caption=Instrumentacion de store\_authorization\_code]
-		def store_authorization_code(...) -> str:
-		# ... codigo original ...
-		db.commit()
-		# A new code has been issued but not yet consumed
-		pending_auth_codes.inc()
-		return code
-	\end{lstlisting}
-	
-	\subsection{consume\_authorization\_code}
-	
-	Se decrementa \texttt{pending\_auth\_codes} cuando el código se consume
-	correctamente. Además se detectan dos casos de seguridad relevantes: el
-	intento de reutilización de un código ya usado (\texttt{auth\_code\_reuse})
-	y el intento de uso de un código expirado:
-	
-	\begin{lstlisting}[style=python, caption=Instrumentacion de consume\_authorization\_code]
-		def consume_authorization_code(code: str) -> Optional[dict]:
-		# ... codigo original ...
-		if data["used"]:
-		# Someone is trying to reuse an already consumed code
-		# This is a sign of an authorization code replay attack
-		auth_code_reuse.inc()
-		return None
+		\textit{models.py} es la capa de acceso a datos. Se ha instrumentado con métricas en las siguientes funciones:
 		
-		if time.time() > data["expires_at"]:
-		return None
+		\subsection{store\_authorization\_code}
 		
-		db.execute("UPDATE authorization_codes SET used = 1 ...")
-		db.commit()
-		# Code consumed correctly, no longer pending
-		pending_auth_codes.dec()
-		return data
-	\end{lstlisting}
-	
-	\subsection{issue\_token\_pair}
-	
-	Se incrementan los gauges de tokens activos cada vez que se emiten tokens.
-	Se distingue entre access tokens y refresh tokens:
-	
-	\begin{lstlisting}[style=python, caption=Instrumentacion de issue\_token\_pair]
-		def issue_token_pair(...) -> dict:
-		# ... codigo original ...
-		db.commit()
-		# Track active tokens in the system
-		active_tokens.labels(token_type="access").inc()
-		if refresh_token:
-		active_tokens.labels(token_type="refresh").inc()
-		return response
-	\end{lstlisting}
-	
-	\subsection{validate\_refresh\_token}
-	
-	Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un token revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
-	
-	\begin{lstlisting}[style=python, caption=Instrumentacion de validate\_refresh\_token]
-		def validate_refresh_token(token: str) -> Optional[dict]:
-		# ... codigo original ...
-		if data["revoked"]:
-		# Someone is using a token after it has been revoked
-		# This is a sign of a token replay attack
-		revoked_token_usage.inc()
-		return None
+			Se incrementa \texttt{pending\_auth\_codes} cada vez que se genera un código
+			de autorización, reflejando que existe un código emitido pero no canjeado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentacion de store\_authorization\_code]
+				def store_authorization_code(...) -> str:
+				# ... codigo original ...
+				db.commit()
+				# A new code has been issued but not yet consumed
+				pending_auth_codes.inc()
+				return code
+			\end{lstlisting}
 		
-		if time.time() > data["expires_at"]:
-		# Someone is trying to use an expired token
-		expired_token_usage.inc()
-		return None
+		\subsection{consume\_authorization\_code}
 		
-		return data
-	\end{lstlisting}
-	
-	\subsection{revoke\_refresh\_token}
-	
-	Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el refresh token antiguo como su access token asociado:
-	
-	\begin{lstlisting}[style=python, caption=Instrumentacion de revoke\_refresh\_token]
-		def revoke_refresh_token(token: str) -> None:
-		# ... codigo original ...
-		db.commit()
-		# Both the refresh token and its associated access token are revoked
-		tokens_revoked.labels(token_type="refresh").inc()
-		tokens_revoked.labels(token_type="access").inc()
-		# Decrement active tokens accordingly
-		active_tokens.labels(token_type="refresh").dec()
-		active_tokens.labels(token_type="access").dec()
-	\end{lstlisting}
-	
-	\subsection{Exposición del endpoint /metrics — app.py}
-	
-	Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} yregistrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
-	
-	\vspace{1cm}
-	\lstinputlisting[style=python, inputencoding=latin1]{app.py}
-	\vspace{1cm}
-	
-	Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP respectivamente, obligando a cada uno de las peticiones a pasar por ellos, haciendo que nuestras métricas recojan los datos, además, nos permite registrar todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
-	Por otra parte  el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
-	
+			Se decrementa \texttt{pending\_auth\_codes} cuando el código se consume correctamente. Además detectamos dos casos de seguridad relevantes: el intento de reutilización de un código ya usado (\texttt{auth\_code\_reuse}) y el intento de uso de uno ya  expirado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentacion de consume\_authorization\_code]
+				def consume_authorization_code(code: str) -> Optional[dict]:
+				# ... codigo original ...
+				if data["used"]:
+				# Someone is trying to reuse an already consumed code
+				# This is a sign of an authorization code replay attack
+				auth_code_reuse.inc()
+				return None
+				
+				if time.time() > data["expires_at"]:
+				return None
+				
+				db.execute("UPDATE authorization_codes SET used = 1 ...")
+				db.commit()
+				# Code consumed correctly, no longer pending
+				pending_auth_codes.dec()
+				return data
+			\end{lstlisting}
+			
+		\subsection{issue\_token\_pair}
+		
+			Se incrementan los gauges de tokens activos cada vez que se emiten, distinguiendo entre access y refresh tokens:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentacion de issue\_token\_pair]
+				def issue_token_pair(...) -> dict:
+				# ... codigo original ...
+				db.commit()
+				# Track active tokens in the system
+				active_tokens.labels(token_type="access").inc()
+				if refresh_token:
+				active_tokens.labels(token_type="refresh").inc()
+				return response
+			\end{lstlisting}
+			
+		\subsection{validate\_refresh\_token}
+		
+			Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un token revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentacion de validate\_refresh\_token]
+				def validate_refresh_token(token: str) -> Optional[dict]:
+				# ... codigo original ...
+				if data["revoked"]:
+				# Someone is using a token after it has been revoked
+				# This is a sign of a token replay attack
+				revoked_token_usage.inc()
+				return None
+				
+				if time.time() > data["expires_at"]:
+				# Someone is trying to use an expired token
+				expired_token_usage.inc()
+				return None
+				
+				return data
+			\end{lstlisting}
+		
+		\subsection{revoke\_refresh\_token}
+		
+			Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el refresh token antiguo como su access token asociado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentacion de revoke\_refresh\_token]
+				def revoke_refresh_token(token: str) -> None:
+				# ... codigo original ...
+				db.commit()
+				# Both the refresh token and its associated access token are revoked
+				tokens_revoked.labels(token_type="refresh").inc()
+				tokens_revoked.labels(token_type="access").inc()
+				# Decrement active tokens accordingly
+				active_tokens.labels(token_type="refresh").dec()
+				active_tokens.labels(token_type="access").dec()
+			\end{lstlisting}
+			
+		\subsection{Exposición del endpoint /metrics — app.py}
+		
+			Modificamos  \texttt{app.py} para exponer el endpoint \texttt{/metrics} yregistrar automáticamente todas las peticiones HTTP mediante decoradores Flask:
+			
+			\vspace{1cm}
+			\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+			\vspace{1cm}
+			
+			Los \textbf{decoradores} (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP respectivamente, obligando a cada uno de las peticiones a pasar por ellos, haciendo que nuestras métricas recojan los datos, además, nos permite registrar todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
+			Por otra parte  el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
+		
 	\section{Modificaciones a\textit{ app.py}}
 	
-	Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.
-	
-	\subsection{Exposición del endpoint /metrics}
-	
-	Se utiliza \texttt{DispatcherMiddleware} para combinar la aplicación Flask
-	con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}.
-	Esto permite que Prometheus pueda leer las métricas en
-	\texttt{http://localhost:5001/metrics}:
-	
-	\begin{lstlisting}[style=python, caption=Exposicion del endpoint /metrics]
-		from prometheus_client import make_wsgi_app
-		from werkzeug.middleware.dispatcher import DispatcherMiddleware
-		from werkzeug.serving import run_simple
+		Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.
 		
-		if __name__ == "__main__":
-		flask_app = create_app()
-		# Combine Flask with the Prometheus /metrics endpoint
-		application = DispatcherMiddleware(flask_app, {
-			"/metrics": make_wsgi_app()
-		})
-		run_simple("0.0.0.0", 5001, application,
-		use_reloader=True, use_debugger=True)
-	\end{lstlisting}
-	
-	\subsection{Registro automático de métricas HTTP}
-	
-	Hemos usado los decoradores \texttt{@before\_request} y \texttt{@after\_request} de Flask para registrar automáticamente todas las peticiones HTTP sin modificar cada ruta individualmente, para así seguir el patrón DRY (\textit{Don't Repeat Yourself}):
-	
-	\begin{lstlisting}[style=python, caption=Decoradores before y after request]
-		@app.before_request
-		def before_request():
-		# Store arrival time and increment in-progress counter
-		g.start_time = time.time()
-		requests_in_progress.labels(endpoint=request.path).inc()
+		\subsection{Exposición del endpoint /metrics}
 		
-		@app.after_request
-		def after_request(response):
-		endpoint = request.path
+			Se utiliza \texttt{DispatcherMiddleware} para combinar la aplicación Flask con Prometheus que genera el endpoint \texttt{/metrics}. Esto permite que pueda leer las métricas en
+			\texttt{http://localhost:5001/metrics}:
+			
+			\begin{lstlisting}[style=python, caption=Exposicion del endpoint /metrics]
+				from prometheus_client import make_wsgi_app
+				from werkzeug.middleware.dispatcher import DispatcherMiddleware
+				from werkzeug.serving import run_simple
+				
+				if __name__ == "__main__":
+				flask_app = create_app()
+				# Combine Flask with the Prometheus /metrics endpoint
+				application = DispatcherMiddleware(flask_app, {
+					"/metrics": make_wsgi_app()
+				})
+				run_simple("0.0.0.0", 5001, application,
+				use_reloader=True, use_debugger=True)
+			\end{lstlisting}
+			
+		\subsection{Registro automático de métricas HTTP}
 		
-		# General HTTP counter
-		http_requests.labels(
-		method=request.method,
-		endpoint=endpoint,
-		status_code=str(response.status_code)
-		).inc()
+			Hemos usado los decoradores \texttt{@before\_request} y \texttt{@after\_request} de Flask para registrar automáticamente todas las peticiones HTTP sin modificar cada ruta individualmente, para así seguir el patrón DRY (\textit{Don't Repeat Yourself}):
+			
+			\begin{lstlisting}[style=python, caption=Decoradores before y after request]
+				@app.before_request
+				def before_request():
+				# Store arrival time and increment in-progress counter
+				g.start_time = time.time()
+				requests_in_progress.labels(endpoint=request.path).inc()
+				
+				@app.after_request
+				def after_request(response):
+				endpoint = request.path
+				
+				# General HTTP counter
+				http_requests.labels(
+				method=request.method,
+				endpoint=endpoint,
+				status_code=str(response.status_code)
+				).inc()
+				
+				# Specific counters per endpoint
+				if "/token" in endpoint:
+				http_requests_token.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				elif "/authorize" in endpoint:
+				http_requests_authorize.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				elif "/admin" in endpoint:
+				http_requests_admin.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				
+				# Decrement in-progress and record duration
+				requests_in_progress.labels(endpoint=request.path).dec()
+				duration = time.time() - g.start_time
+				request_duration.labels(
+				endpoint=request.path,
+				method=request.method
+				).observe(duration)
+				
+				return response
+			\end{lstlisting}
 		
-		# Specific counters per endpoint
-		if "/token" in endpoint:
-		http_requests_token.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
-		elif "/authorize" in endpoint:
-		http_requests_authorize.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
-		elif "/admin" in endpoint:
-		http_requests_admin.labels(
-		method=request.method,
-		status_code=str(response.status_code)
-		).inc()
 		
-		# Decrement in-progress and record duration
-		requests_in_progress.labels(endpoint=request.path).dec()
-		duration = time.time() - g.start_time
-		request_duration.labels(
-		endpoint=request.path,
-		method=request.method
-		).observe(duration)
-		
-		return response
-	\end{lstlisting}
-	
-	
-	\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
-	Hemos tenido que modificar este fichero puesto que nuestras métricas afectan a los 3  flujos de nuestra aplicación, siguiendo siempre la misma lógica   se incrementa \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
-	Esto se entiende mejor con un ejemplo:
-	\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
-		def _handle_client_credentials():
-		auth_flows_started.labels(
-		grant_type="client_credentials").inc()
-		
-		client_id, err = _authenticate_client()
-		if err:
-		auth_flows_failed.labels(
-		grant_type="client_credentials").inc()
-		return _error_response("invalid_client", err, 401)
-		
-		client = get_client(client_id)
-		if client is None or \
-		"client_credentials" not in client["grant_types"]:
-		auth_flows_failed.labels(
-		grant_type="client_credentials").inc()
-		return _error_response("unauthorized_client",
-		"Client is not authorized for client_credentials")
-		
-		scope = request.form.get("scope", "")
-		token_response = issue_token_pair(
-		client_id=client_id,
-		scope=scope,
-		user_id=None,
-		include_refresh=False,
-		)
-		
-		auth_flows_success.labels(
-		grant_type="client_credentials").inc()
-		tokens_issued.labels(
-		token_type="access",
-		grant_type="client_credentials").inc()
-		access_tokens_issued.labels(
-		grant_type="client_credentials").inc()
-		# client_credentials no emite refresh token (RFC 6749)
-		
-		return jsonify(token_response)
-	\end{lstlisting}
-	
-	De tal manera que  el flujo de trabajo de la aplicación es el siguiente
-	 \begin{center}
-		\texttt{App OAuth2 (5001)} $\rightarrow$ \texttt{Prometheus (9090)} $\rightarrow$ \texttt{Grafana (3000)}
-	\end{center}
-	Ahora que ya tenemos los dos primeros pasos configurados,  vamos a preparar el grafana.\\
-	Lo primero que hacemos es añadir  Prometheus como fuente de datos en \textit{Connections > Data Sources > Add data source}, se configura la URL \texttt{http://localhost:9090} y se verifica la conexión
-	con \textit{Save \& Test}, obteniendo el mensaje:
-	
-	\begin{center}
-		\textit{"Successfully queried the Prometheus API."}
-	\end{center}
+		\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
+			Hemos tenido que modificar este fichero puesto que nuestras métricas afectan a los 3  flujos de nuestra aplicación, para ello hemos seguido siempre la misma lógica, incrementamos, \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
+			Esto se entiende mejor con un ejemplo:
+			\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
+				def _handle_client_credentials():
+				auth_flows_started.labels(
+				grant_type="client_credentials").inc()
+				
+				client_id, err = _authenticate_client()
+				if err:
+				auth_flows_failed.labels(
+				grant_type="client_credentials").inc()
+				return _error_response("invalid_client", err, 401)
+				
+				client = get_client(client_id)
+				if client is None or \
+				"client_credentials" not in client["grant_types"]:
+				auth_flows_failed.labels(
+				grant_type="client_credentials").inc()
+				return _error_response("unauthorized_client",
+				"Client is not authorized for client_credentials")
+				
+				scope = request.form.get("scope", "")
+				token_response = issue_token_pair(
+				client_id=client_id,
+				scope=scope,
+				user_id=None,
+				include_refresh=False,
+				)
+				
+				auth_flows_success.labels(
+				grant_type="client_credentials").inc()
+				tokens_issued.labels(
+				token_type="access",
+				grant_type="client_credentials").inc()
+				access_tokens_issued.labels(
+				grant_type="client_credentials").inc()
+				# client_credentials no emite refresh token (RFC 6749)
+				
+				return jsonify(token_response)
+			\end{lstlisting}
+			
+			
+			Ahora que ya tenemos los dos primeros pasos configurados,  vamos a preparar el grafana.\\
+			Lo primero que hacemos es añadir  Prometheus como fuente de datos en \textit{Connections > Data Sources > Add data source}, se configura la URL \texttt{http://localhost:9090} y se verifica la conexión
+			con \textit{Save \& Test}, obteniendo el mensaje:
+			
+			\begin{center}
+				\textit{"Successfully queried the Prometheus API."}
+			\end{center}
 	
 	
 	\section{Locust }
@@ -578,6 +557,7 @@
 			\bottomrule
 		\end{tabular}
 		\caption{Configuración de la prueba de carga}
+		\label{Normal}
 	\end{table}
 	
 	\textbf{Prueba de estrés} — Evalúa el comportamiento del sistema en
@@ -595,6 +575,7 @@
 			\bottomrule
 		\end{tabular}
 		\caption{Configuración de la prueba de estrés}
+		\label{estrés}
 	\end{table}
 	
 	\subsection{Protección de la VM durante las pruebas}
@@ -621,7 +602,7 @@
 			\begin{figure}
 				\centering
 				\includegraphics[width=\linewidth]{Recursos/CargaNormal}
-				\caption{Como podemos observar con los parámetros del locust del cuadro 2 obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
+				\caption{Como podemos observar con los parámetros del locust del cuadro 2(\ref{Normal}) obtenemos una resultados normales, es decir el sistema puede manejar la carga de trabajo de manera normal}
 			\end{figure}
 		\subsubsection{Condiciones de estrés}
 		\begin{figure}[H]
@@ -650,11 +631,12 @@
 				\label{fig:imagen_c}
 			\end{subfigure}
 			
-			\caption{Pruebas de carga con diferentes usuarios totales}
+			\caption{Pruebas de carga con diferentes usuarios totales partiendo del caso inical del cuadro 3 \ref{estrés}}
 		\end{figure}
 		
-		Si nos fijamos hemos hecho pruebas de estres con diferentes números de usuarios totales la cuestión es que manteniendo constantes los números de usuarios concurrentes por segundo, nuestra vm no puede con ellos, debido a las limitaciones de memoria RAM y de CPU, con esto demostramos que tenemos un cuello de botella en la concurrencia, por lo que modificamos el número de usuarios concurrentes para que la prueba de estrés se acerque al límite del sistema, tomaremos como referente 150 usuarios, ya que es un número realista, pero reduciremos el número de usuarios concurrentes para que nuestro sistema pueda atender dichas peticiones.\\
-		Hemos probado con 6 usuarios y nos damos cuenta, de que el límte del sistema está en 5 usuarios concurrentes por segundo, ya que a partir a partir de los 5 primeros segundos, el sistema no puede procesar más de estos usuarios por segundos.
+		Como se puede observar en los paneles de grafana, ninguno de los intentos anteriores llegaba a recibir información, o si lo hacía era por un breve periodo de tiempo, esto se debe a que nuestra VM no puede soportar la carga que supone tener a  10 usuarios concurrentes , debido a las limitaciones de memoria RAM y de CPU.\\
+		Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.\\ Sabiendo que con 10 usuarios concurrentes saturamos el sistema y que con 5, no hubo problemas procedemos a modificar este parámetro pero manteniendo como referencia 150 usuarios totales , puesto que  es un número realista de ellos .\\
+		Al hacer la prueba con 6 usuarios vemos que el sistema tampoco reacciona, por lo que deducimos de que el límte del sistema está en 5 usuarios concurrentes por segundo.
 		\begin{figure}[H]
 			\centering
 			\includegraphics[width=\textwidth]{Recursos/6concurrentes}
@@ -670,7 +652,6 @@
 		\item Terminal 3  \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
 		\item Terminal 4  (opcional, sólo si tenemos pocos recursos en la VM)\texttt{watch} para vigilancia de recursos
 	\end{enumerate}
-	
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\linewidth]{Recursos/EjecucionTodoSistema}
@@ -679,9 +660,7 @@
 	Y el orden de parada es el inverso, esperando 30 segundos entre Locust y Prometheus para que este último recoja los últimos datos antes de apagarse.
 	
 	\section{Verificación manual de métricas EDR}
-	En el punto anterior, hemos mencionado el 
-	\texttt{test.py}, el cual es un script que comprueba cada alguna métrica de manera individual, en concreto comprobamos las siguientes:
-	
+	En el punto anterior, hemos mencionado el \texttt{test.py}, el cual es un script que comprueba cada alguna métrica de manera individual, en concreto comprobamos las siguientes:
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{clp{6cm}}
@@ -702,7 +681,6 @@
 		\caption{Tests del script de verificación manual}
 	\end{table}
 	
-	Esto lo testeamos con un \textit{script} en python el cual mostramos a continuación:
 	\vspace{1cm}
 	\lstinputlisting[style=python, inputencoding=latin1]{test.py}
 	\vspace{1cm}
@@ -711,92 +689,91 @@
 
 \section{Enfoque EDR del sistema de métricas}
 
-El enunciado de la práctica señala explícitamente que uno de los objetivos
-de las pruebas de carga es identificar \textit{``si surgen fallos de seguridad
-	fruto del alto nivel de carga''} y que \textit{``se podrán añadir métricas
-	adicionales''}. Partiendo de este punto, hemos optado por un enfoque orientado
-a la ciberseguridad, intentando emular un  EDR (\textit{Endpoint Detection and
-	Response}), que permite detectar comportamientos anómalos en tiempo real
-durante las pruebas de carga.
+	El enunciado de la práctica señala explícitamente que uno de los objetivos
+	de las pruebas de carga es identificar \textit{``si surgen fallos de seguridad
+		fruto del alto nivel de carga''} y que \textit{``se podrán añadir métricas
+		adicionales''}. Partiendo de este punto, hemos optado por un enfoque orientado
+	a la ciberseguridad, intentando emular un  EDR (\textit{Endpoint Detection and
+		Response}), que permite detectar comportamientos anómalos en tiempo real
+	durante las pruebas de carga.
+	
+	Un sistema EDR monitoriza eventos de seguridad en tiempo real para detectar
+	patrones de ataque como fuerza bruta, reutilización de tokens o intentos de
+	acceso con credenciales comprometidas. Prometheus y Grafana permiten replicar
+	este comportamiento de forma sencilla sobre el servidor OAuth2.
 
-Un sistema EDR monitoriza eventos de seguridad en tiempo real para detectar
-patrones de ataque como fuerza bruta, reutilización de tokens o intentos de
-acceso con credenciales comprometidas. Prometheus y Grafana permiten replicar
-este comportamiento de forma sencilla sobre el servidor OAuth2.
+	\subsection{Métricas adicionales implementadas}
+	
+		Se han añadido tres categorías de métricas adicionales sobre las requeridas
+		por el enunciado:
 
-\subsection{Métricas adicionales implementadas}
+	\subsubsection{Rendimiento del sistema}
+	
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+				\toprule
+				\textbf{Métrica} & \textbf{Descripción} \\
+				\midrule
+				oauth2\_request\_duration\_seconds & Histogram del tiempo de respuesta por
+				endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
+				fija en 250ms como umbral de referencia. \\
+				oauth2\_requests\_in\_progress & Gauge de peticiones HTTP simultáneas en
+				curso en este momento. Útil para detectar ataques DoS bajo pruebas de estrés. \\
+				\bottomrule
+			\end{tabular}
+			\caption{Métricas de rendimiento}
+		\end{table}
 
-Se han añadido tres categorías de métricas adicionales sobre las requeridas
-por el enunciado:
+	\subsubsection{Estado de tokens}
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+				\toprule
+				\textbf{Métrica} & \textbf{Descripción} \\
+				\midrule
+				oauth2\_active\_tokens & Gauge de tokens activos en el sistema por tipo.
+				Sube al emitir tokens y baja al revocarlos. \\
+				oauth2\_tokens\_revoked\_total & Counter de tokens revocados por tipo.
+				Refleja la rotación de tokens en el flujo refresh\_token. \\
+				oauth2\_pending\_auth\_codes & Gauge de códigos de autorización emitidos
+				pero no canjeados todavía. Un valor creciente indica clientes que piden
+				códigos sin completar el flujo. \\
+				oauth2\_revoked\_token\_usage\_total & Counter de intentos de uso de tokens
+				ya revocados. Señal de posible token replay attack. \\
+				oauth2\_expired\_token\_usage\_total & Counter de intentos de uso de tokens
+				expirados. \\
+				oauth2\_auth\_code\_reuse\_total & Counter de intentos de reutilización de
+				códigos de autorización ya consumidos. Señal de authorization code replay
+				attack. \\
+				\bottomrule
+			\end{tabular}
+			\caption{Métricas de estado de tokens}
+		\end{table}
+	
+	\subsubsection{Detección de ataques}
 
-\subsubsection{Rendimiento del sistema}
-
-\begin{table}[H]
-	\centering
-	\begin{tabular}{>{\ttfamily\small}lp{8cm}}
-		\toprule
-		\textbf{Métrica} & \textbf{Descripción} \\
-		\midrule
-		oauth2\_request\_duration\_seconds & Histogram del tiempo de respuesta por
-		endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
-		fija en 250ms como umbral de referencia. \\
-		oauth2\_requests\_in\_progress & Gauge de peticiones HTTP simultáneas en
-		curso en este momento. Útil para detectar ataques DoS bajo pruebas de estrés. \\
-		\bottomrule
-	\end{tabular}
-	\caption{Métricas de rendimiento}
-\end{table}
-
-\subsubsection{Estado de tokens}
-
-\begin{table}[H]
-	\centering
-	\begin{tabular}{>{\ttfamily\small}lp{8cm}}
-		\toprule
-		\textbf{Métrica} & \textbf{Descripción} \\
-		\midrule
-		oauth2\_active\_tokens & Gauge de tokens activos en el sistema por tipo.
-		Sube al emitir tokens y baja al revocarlos. \\
-		oauth2\_tokens\_revoked\_total & Counter de tokens revocados por tipo.
-		Refleja la rotación de tokens en el flujo refresh\_token. \\
-		oauth2\_pending\_auth\_codes & Gauge de códigos de autorización emitidos
-		pero no canjeados todavía. Un valor creciente indica clientes que piden
-		códigos sin completar el flujo. \\
-		oauth2\_revoked\_token\_usage\_total & Counter de intentos de uso de tokens
-		ya revocados. Señal de posible token replay attack. \\
-		oauth2\_expired\_token\_usage\_total & Counter de intentos de uso de tokens
-		expirados. \\
-		oauth2\_auth\_code\_reuse\_total & Counter de intentos de reutilización de
-		códigos de autorización ya consumidos. Señal de authorization code replay
-		attack. \\
-		\bottomrule
-	\end{tabular}
-	\caption{Métricas de estado de tokens}
-\end{table}
-
-\subsubsection{Detección de ataques}
-
-\begin{table}[H]
-	\centering
-	\begin{tabular}{>{\ttfamily\small}lp{8cm}}
-		\toprule
-		\textbf{Métrica} & \textbf{Descripción} \\
-		\midrule
-		oauth2\_brute\_force\_attempts\_total & Counter de intentos fallidos de
-		autenticación por client\_id. Detecta ataques de fuerza bruta M2M. \\
-		oauth2\_user\_auth\_failed\_total & Counter de intentos fallidos de login
-		por username y client\_id. Detecta ataques de fuerza bruta sobre usuarios. \\
-		\bottomrule
-	\end{tabular}
-	\caption{Métricas de detección de ataques}
-\end{table}
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+				\toprule
+				\textbf{Métrica} & \textbf{Descripción} \\
+				\midrule
+				oauth2\_brute\_force\_attempts\_total & Counter de intentos fallidos de
+				autenticación por client\_id. Detecta ataques de fuerza bruta M2M. \\
+				oauth2\_user\_auth\_failed\_total & Counter de intentos fallidos de login
+				por username y client\_id. Detecta ataques de fuerza bruta sobre usuarios. \\
+				\bottomrule
+			\end{tabular}
+			\caption{Métricas de detección de ataques}
+		\end{table}
 
 \section{Paneles de grafana}
 	Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación gráfica de nuestro trabajo en esta práctica\\
 	\begin{figure}[H]
 			\centering
 			\includegraphics[width=\linewidth]{Recursos/VistazoGeneralGrafana}
-			\caption{Nuestro panel de grafana para esta práctica. 	Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
+			\caption{Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
 	\end{figure}
 	Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicándo un poco la intención y alguna peculiaridad de la representación.\\
 	Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrando a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.
@@ -820,21 +797,21 @@ por el enunciado:
 		\end{figure}
 		
 		\subsection{Ratio de Tokens }
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/TokenReplay}
-				\caption{Tipos de tokens que maneja nuestro sistema}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un token válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
-				Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (i\textit{ncrease()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
-			\end{minipage}
-		\end{figure}
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/TokenReplay}
+					\caption{Tipos de tokens que maneja nuestro sistema}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un token válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
+					Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (i\textit{ncrease()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
+				\end{minipage}
+			\end{figure}
 		
 		
 		\subsection{Fallos del login de los usuarios}
@@ -871,72 +848,87 @@ por el enunciado:
 			\end{figure}
 		
 		\subsection{Logins correctos en el sistema}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/loginsCorrectos}
-				\caption{Número de logins correctos en el sistema}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
-			\end{minipage}
-		\end{figure}
-		
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/loginsCorrectos}
+					\caption{Número de logins correctos en el sistema}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga, con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
+				\end{minipage}
+			\end{figure}
+		\subsection{Intento de login por parte de usuarios desconocidos}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/IntentosUsuariosDesconocidos}
+					\caption{Peticiones de inicio de sesión de usuarios desconocidos para nuestro sistema.}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos, en caso de detectar algún incremento en esta métrica, podríamos deducir que el sistema se ha visto comprometido, adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
+				\end{minipage}
+			\end{figure}
 		\subsection{Peticiones a los diferentes endpoints de nuestro sistema}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RequestAEndPoints}
-				\caption{Peticiones que le llegan a los diferentes endpoints al sistema.}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-				En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
-				Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
-				Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
-				Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.
-				
-			\end{minipage}
-		\end{figure}
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/RequestAEndPoints}
+					\caption{Peticiones que le llegan a los diferentes endpoints al sistema.}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
+					Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo para ello.\\
+					Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
+					Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.
+				\end{minipage}
+			\end{figure}
 		
 		\subsection{Distribución de las peticiones en nuestro sistema}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RespuestasARequests}
-				\caption{Distribución de las peticiones en nuestro sistema.}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-			Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302., los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
-			\end{minipage}
-		\end{figure}
-		\subsection{Ratio peticiones correctas fallidas por los usuarios}
-		\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-			\centering
-			% Columna 1: La Imagen
-			\begin{minipage}{0.45\textwidth}
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/RespuestasARequests}
+					\caption{Distribución de las peticiones en nuestro sistema.}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+				Panel que sirve para ver el estado de sistemas, el 200 es el código para las peticiones correcta  por eso se representa de color ver mientras que las peticiones en el sector de color amarillo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302., los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
+				\end{minipage}
+			\end{figure}
+		
+		\subsection{ Ratio peticiones correctas fallidas por los usuarios}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
-				\includegraphics[width=\linewidth]{Recursos/RatioPeticones}
-				\caption{Tipos de tokens que maneja nuestro sistema}
-			\end{minipage}
-			\hfill % Crea un espacio elástico entre las dos minipages
-			% Columna 2: El Texto
-			\begin{minipage}{0.50\textwidth}
-			Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación, como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comproabr la seguridad del sistema por lo que esté gráfico nos dice que el sistema es capaz de mantener un fijo constante de autorizaciones válidas pese a todo el ruido de peticiones malicosas que le estamos haciendo, teniendo un comprotamiento estable por lo que se puede ver en la linea de tendencias y que además, no está dando falsos positivos, es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
-			\end{minipage}
-		\end{figure}
-		\subsubsection{Tiempo de respuesta a cada \textit{endpint}}
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/RatioPeticones}
+					\caption{Tipos de tokens que maneja nuestro sistema}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+					Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación, como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comproabr la seguridad del sistema por lo que esté gráfico nos dice que el sistema es capaz de mantener un fijo constante de autorizaciones válidas pese a todo el ruido de peticiones malicosas que le estamos haciendo, teniendo un comprotamiento estable por lo que se puede ver en la linea de tendencias y que además, no está dando falsos positivos, es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
+				\end{minipage}
+			\end{figure}
+		
+		\subsection{ Tiempo de respuesta a cada \textit{endpint}}
 			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
 				\centering
 				% Columna 1: La Imagen
@@ -953,18 +945,18 @@ por el enunciado:
 				\end{minipage}
 			\end{figure}
 			
-			\subsubsection{Tipos de \textit{tokens} en nuestro sistema.}
-				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+		\subsection{Tipos de \textit{tokens} en nuestro sistema.}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
 					\centering
-					% Columna 1: La Imagen
-					\begin{minipage}{0.45\textwidth}
-						\centering
-						\includegraphics[width=\linewidth]{Recursos/RatioTokens}
-						\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
-					\end{minipage}
-					\hfill % Crea un espacio elástico entre las dos minipages
-					% Columna 2: El Texto
-					\begin{minipage}{0.50\textwidth}
+					\includegraphics[width=\linewidth]{Recursos/RatioTokens}
+					\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
 					Con este panel estamos registrando los tokens que se están emitiendo/empleando en nuestro sistema, debemos recordar que estamos empleando un servidor oauth2 para la autenticación por lo que esta estadistica es necesaria para comprobar que el sistema funciona bien y que no estamos sufriendo ningún tipo de ataque.\\ 
 					Como tenemos 3 tipos vamos a explicar cada uno de ellos
 					\begin{itemize}
@@ -972,80 +964,62 @@ por el enunciado:
 						\item  \textbf{Query B (\textit{Refresh Tokens}):} representa el número de sesiones de larga duración que permiten a los clientes obtener nuevas credenciales sin intervención del usuario.
 						\item \textbf{Query C (\textit{Total Tokens}):} como su nombre indica la suma de las anteriores.
 					\end{itemize}
+				\end{minipage}
+			\end{figure}
+			
+			\subsection{Distribución de \textit{tokens} en el sistema}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/TokensActivos}
+						\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador, si nos damos cuanta esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de token y los tipos de cada uno.
 					\end{minipage}
 				\end{figure}
 				
-				\subsubsection{Distribución de \textit{tokens} en el sistema}
-					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+			\subsection{Intentos de ataque de fuerza bruta}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
 						\centering
-						% Columna 1: La Imagen
-						\begin{minipage}{0.45\textwidth}
-							\centering
-							\includegraphics[width=\linewidth]{Recursos/TokensActivos}
-							\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
-						\end{minipage}
-						\hfill % Crea un espacio elástico entre las dos minipages
-						% Columna 2: El Texto
-						\begin{minipage}{0.50\textwidth}
-							Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador, si nos damos cuanta esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de token y los tipos de cada uno.
-						\end{minipage}
-					\end{figure}
-					
-				\subsubsection{Intentos de ataque de fuerza bruta}
-					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\includegraphics[width=\linewidth]{Recursos/bruteForze}
+						\caption{Peticiones consideradas de fuerza bruta que está recibiendo el sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema. Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos plantamos en el grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aqellos usuarios que son probelmáticos.
+					\end{minipage}
+				\end{figure}
+				
+			\subsection{Flujos de autenticació en cada uno de los \textit{endpoints}}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
 						\centering
-						% Columna 1: La Imagen
-						\begin{minipage}{0.45\textwidth}
-							\centering
-							\includegraphics[width=\linewidth]{Recursos/bruteForze}
-							\caption{Peticiones consideradas de fuerza bruta que está recibiendo el sistema.}
-						\end{minipage}
-						\hfill % Crea un espacio elástico entre las dos minipages
-						% Columna 2: El Texto
-						\begin{minipage}{0.50\textwidth}
-							Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema. Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos plantamos en el grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aqellos usuarios que son probelmáticos.
-						\end{minipage}
-					\end{figure}
-					
-				\subsubsection{Flujos de autenticació en cada uno de los \textit{endpoints}}
-					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionInvalidos}
+						\caption{Tipos de tokens que maneja nuestro sistema}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.45\textwidth}
 						\centering
-						% Columna 1: La Imagen
-						\begin{minipage}{0.45\textwidth}
-							\centering
-							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionInvalidos}
-							\caption{Tipos de tokens que maneja nuestro sistema}
-						\end{minipage}
-						\hfill % Crea un espacio elástico entre las dos minipages
-						% Columna 2: El Texto
-						\begin{minipage}{0.45\textwidth}
-							\centering
-							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionValidos}
-							\caption{Tipos de tokens que maneja nuestro sistema}
-						\end{minipage}
-					\end{figure}
-			
-					Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
-					\begin{itemize}
-						\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
-						\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
-						\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
-					\end{itemize}
-				\subsection{Intento de login por parte de usuarios desconocidos}
-						\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
-						\centering
-						% Columna 1: La Imagen
-						\begin{minipage}{0.45\textwidth}
-							\centering
-							\includegraphics[width=\linewidth]{Recursos/IntentosUsuariosDesconocidos}
-							\caption{Peticiones de inicio de sesión de usuarios desconocidos para nuestro sistema.}
-						\end{minipage}
-						\hfill % Crea un espacio elástico entre las dos minipages
-						% Columna 2: El Texto
-						\begin{minipage}{0.50\textwidth}
-							Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos, en caso de detectar algún incremento en esta métrica, podríamos deducir que el sistema se ha visto comprometido, adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande, por lo que detectaríamos cualquier fallo en dicho panel. Aunque sí que es cierto que si revisamos el \textit{app.py} el sistema está planteado para evitar este tipo de peticiones pero mejor prevenir que curar.
-						\end{minipage}
-					\end{figure}
-	
-	
+						\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionValidos}
+						\caption{Tipos de tokens que maneja nuestro sistema}
+					\end{minipage}
+				\end{figure}
+				Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints de nuestro sistema }
+				\begin{itemize}
+					\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
+					\item \textbf{Amarillo}:representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
+					\item \textbf{Azul:} coontabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
+				\end{itemize}
 \end{document}
