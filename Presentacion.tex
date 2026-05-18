@@ -139,11 +139,126 @@
 		\end{enumerate}
 	\end{frame}
 \section{Grafana}
+	
 	\begin{frame}
-		\centering
-		\Huge \textbf{\hyperlink{http://virtual.lab.inf.uva.es:31162/d/ad46rtj/esi-p2-16?orgId=1&from=now-5m&to=now&timezone=browser}{Nuestro panel de Grafana}}\\
-		\vspace{1cm}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.65\textwidth]{Recursos/VistazoGeneralGrafana.png}
+		\end{figure}
 	\end{frame}
+	
+	\subsection{Login}
+		\subsubsection{Fallos en los \textit{logins }de usuarios}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/FallosLoginUsuario}
+			\end{figure}
+		\end{frame}
+		
+		\subsubsection{Fallos en los \textit{logins }de usuarios}
+		\begin{frame}
+			\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.8\textwidth]{Recursos/loginsCorrectos.png}
+			\end{figure}
+		\end{frame}
+		
+		\subsubsection{Fallos de autenticación por usuarios no validos}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=0.6\textwidth]{Recursos/FlujosAutenticacionInvalidos.png}
+			\end{figure}
+		\end{frame}
+		
+		\subsubsection{Flujos de autenticación válidos}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=0.6\textwidth]{Recursos/FlujosAutenticacionValidos.png}
+			\end{figure}
+		\end{frame}
+		
+		\subsubsection{Flujos de autenticación válidos}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=0.9\textwidth]{Recursos/IntentosLoginsFallidosPorUser.png}
+			\end{figure}
+		\end{frame}
+		
+		\subsubsection{Flujos de autenticación válidos}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.6\textwidth]{Recursos/IntentosUsuariosDesconocidos.png}
+				\end{figure}
+			\end{frame}
+	
+	\subsubsection{Peticiones}
+		\subsubsection{Ratio Peticiones}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=\textwidth]{Recursos/RatioPeticones.png}
+				\end{figure}
+			\end{frame}
+		\subsubsection{Peticiones a los \textit{endpoints}}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\textwidth]{Recursos/RequestAEndPoints.png}
+				\end{figure}
+			\end{frame}		
+		\subsubsection{Respuestas a peticiones}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\textwidth]{Recursos/RespuestasARequests.png}
+				\end{figure}
+			\end{frame}		
+		\subsubsection{Tiempo de respuesta a los diferentes \textit{endpoints}}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.6\textwidth]{Recursos/TiempoRespuestaEndPoints.png}
+				\end{figure}
+			\end{frame}		
+	\subsection{\textit{Tokens}}
+	
+		\subsubsection{Ratio de \textit{Tokens} en circulación en nuestro sistema}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=0.9\textwidth]{Recursos/RatioTokens.png}
+			\end{figure}
+		\end{frame}
+		\subsubsection{Ratio de \textit{Tokens} en circulación en nuestro sistema}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/TokensActivos.png}
+			\end{figure}
+		\end{frame}
+		
+	\subsection{Ataques-Enfoque \textit{EDR}}
+		\subsubsection{Intentos de ataque de fuerza bruta}
+			\begin{frame}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\textwidth]{Recursos/IntentosAtaquesFuerzaBruta.png}
+				\end{figure}
+			\end{frame}
+			
+		\subsubsection{\textit{Token Replay}}
+		\begin{frame}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=0.9\textwidth]{Recursos/TokenReplay.png}
+			\end{figure}
+		\end{frame}
+	
 	
 	% ── Diapositiva Final ───────────────────────────────────────────────────────
 	\begin{frame}
