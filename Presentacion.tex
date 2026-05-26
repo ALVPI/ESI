@@ -138,18 +138,18 @@
 	\end{frame}
 	
 	\begin{frame}{Ejecución y Verificación}
-		\textbf{Configuración de Pruebas:}
+		\textbf{Garantías del sistema:}
+		\begin{enumerate}
+			\item Uso de script de verificación (\texttt{test.py}) para validar manualmente los 12 escenarios de métricas antes del ataque global.
+			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
+		\end{enumerate}
+		\vspace{0.5cm}
+			\textbf{Configuración de Pruebas:}
 		\begin{itemize}
 			\item \textbf{Carga normal:} 50 usuarios, \textit{spawn rate} 5/s durante 5 min].
 			\item \textbf{Prueba de estrés:} 200 usuarios, \textit{spawn rate} 10/s durante 3 min].
 		\end{itemize}
 		
-		\vspace{0.5cm}
-		\textbf{Garantías del sistema:}
-		\begin{enumerate}
-			\item Uso de script de verificación (\texttt{test\_metrics.py}) para validar manualmente los 12 escenarios de métricas antes del ataque global.
-			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
-		\end{enumerate}
 	\end{frame}
 \section{Pruebas de carga}
 	\subsection{Carga de trabajo con 50 usuarios}
