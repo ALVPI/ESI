@@ -614,8 +614,6 @@ def main():
     test_client_enumeration()
     test_credential_stuffing()
     test_token_harvesting()
-    test_client_enumeration()
-
 
 if __name__ == "__main__":
     main()

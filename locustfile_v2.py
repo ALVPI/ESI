@@ -23,9 +23,9 @@ class OAuth2LoadTest(HttpUser):
         - active_clients
 
     Traffic distribution:
-        Legitimate:  6+3+2 = 11/19 = 58% of traffic
-        Malicious:   2+2+1+1+1 = 7/19 = 37% of traffic
-        Monitoring:  1/19 = 5% of traffic
+        Legitimate:  6+3+2 = 11/22 = 50% of traffic
+        Malicious:   2+2+1+1+1+1+1+1 = 7/22 = 45% of traffic
+        Monitoring:  1/22 = 5% of traffic
     """
 
     # Each virtual user waits between 3 and 7 seconds before the next task
