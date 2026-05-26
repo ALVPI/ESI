@@ -6,6 +6,7 @@
 \usepackage[spanish]{babel}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{multicol}
 
 % Colores
 \definecolor{headercolor}{RGB}{45, 62, 80}
@@ -34,9 +35,12 @@
 		\titlepage
 	\end{frame}
 	
-	% ── Diapositiva 2: Índice ───────────────────────────────────────────────────
+	% ── Diapositiva 2: Índice ──────────────────────────────────────────────────	
+	
 	\begin{frame}{Índice}
-		\tableofcontents
+		\begin{multicols}{2}
+			\tableofcontents
+		\end{multicols}
 	\end{frame}
 	
 	% ════════════════════════════════════════════════════════════════════════════
@@ -104,8 +108,7 @@
 	\section{Pruebas de Carga con Locust}
 	
 	\begin{frame}{Diseño de Escenarios en Locust}
-		En el \texttt{locustfile.py} hemos intentado simular un comportamiento "real"  \textbf{50\% tráfico legítimo, 50\% tráfico malicioso}.
-		
+		En el \texttt{locustfile.py} hemos intentado simular un comportamiento "real" con unos porcentajes de tráfico de  \textbf{58\% tráfico legítimo, 38\% tráfico malicioso y un 4\% de tráfico a los puntos de autenticación.}
 		\vspace{0.3cm}
 		\begin{table}[H]
 			\centering
@@ -138,6 +141,30 @@
 			\item Limitación de almacenamiento en Prometheus (\texttt{retention.size=500MB}) para proteger los recursos de la máquina virtual.
 		\end{enumerate}
 	\end{frame}
+\section{Pruebas de carga}
+	\subsection{Carga de trabajo con 50 usuarios}
+	\begin{frame}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.75\textwidth]{Recursos/CargaNormal.png}
+		\end{figure}
+	\end{frame}
+	
+	\subsection{Prueba de estrés 200 usuarios}
+	\begin{frame}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.75\textwidth]{Recursos/Estrés200.png}
+		\end{figure}
+	\end{frame}
+	\subsection{Límite de nuestro sistema}
+	\begin{frame}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.8\textwidth]{Recursos/6concurrentes.png}
+		\end{figure}
+	\end{frame}
+	
 \section{Grafana}
 	
 	\begin{frame}
@@ -266,30 +293,7 @@
 				\includegraphics[width=0.9\textwidth]{Recursos/TokenReplay.png}
 			\end{figure}
 		\end{frame}
-\section{Pruebas de carga}
-	\subsection{Carga de trabajo con 50 usuarios}
-		\begin{frame}
-			\begin{figure}[H]
-				\centering
-				\includegraphics[width=0.75\textwidth]{Recursos/CargaNormal.png}
-			\end{figure}
-		\end{frame}
-		
-	\subsection{Prueba de estrés 200 usuarios}
-		\begin{frame}
-			\begin{figure}[H]
-				\centering
-				\includegraphics[width=0.75\textwidth]{Recursos/Estrés200.png}
-			\end{figure}
-		\end{frame}
-	\subsection{Límite de nuestro sistema}
-		\begin{frame}
-			\begin{figure}[H]
-				\centering
-				\includegraphics[width=0.8\textwidth]{Recursos/6concurrentes.png}
-			\end{figure}
-		\end{frame}
-	
+
 	% ── Diapositiva Final ───────────────────────────────────────────────────────
 	\begin{frame}
 		\centering
