@@ -108,23 +108,33 @@
 	\section{Pruebas de Carga con Locust}
 	
 	\begin{frame}{Diseño de Escenarios en Locust}
-		En el \texttt{locustfile.py} hemos intentado simular un comportamiento "real" con unos porcentajes de tráfico de  \textbf{58\% tráfico legítimo, 38\% tráfico malicioso y un 4\% de tráfico a los puntos de autenticación.}
-		\vspace{0.3cm}
-		\begin{table}[H]
-			\centering
-			\small
-			\begin{tabular}{llcc}
-				\toprule
-				\textbf{Tarea} & \textbf{Tipo} & \textbf{Peso} & \textbf{Prob.} \\
-				\midrule
-				\texttt{valid\_client\_credentials} & Tráfico legítimo M2M    & 4 & 40\% \\
-				\texttt{brute\_force\_api}          & Ataque fuerza bruta M2M & 2 & 20\% \\
-				\texttt{brute\_force\_user\_login}  & Ataque fuerza bruta web & 2 & 20\% \\
-				\texttt{valid\_user\_login}         & Tráfico legítimo web    & 1 & 10\% \\
-				\texttt{replay\_attack}             & Ataque token replay     & 1 & 10\% \\
-				\bottomrule
-			\end{tabular}
-		\end{table}
+	En el \texttt{locustfile.py} hemos intentado simular un comportamiento "real" con unos porcentajes de tráfico actualizados de \textbf{50\% tráfico legítimo, 45.5\% tráfico malicioso y un 4.5\% de tráfico de monitorización y administración.}
+	
+	\vspace{0.2cm}
+	
+	\begin{table}[H]
+		\centering
+		\footnotesize % Reducido para que quepan todas las tareas en la diapo
+		\begin{tabular}{llcc}
+			\toprule
+			\textbf{Tarea} & \textbf{Tipo} & \textbf{Peso} & \textbf{Prob.} \\
+			\midrule
+			\texttt{valid\_client\_credentials}     & Tráfico legítimo M2M      & 6 & 27.3\% \\
+			\texttt{valid\_authorization\_code}     & Tráfico legítimo web      & 3 & 13.6\% \\
+			\texttt{valid\_refresh\_token}          & Tráfico legítimo web      & 2 & 9.1\% \\
+			\texttt{brute\_force\_api}              & Fuerza bruta M2M          & 2 & 9.1\% \\
+			\texttt{brute\_force\_user\_login}      & Fuerza bruta web          & 2 & 9.1\% \\
+			\texttt{auth\_code\_replay\_attack}     & Ataque token replay       & 1 & 4.5\% \\
+			\texttt{revoked\_token\_replay}         & Uso token revocado        & 1 & 4.5\% \\
+			\texttt{invalid\_refresh\_token}        & Token inválido/falso      & 1 & 4.5\% \\
+			\texttt{client\_enumeration\_attack}    & Enumeración de clientes   & 1 & 4.5\% \\
+			\texttt{credential\_stuffing\_attack}   & Credential stuffing       & 1 & 4.5\% \\
+			\texttt{token\_harvesting\_attack}      & Recolección de tokens     & 1 & 4.5\% \\
+			\texttt{list\_admin\_clients}           & Monitorización            & 1 & 4.5\% \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
 	\end{frame}
 	
 	\begin{frame}{Ejecución y Verificación}
