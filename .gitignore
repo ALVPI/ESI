@@ -190,6 +190,20 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# LaTeX (Fuentes y compilación)
+*.tex
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.log.tex
+*.snm
+*.nav
+_minted-*
+
 # Cursor
 #  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data

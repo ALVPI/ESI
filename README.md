@@ -17,6 +17,8 @@ El servidor ha sido modificado siguiendo el principio DRY (centralizando los con
 *   **Prevención de Token Replay:** Seguimiento de códigos de autorización pendientes y detección de intentos de uso de *Refresh Tokens* revocados o expirados.
 *   **Rendimiento y Saturación:** Histogramas del tiempo de respuesta (Percentil 95) y medidores (gauges) de peticiones HTTP en curso para detectar posibles ataques DoS.
 
+![Panel EDR en Grafana](./Recursos/VistazoGeneralGrafana.png)
+
 ## ⚡ Diseño de Pruebas (Locust)
 Se diseñó un `locustfile.py` realista que distribuye el tráfico en tres categorías simulando un entorno de producción:
 *   **50% Tráfico Legítimo:** Flujos M2M (*Client Credentials*), autenticaciones web (*Authorization Code*) y rotación de *Refresh Tokens*.
@@ -25,6 +27,8 @@ Se diseñó un `locustfile.py` realista que distribuye el tráfico en tres categ
 
 ### Resultados del Análisis de Estrés
 Durante las pruebas de estrés escalonadas (de 10 a 200 usuarios concurrentes), se identificó un **cuello de botella de concurrencia** en el servidor de desarrollo de Flask (límite operativo estable: ~10 usuarios concurrentes / 12 RPS antes de degradar el SLA de 250ms), causado por la ejecución síncrona monohilo durante las operaciones criptográficas de los tokens. El dashboard EDR diferenció exitosamente los falsos positivos de los ataques reales de *Credential Stuffing*.
+
+![Prueba de Carga en Locust](./Recursos/CargaNormal.png)
 
 ## 📂 Documentación
 *   📄 **[Memoria Técnica Completa (PDF)](./docs/ESI_P2_G16.pdf)**: Análisis detallado de las métricas PromQL, capturas del dashboard y flujos de ejecución.
