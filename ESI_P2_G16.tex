@@ -1,0 +1,1174 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% ── Paquetes ────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage[style=english]{csquotes}
+% ── Geometría de página ──────────────────────────────────────────────────────
+\geometry{
+	top=2cm,
+	bottom=2cm,
+	left=1.5cm,
+	right=1.5cm
+}
+
+% ── Colores ──────────────────────────────────────────────────────────────────
+\definecolor{azulUVa}{RGB}{0, 51, 153}
+\definecolor{rojoUVa}{RGB}{193, 0, 60}
+\definecolor{grisClaro}{RGB}{245, 245, 245}
+\definecolor{verdeCodigo}{RGB}{0, 128, 0}
+\definecolor{azulCodigo}{RGB}{0, 0, 255}
+\definecolor{grisComentario}{RGB}{128, 128, 128}
+\definecolor{grisClaro}{RGB}{245,245,245}
+\definecolor{grisComentario}{RGB}{120,120,120}
+\definecolor{azulCodigo}{RGB}{0,0,200}
+\definecolor{rojoUVa}{RGB}{186,12,47} % Color corporativo UVa
+
+% ── Estilo de código ─────────────────────────────────────────────────────────
+
+\lstdefinestyle{python}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numberstyle=\tiny\color{gray},
+	numbers=left,
+	numbersep=5pt,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	language=Python,
+	showstringspaces=false,
+	tabsize=4,
+	captionpos=b,
+	extendedchars=true,
+	columns=fullflexible,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {—}{{---}}1 {–}{{--}}1 {¿}{{\textquestiondown}}1
+	{¡}{{\textexclamdown}}1 {─}{{-}}1 {━}{{-}}1
+}
+
+\lstdefinestyle{yaml}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	showstringspaces=false,
+	captionpos=b,	extendedchars=true,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+	{ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1
+	{Ú}{{\'U}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
+	{─}{{-}}1 {━}{{-}}1
+}
+\lstdefinestyle{bash}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{verdeCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	language=bash,
+	showstringspaces=false,
+	captionpos=b
+}
+
+\lstdefinestyle{yaml}{
+	backgroundcolor=\color{grisClaro},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{azulCodigo}\bfseries,
+	commentstyle=\color{grisComentario}\itshape,
+	stringstyle=\color{rojoUVa},
+	numbers=none,
+	breaklines=true,
+	frame=single,
+	rulecolor=\color{gray},
+	showstringspaces=false,
+	captionpos=b
+}
+
+
+% ── Cabecera y pie de página ─────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{azulUVa}{\small Práctica 2 Pruebas de carga, Locust y Prometheus}}
+\fancyhead[R]{\textcolor{azulUVa}{\small Evaluación de Sistemas Informáticos}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{azulUVa}\leaders\hrule height \headrulewidth\hfill}}
+
+% ── Estilo de títulos ────────────────────────────────────────────────────────
+\titleformat{\section}
+{\large\bfseries\color{azulUVa}}
+{\thesection}{1em}{}[\color{azulUVa}\titlerule]
+
+\titleformat{\subsection}
+{\normalsize\bfseries\color{rojoUVa}}
+{\thesubsection}{1em}{}
+
+% ── Hipervínculos ────────────────────────────────────────────────────────────
+\hypersetup{
+	colorlinks=true,
+	linkcolor=azulUVa,
+	urlcolor=rojoUVa
+}
+
+% ── Datos de la portada ──────────────────────────────────────────────────────
+\title{\textbf{Práctica 2: Pruebas de carga, Locust y Prometheus}}
+\author{\textbf{\small Grupo 16}} % Pon aquí el nombre de los autores
+\date{\today}
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+	
+	% ── Portada ──────────────────────────────────────────────────────────────────
+	\begin{titlepage}
+		\centering
+		\includegraphics[scale=0.3]{Recursos/UVA-3881270087.pdf}\\[0.5cm]
+		\rule{\linewidth}{0.2mm}\\[0.4cm]
+		{\huge\bfseries \thetitle}\\
+		\rule{\linewidth}{0.2mm}\\[1.5cm]
+		{\Large\bfseries Grado en Ingeniería Informática}\\[0.3cm]
+		{\Large\bfseries Evaluación de Sistemas Informáticos}\\[1cm]
+		{\Large \theauthor}\\[1.5cm]
+	\end{titlepage}
+	
+	% ── Índice ────────────────────────────────────────────────────────────────────
+	\tableofcontents
+	\newpage
+	
+	% ════════════════════════════════════════════════════════════════════════════
+	\section{Introducción}
+	
+	En esta práctica estaremos empleando un servidor de autenticación \textit{OAuth2}, el estándar por excelencia para hacer de mediación en la tarea de distribución de claves de acceso.\\
+	Sobre él, realizaremos pruebas de carga con Locust y recogeremos los resultados con Prometheus.\\
+	De tal manera que tenemos 3 objetivos:
+	\begin{enumerate}
+		\item Instrumentación del backend con métricas Prometheus (haremos hincapié en esta tecnología en el punto \ref{PO}).
+		\item Despliegue y configuración de Prometheus y Grafana.
+		\item Pruebas de carga y estrés con Locust.
+	\end{enumerate}
+	
+	\subsection{Descripción del sistema bajo prueba}
+	
+	El backend proporcionado por el profesor está desarrollado en Python con Flask y SQLite, implementando los tres flujos principales definidos en el \hyperlink{https://www.rfc-editor.org/rfc/rfc6749.html}{RFC 6749}:
+	\begin{itemize}
+		\item \textbf{Authorization Code}: flujo orientado a aplicaciones web donde un usuario humano se autentica mediante un formulario de login. El servidor emite un código temporal que posteriormente se canjea por un par de tokens.
+		\item \textbf{Client Credentials}: flujo orientado a aplicaciones máquina a máquina. La aplicación se autentica directamente con sus credenciales y obtiene un \textit{token} de acceso.
+		\item \textbf{Refresh Token}: flujo que permite renovar un \textit{token} de acceso caducado sin necesidad de repetir el proceso de autenticación completo.
+	\end{itemize}
+	
+	La aplicación se gestiona con \texttt{uv}, el cual nosotros ya empleamos en nuestra primera práctica y como se explicó en su  respectivo informe es un gestor de paquetes para Python (más moderno que el típico pip).\\
+	Aquí uv juega un papel fundamental, puesto que con el comando  \textit{uv add} instalará de manera automática las librerías y actualiza el .toml del proyecto para registra la dependencia en el \textit{uv.lock}. \\
+	
+	\newpage
+	\section{Estructura del proyecto}
+	Para entender el proyecto vamos a ver qué hacen los ficheros que han sido proporcionados por el profesor y los que hemos tenido que crear para el mismo:
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{>{\ttfamily}lp{9cm}}
+			\toprule
+			\textbf{Fichero} & \textbf{Descripción} \\
+			\midrule
+			app.py & Punto de entrada de la aplicación Flask. Registra blueprints, configura la base de datos y expone el endpoint \texttt{/metrics}. \\
+			oauth2\_routes.py & Implementación de los endpoints \textit{OAuth2}: \texttt{/authorize} y \texttt{/token}. \\
+			admin\_routes.py & Endpoints de administración bajo \texttt{/admin/clients} para gestionar clientes OAuth2. \\
+			models.py & Capa de acceso a datos: clientes, códigos de autorización y tokens. \\
+			database.py & Gestión de la conexión SQLite y definición del esquema. \\
+			metrics.py & Definición centralizada de todas las métricas Prometheus (fichero creado en esta práctica). \\
+			seed.py & Script de inicialización que crea dos clientes de prueba en la base de datos. \\
+			\bottomrule
+		\end{tabular}
+		\caption{Estructura de ficheros modificados en el proyecto}
+	\end{table}
+	
+	De tal manera que  el flujo de trabajo es el siguiente
+	\begin{center}
+		\texttt{App OAuth2 (5001)} $\rightarrow$ \texttt{Prometheus (9090)} $\rightarrow$ \texttt{Grafana (3000)}
+	\end{center}
+	\newpage
+	\section{Prometheus}\label{PO}
+	
+	Prometheus es una base de datos de series temporales de tipo \textit{pull}, es decir, es la propia base de datos quien periódicamente consulta las aplicaciones para conseguir las métricas.\\
+	Nuestra aplicación (\textit{app.py}) toma  un papel pasivo, donde  se encarga de realizar sus tareas y de exponer un \textit{endpoint} llamado \textit{/metrics} para que sea Prometheus el que coja los datos.
+	\subsection{Instalación}
+	
+	Descargamos el binario de github y lo dejamos descomprimido en la VM
+\begin{lstlisting}[style=bash]
+	wget https://github.com/prometheus/prometheus/releases/download/\
+	v3.3.1/prometheus-3.3.1.linux-amd64.tar.gz
+	tar -xvf prometheus-3.3.1.linux-amd64.tar.gz
+	cd prometheus-3.3.1.linux-amd64
+\end{lstlisting}
+\begin{lstlisting}[style=bash]
+	uv add prometheus-client
+\end{lstlisting}
+	Para adaptarnos a las especificaciones de la práctica, hemos tenido que modificar el fichero \textit{prometheus.yml} como mostramos a continuación.
+	\vspace{1cm}
+	\lstinputlisting[style=yaml]{./prometheus.yml}
+	\vspace{1cm}
+	Hemos definido el comportamiento del monitoreo, en el cual establecemos que se recojan métricas cada 15 segundos de la aplicación que está corriendo en el puerto 5001, en concreto de su endpoint \textit{/metrics}.\\
+	Ahora que lo tenemos todo configurado, simplemente ejecutamos el siguiente comando especificando su fichero de configuración.
+	\begin{lstlisting}[style=bash]
+		./prometheus --config.file=prometheus.yml
+	\end{lstlisting}
+	
+\newpage
+\section{Métricas que vamos a emplear en la práctica}
+	Para esta sección, emplearemos 2 de los 4 tipos de métricas que nos proporciona la aplicación:
+	\begin{itemize}
+		\item \textbf{\textit{Counter}}: contador de incremento monotónico, esto quiere decir que sólo va a ir aumentando, lo  usaremos para contar eventos como peticiones recibidas, tokens emitidos o errores producidos.\\Por convención, los counters tienen el sufijo \texttt{\_total}.
+		\item \textbf{\textit{Gauge}}: contador clásico,  lo usaremos para valores que fluctúan como memoria usada o conexiones activas.
+	\end{itemize}
+	
+	\subsection{Definición de las métricas que vamos a recoger}
+		Hemos creado un fichero \textit{metrics.py}, detallado en el anexo \ref{anexo:metrics.py} \nameref{anexo:metrics.py}, en el que hemos añadido todos los contadores, con dos objetivos, por una parte centralizarlo todo en un fichero, facilitando el desarrollo y la depuración del código y por otra parte, evitar las importaciones circulares de módulos.\\ 
+		Este fenómeno ocurre cuando dos ficheros se importan entre ellos, es decir, si por ejemplo en \textit{oauth2\_metrics.py} importamos cosas de \textit{app.py} y en este último hacemos el \textit{import} de funciones del primero, esto lo solucionamos gestionando todos los contadores en un mismo fichero.
+		
+	\subsection{Sintaxis de los contadores}
+		Antes de mostrar todos nuestro trabajo en \textit{metrics}, vamos a explicar un poco la sintaxis de este fichero, puesto que es una tecnología nueva, que al menos en la carrera no hemos tocado mucho:
+		\begin{itemize}
+			\item  auth\_flows\_started = Counter( : nombre de variable la cual es un contador, la cual sólo puede incrementarse
+			\item \enquote{oauth2\_auth\_flows\_started\_total}: nombre de la métrica para su posterior integración con grafana
+			\item "Flujos de autenticacion iniciados":  descripción de la metrica
+			\item $["grant\_type"]$: la etiqueta para luego poder filtrarlo en el grafana.
+			)
+		\end{itemize}
+		
+		%\vspace{1cm}
+		%\lstinputlisting[style=python]{./metrics.py}
+		%\vspace{1cm}
+		
+		Las \textbf{etiquetas} (\textit{labels}) permiten que un mismo \textit{counter} almacene valores independientes para cada combinación de etiquetas. Por ejemplo, \texttt{auth\_flows\_started} con la etiqueta \texttt{grant\_type} almacena
+		un contador separado para cada tipo de flujo:
+\begin{lstlisting}[style=bash]
+	oauth2_auth_flows_started_total{grant_type="client_credentials"} 10.0
+	oauth2_auth_flows_started_total{grant_type="authorization_code"} 3.0
+	oauth2_auth_flows_started_total{grant_type="refresh_token"} 5.0
+\end{lstlisting}
+		Esta información nos fue útil en fases tempranas de la práctica ya que con un\textit{ curl } íbamos testeando las métricas para cerciorarnos de que realmente se estaban incrementando cuando deberían.
+		\subsection {Decisiones importantes sobre \textit{metrics.py}}
+			Una decisión de diseño importante fue no añadir \texttt{client\_id} en etiquetas como  \texttt{tokens\_issued}.\\ Aunque inicialmente se contempló para tener información categorizadas por  clientes, se descartó porque Prometheus crea una serie temporal por cada combinación única de etiquetas. Con una etiqueta de alta cardinalidad como \texttt{client\_id} el número de series crecería proporcionalmente al número de clientes, lo que en una VM con 2GB de RAM podría causar problemas de memoria durante las pruebas de carga.
+
+\newpage
+\section{Modificaciones a \textit{models.py}}
+		\textit{models.py} es la capa de acceso a datos. Se ha instrumentado con métricas en las siguientes funciones:
+		
+		\subsection{store\_authorization\_code}
+		
+			Se incrementa \texttt{pending\_auth\_codes} cada vez que se genera un código
+			de autorización, reflejando que existe un código emitido pero no canjeado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentación de store\_authorization\_code]
+				def store_authorization_code(...) -> str:
+				# ... codigo original ...
+				db.commit()
+				# A new code has been issued but not yet consumed
+				pending_auth_codes.inc()
+				return code
+			\end{lstlisting}
+		
+		\subsection{consume\_authorization\_code}
+		
+			Se decrementa \texttt{pending\_auth\_codes} cuando el código se consume correctamente. Además detectamos dos casos de seguridad relevantes: el intento de reutilización de un código ya usado (\texttt{auth\_code\_reuse}) y el intento de uso de uno ya  expirado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentación de consume\_authorization\_code]
+				def consume_authorization_code(code: str) -> Optional[dict]:
+				# ... codigo original ...
+				if data["used"]:
+				# Someone is trying to reuse an already consumed code
+				# This is a sign of an authorization code replay attack
+				auth_code_reuse.inc()
+				return None
+				
+				if time.time() > data["expires_at"]:
+				return None
+				
+				db.execute("UPDATE authorization_codes SET used = 1 ...")
+				db.commit()
+				# Code consumed correctly, no longer pending
+				pending_auth_codes.dec()
+				return data
+			\end{lstlisting}
+			
+		\subsection{issue\_token\_pair}
+		
+			Se incrementan los gauges de tokens activos cada vez que se emiten, distinguiendo entre \textit{access }y \textit{refresh tokens:}
+			
+			\begin{lstlisting}[style=python, caption=Instrumentación de issue\_token\_pair]
+				def issue_token_pair(...) -> dict:
+				# ... codigo original ...
+				db.commit()
+				# Track active tokens in the system
+				active_tokens.labels(token_type="access").inc()
+				if refresh_token:
+				active_tokens.labels(token_type="refresh").inc()
+				return response
+			\end{lstlisting}
+			
+		\subsection{validate\_refresh\_token}
+		
+			Detectamos los dos casos de fallo relevantes para la seguridad: el intento de uso de un \textit{token} revocado y el de uso de uno expirado.\\ Es importante que estos contadores se incrementen aquí en \texttt{models.py} y no en \texttt{oauth2\_routes.py}, porque esta función tiene acceso directo al motivo exacto del fallo y nos evitamos meter ruido en las métricas:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentación de validate\_refresh\_token]
+				def validate_refresh_token(token: str) -> Optional[dict]:
+				# ... codigo original ...
+				if data["revoked"]:
+				# Someone is using a token after it has been revoked
+				# This is a sign of a token replay attack
+				revoked_token_usage.inc()
+				return None
+				
+				if time.time() > data["expires_at"]:
+				# Someone is trying to use an expired token
+				expired_token_usage.inc()
+				return None
+				
+				return data
+			\end{lstlisting}
+		
+		\subsection{revoke\_refresh\_token}
+		
+			Incrementamos los \textit{counter}s de \textit{tokens} revocados y se decrementan los \textit{gauges} de \textit{tokens} activos. La rotación de \textit{tokens }del flujo \texttt{refresh\_token} revoca tanto el \textit{refresh token }antiguo como su \textit{access token} asociado:
+			
+			\begin{lstlisting}[style=python, caption=Instrumentación de revoke\_refresh\_token]
+				def revoke_refresh_token(token: str) -> None:
+				# ... codigo original ...
+				db.commit()
+				# Both the refresh token and its associated access token are revoked
+				tokens_revoked.labels(token_type="refresh").inc()
+				tokens_revoked.labels(token_type="access").inc()
+				# Decrement active tokens accordingly
+				active_tokens.labels(token_type="refresh").dec()
+				active_tokens.labels(token_type="access").dec()
+			\end{lstlisting}
+			
+			
+	\newpage
+	\section{Modificaciones a\textit{ app.py}}
+	
+		% LEGACY - Se han añadido dos instrumentaciones importantes en \texttt{app.py} mediante decoradores Flask.\\
+	
+		Modificamos \texttt{app.py} (código con las modificaciones detallado en el anexo \ref{anexo:app.py} \nameref{anexo:app.py}) para exponer el endpoint \texttt{/metrics} y registrar automáticamente todas las peticiones HTTP mediante decoradores Flask.
+		
+		Los \textbf{decoradores} aplicados (\texttt{@before\_request} y \texttt{@after\_request}) son \textit{hooks} de Flask que se ejecutan automáticamente antes y después de cada petición HTTP,  obligando a cada uno de las peticiones a pasar por ellos.\\
+		Esto es lo que permite que nuestras métricas recojan los datos y todas las peticiones en un único lugar sin modificar cada ruta individualmente, siguiendo el principio DRY (\textit{Don't Repeat Yourself}).\\
+		Además el \texttt{DispatcherMiddleware} combina la aplicación Flask con la mini aplicación de Prometheus que genera el endpoint \texttt{/metrics}, de modo que todo el tráfico a \texttt{/metrics} lo gestiona Prometheus y el resto lo gestiona Flask.
+		
+		\subsection{Exposición del endpoint /metrics}
+		
+			Se utiliza \texttt{DispatcherMiddleware} para combinar la aplicación Flask con Prometheus que genera el endpoint \texttt{/metrics}. Esto permite que pueda leer las métricas en
+			\texttt{http://localhost:5001/metrics}:
+			
+			\begin{lstlisting}[style=python, caption=Exposición del endpoint /metrics]
+				from prometheus_client import make_wsgi_app
+				from werkzeug.middleware.dispatcher import DispatcherMiddleware
+				from werkzeug.serving import run_simple
+				
+				if __name__ == "__main__":
+				flask_app = create_app()
+				# Combine Flask with the Prometheus /metrics endpoint
+				application = DispatcherMiddleware(flask_app, {
+					"/metrics": make_wsgi_app()
+				})
+				run_simple("0.0.0.0", 5001, application,
+				use_reloader=True, use_debugger=True)
+			\end{lstlisting}
+			
+		\subsection{Registro automático de métricas HTTP}
+		
+			Hemos usado los decoradores \texttt{@before\_request} y \texttt{@after\_request} de Flask para registrar automáticamente todas las peticiones HTTP sin modificar cada ruta individualmente, para así seguir el patrón DRY (\textit{Don't Repeat Yourself}):
+			
+			\begin{lstlisting}[style=python, caption=Decoradores before y after request]
+				@app.before_request
+				def before_request():
+				# Store arrival time and increment in-progress counter
+				g.start_time = time.time()
+				requests_in_progress.labels(endpoint=request.path).inc()
+				
+				@app.after_request
+				def after_request(response):
+				endpoint = request.path
+				
+				# General HTTP counter
+				http_requests.labels(
+				method=request.method,
+				endpoint=endpoint,
+				status_code=str(response.status_code)
+				).inc()
+				
+				# Specific counters per endpoint
+				if "/token" in endpoint:
+				http_requests_token.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				elif "/authorize" in endpoint:
+				http_requests_authorize.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				elif "/admin" in endpoint:
+				http_requests_admin.labels(
+				method=request.method,
+				status_code=str(response.status_code)
+				).inc()
+				
+				# Decrement in-progress and record duration
+				requests_in_progress.labels(endpoint=request.path).dec()
+				duration = time.time() - g.start_time
+				request_duration.labels(
+				endpoint=request.path,
+				method=request.method
+				).observe(duration)
+				
+				return response
+			\end{lstlisting}
+		
+		
+		\subsection{Instrumentación de flujos OAuth2 — oauth2\_routes.py}
+			Hemos tenido que modificar este fichero puesto que, nuestras métricas afectan a los 3  flujos de nuestra aplicación.\\
+			De cara a esta modificación hemos seguido siempre la siguiente lógica: incrementamos \texttt{started} al entrar en la función, \texttt{failed} en cada punto de fallo y \texttt{success} junto con los contadores de tokens al completarse con éxito.\\
+			Esto se entiende mejor con un ejemplo:
+			\begin{lstlisting}[style=python, caption=Fragmento de \_handle\_client\_credentials()]
+				def _handle_client_credentials():
+				auth_flows_started.labels(
+				grant_type="client_credentials").inc()
+				
+				client_id, err = _authenticate_client()
+				if err:
+				auth_flows_failed.labels(
+				grant_type="client_credentials").inc()
+				return _error_response("invalid_client", err, 401)
+				
+				client = get_client(client_id)
+				if client is None or \
+				"client_credentials" not in client["grant_types"]:
+				auth_flows_failed.labels(
+				grant_type="client_credentials").inc()
+				return _error_response("unauthorized_client",
+				"Client is not authorized for client_credentials")
+				
+				scope = request.form.get("scope", "")
+				token_response = issue_token_pair(
+				client_id=client_id,
+				scope=scope,
+				user_id=None,
+				include_refresh=False,
+				)
+				
+				auth_flows_success.labels(
+				grant_type="client_credentials").inc()
+				tokens_issued.labels(
+				token_type="access",
+				grant_type="client_credentials").inc()
+				access_tokens_issued.labels(
+				grant_type="client_credentials").inc()
+				# client_credentials no emite refresh token (RFC 6749)
+				
+				return jsonify(token_response)
+			\end{lstlisting}
+			
+			
+			Ahora que ya tenemos los dos primeros pasos configurados,  vamos a preparar el grafana.\\
+			Lo primero que hacemos es añadir  Prometheus como fuente de datos en \textit{Connections > Data Sources > Add data source}, se configura la URL \texttt{http://localhost:9090} y se verifica la conexión
+			con \textit{Save \& Test}, obteniendo el mensaje:
+			
+			\begin{center}
+				\textit{"Successfully queried the Prometheus API."}
+			\end{center}
+	
+	\newpage
+		\section{Locust }
+		Llegados a este punto ya tenemos toda la parte de configurado de la aplicación hecho, pero claro no hemos mencionado nada de Locust, esto se debe a que Locust simplemente va a realizar las pruebas de carga que nosotros dictemos sobre nuestro sistema, por lo que necesitábamos todo el trabajo previo para que esta aplicación pudiese funcionar de manera correcta.
+		\subsection{Instalación}
+		
+		Locust se instala como una dependencia del proyecto mediante \texttt{uv}:
+		
+	\begin{lstlisting}[style=bash]
+		cd ~/oauth2
+		uv add locust
+	\end{lstlisting}
+		
+		Se arranca con el siguiente comando, que lanza la interfaz web en el
+		puerto 8089:
+		
+	\begin{lstlisting}[style=bash]
+		uv run locust -f locustfile.py --host=http://localhost:5001
+	\end{lstlisting}
+		
+		
+		%\vspace{1cm}
+		%\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
+		%\vspace{1cm}
+	
+		
+		\subsection{Diseño del fichero de pruebas de carga}
+		En esta parte hemos dedicado mucho tiempo debido a que queríamos realizar una distribución realista del tráfico y no sabíamos muy bien como comprobar todas nuestras métricas desde un mismo punto.\\
+		El fichero locust finalmente implementado se encuentra detallado en el anexo \ref{anexo:locust.py} \nameref{anexo:locust.py}
+		
+		\subsubsection{Endpoints objetivo del Locust}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=\textwidth]{Recursos/EndPointsLocust.png}
+			\caption{Puntos objetivo de nuestras pruebas con el fichero de Locust}
+		\end{figure}
+		\subsubsection{Distribución del tráfico}
+			\begin{table}[H]
+				\centering
+				\begin{tabular}{llcc}
+					\toprule
+					\textbf{Tarea} & \textbf{Tipo} & \textbf{Peso} & \textbf{Probabilidad} \\
+					\midrule
+					\texttt{valid\_client\_credentials}      & Legítimo M2M         & 6 & 27\% \\
+					\texttt{valid\_authorization\_code\_flow} & Legítimo web         & 3 & 14\% \\
+					\texttt{valid\_refresh\_token\_flow}      & Legítimo renovación  & 2 & 9\%  \\
+					\texttt{brute\_force\_api}               & Ataque fuerza bruta  & 2 & 9\%  \\
+					\texttt{brute\_force\_user\_login}        & Ataque fuerza bruta  & 2 & 9\%  \\
+					\texttt{auth\_code\_replay\_attack}       & Ataque replay        & 1 & 5\%  \\
+					\texttt{revoked\_token\_replay\_attack}   & Ataque replay        & 1 & 5\%  \\
+					\texttt{invalid\_refresh\_token}          & \textit{Token }inválido       & 1 & 5\%  \\
+					\texttt{client\_enumeration\_attack}      & Ataque EDR           & 1 & 5\%  \\
+					\texttt{credential\_stuffing\_attack}     & Ataque EDR           & 1 & 5\%  \\
+					\texttt{token\_harvesting\_attack}        & Ataque EDR           & 1 & 5\%  \\
+					\texttt{list\_admin\_clients}             & Monitorización       & 1 & 5\%  \\
+					\bottomrule
+				\end{tabular}
+				\caption{Distribución de tareas del fichero Locust}
+			\end{table}
+			Al querer hacer un diseño realista del trafico que soportaría un sistema como el nuestro hemos decidido emplear esta distribución teniendo en cuenta que cada usuario espera entre 1 y 3 segundos entre tareas mediante \texttt{wait\_time = between(1, 3)}, para tener en cuenta ese "tiempo de pensar" que tienen los usuarios.\\
+			De tal manera que todo el tráfico de nuestra aplicación se divide en estas 3 categorías:
+			\begin{itemize}
+				\item \textbf{Tráfico legítimo}: 11/22 tareas = 50\%
+				\item \textbf{Ataques}: 9/22 tareas = 41\%
+				\item \textbf{Monitorización}: 1/22 tareas = 5\%
+			\end{itemize}
+			Siendo las tareas de administración las que menos peso tienen debido a que en un escenario real, un administrador de una web no se autentica varias veces ni hace un uso similar al de un usuario.
+			
+			\subsubsection{Tareas de tráfico legítimo}
+				\begin{itemize}
+						\item \textbf{\texttt{valid\_client\_credentials} (peso 6)} es la tarea más frecuente porque el tráfico M2M es el mayoritario y el  flujo más sencillo, puesto que el servidor solo se encarga de enviar las credenciales correctas al endpoint \texttt{/token}, verificando que la respuesta es un código 200.
+						\item \textbf{\texttt{valid\_authorization\_code\_flow} (peso 3)} implementa el flujo completo de autorización en dos pasos: primero realiza el login en \texttt{/authorize} obteniendo un código de autorización de la cabecera \texttt{Location} de la redirección 302, y después canjea ese código en \texttt{/token} por un par de tokens. Ojo esto es clave, ya que sin ella \texttt{pending\_auth\_codes} crecería indefinidamente al emitirse códigos que nunca se consumen.
+						\item \textbf{\texttt{valid\_refresh\_token\_flow} (peso 2)} obtiene primero un par de tokens mediante el flujo \texttt{authorization\_code} y después los renueva usando el refresh \textit{token}. Sin esta tarea las métricas \texttt{tokens\_revoked} y \texttt{refresh\_tokens\_issued} siempre serían cero durante las pruebas de carga, ya que la rotación de tokens solo ocurre en este flujo.
+						\item \textbf{\texttt{list\_admin\_clients} (peso 1)} consulta el endpoint de administración \texttt{/admin/clients} para generar tráfico en \texttt{http\_requests\_admin}, reflejando el bajo uso previsto del admin.
+				\end{itemize}
+		
+			\subsubsection{Tareas de ataque}
+				\begin{itemize}
+						\item \textbf{\texttt{brute\_force\_api} (peso 2)} simula un ataque de fuerza bruta M2M enviando credenciales incorrectas contra el endpoint \texttt{/token}. Siempre usa el mismo \texttt{client\_id} con \textit{secrets} distintos.
+						\item \textbf{\texttt{brute\_force\_user\_login} (peso 2)} simula un ataque de fuerza bruta web enviando contraseñas incorrectas contra \texttt{/authorize}. Siempre usa el mismo username, lo que lo distingue del \textit{credential stuffing} y dispara.
+						\item \textbf{\texttt{auth\_code\_replay\_attack} (peso 1)} canjea el mismo código de autorización dos veces. La primera petición tiene éxito (200) y la segunda falla( 400) porque el código ya está marcado como usado en la base de datos, disparando la métrica \texttt{auth\_code\_reuse}.
+						\item \textbf{\texttt{revoked\_token\_replay\_attack} (peso 1)} simula un ataque de \textit{token replay} en tres pasos: primero obtiene tokens válidos, los rota mediante el flujo \texttt{refresh\_token} revocando el original, e intenta usar el\textit{ token} ya revocado. Dispara \texttt{revoked\_token\_usage}, señal de posible robo de tokens.
+						\item 	\textbf{\texttt{invalid\_refresh\_token} (peso 1)} envía un\textit{ refresh token} completamente falso al servidor para ejercitar el camino de error de tokens inválidos y verificar que el servidor responde correctamente con un 400.
+				\end{itemize}
+			
+			\subsubsection{Tareas de ataque EDR}
+			Estas tres tareas las hemos añadido específicamente para el enfoque EDR y detectar patrones de ataque:
+				\begin{itemize}
+						\item \textbf{\texttt{client\_enumeration\_attack} (peso 1)} prueba \texttt{client\_id} comunes como \texttt{admin}, \texttt{root} o \texttt{test} seleccionados aleatoriamente de una lista de diez valores. Simula a un atacante escaneando qué clientes OAuth2 están registrados en el servidor, disparando la métrica	\texttt{unknown\_client\_attempts}.
+						\item \textbf{\texttt{credential\_stuffing\_attack} (peso 1)} selecciona aleatoriamente entre ocho pares de credenciales filtradas de otras plataformas y las prueba contra el endpoint \texttt{/authorize}. A diferencia de la fuerza bruta, cada intento usa un username distinto, lo que hace subir el \textit{gauge} \texttt{unique\_failed\_usernames\_active} y permite distinguir los dos tipos de ataque en el dashboard EDR.
+						\item \textbf{\texttt{token\_harvesting\_attack} (peso 1)} solicita tokens válidos sin revocarlos ni renovarlos nunca. Hace que \texttt{active\_tokens} suba sin que \texttt{tokens\_revoked} lo acompañe proporcionalmente.
+				\end{itemize}
+				
+	
+		
+		\subsection{Decisiones de diseño relevantes}
+		
+			\begin{itemize}
+				\item \textbf{\texttt{catch\_response=True}} se usa en todas las tareas de ataque para indicar a Locust que una respuesta 401 o 400 es el comportamiento esperado y no debe contabilizarse como fallo en las estadísticas de rendimiento. Sin esto Locust
+				marcaría todos los ataques como errores y distorsionaría las métricas de la prueba.
+				\item \textbf{\texttt{allow\_redirects=False}} se usa en las peticiones a \texttt{/authorize} para capturar el código de autorización de la cabecera \texttt{Location} antes de que Locust siga la redirección automáticamente. Sin esto el código se perdería y el flujo \texttt{authorization\_code} no podría completarse.
+				\item \textbf{Método auxiliar \texttt{\_get\_authorization\_code()}} encapsula el proceso de login y extracción del código de autorización. Es reutilizado por \texttt{valid\_refresh\_token\_flow}, \texttt{auth\_code\_replay\_attack} y \texttt{revoked\_token\_replay\_attack}, siguiendo el principio DRY y facilitando el mantenimiento del código.
+				\item \textbf{Importaciones dentro de las tareas} (\texttt{import random}) se usan en los ataques de enumeración y credential \textit{stuffing }para seleccionar aleatoriamente	entre listas de valores, simulando comportamiento real de atacante y generando variedad en las etiquetas de las métricas de Prometheus.
+			\end{itemize}
+			
+			
+		
+		\subsection{Configuración de las pruebas} 
+		
+		Desde la interfaz web de Locust vamos a configurar dos tipos de pruebas:\\
+		
+		\textbf{Prueba de carga} — Evalúa el comportamiento del sistema en condiciones
+		normales:
+		
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{ll}
+				\toprule
+				\textbf{Parámetro} & \textbf{Valor} \\
+				\midrule
+				Number of users & 50 \\
+				Spawn rate      & 5 usuarios/segundo \\
+				Duración        & 5 minutos \\
+				\bottomrule
+			\end{tabular}
+			\caption{Configuración de la prueba de carga normal dentro de un sistema de autenticación}
+			\label{Normal}
+		\end{table}
+		
+		\textbf{Prueba de estrés} — Evalúa el comportamiento del sistema en
+		condiciones extremas para encontrar el límite real:
+		
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{ll}
+				\toprule
+				\textbf{Parámetro} & \textbf{Valor} \\
+				\midrule
+				Number of users & 200 \\
+				Spawn rate      & 10 usuarios/segundo \\
+				Duración        & 3 minutos \\
+				\bottomrule
+			\end{tabular}
+			\caption{Configuración de la prueba de estrés}
+			\label{estrés}
+		\end{table}
+		
+		\subsection{Protección de la VM durante las pruebas}
+		
+		Debido a los recursos de nuestra VM, nos vemos con un problema similar al de la práctica 1, no podemos lanzar peticiones como locos sin preocuparnos de las consecuencias para nuestro sistema. Por ello hemos decidido tomar ciertas precauciones por lo que arrancamos prometheus con unos  límites explícitos de retención de datos:
+\begin{lstlisting}[style=bash]
+	./prometheus --config.file=prometheus.yml \
+	--storage.tsdb.retention.time=2h \
+	--storage.tsdb.retention.size=500MB
+\end{lstlisting}
+		
+		Si el otro \textit{dashboard} de grafana nos indica que estamos muy cerca de los límites, podemos llegar a lanzar estos comandos para tener un control a tiempo real sin necesidad de estar cambiando de panel constantemente:
+		
+\begin{lstlisting}[style=bash]
+	watch -n 2 'echo "=== DISCO ===" && df -h / && \
+	echo "=== RAM ===" && free -h && \
+	echo "=== CPU ===" && top -bn1 | head -5'
+\end{lstlisting}
+	
+		\subsection{Comportamientos del sistema frente  a los dos escenarios de prueba}
+			En este apartado mostraremos una captura general del locust en el que podremos comprobar cómo se ha comportado nuestro sistema ante las pruebas que hemos considerado adecuadas para sus dos escenarios.\\
+			Explicaremos en detalle cada uno de los paneles más adelante en este informe pero es una representación visual de cómo se está comportando el sistema.
+			\subsubsection{Condiciones normales}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/CargaNormal}
+					\caption{Como podemos observar con los parámetros del locust del cuadro (\ref{Normal}) obtenemos una resultados muy malos en el tiempo de respuesta, debido a las limitaciones de nuestra VM y diversos factores que explicaremos a continuación.}
+				\end{figure}
+			\subsubsection{Condiciones de estrés}
+			\begin{figure}[H]
+				\centering
+				% --- Primera imagen ---
+				\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\textwidth]{Recursos/Estrés200.png}
+					\caption{200 usuarios totales.}
+					\label{fig:imagen_a}
+				\end{subfigure}
+				\hfill % Espacio elástico entre imágenes
+				% --- Segunda imagen ---
+				\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\textwidth]{Recursos/Estrés150.png}
+					\caption{150 usuarios totales.}
+					\label{fig:imagen_b}
+				\end{subfigure}
+				\hfill % Espacio elástico entre imágenes
+				% --- Tercera imagen ---
+				\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\textwidth]{Recursos/Estrés125.png}
+					\caption{125 usuarios totales.}
+					\label{fig:imagen_c}
+				\end{subfigure}
+				
+				\caption{Pruebas de carga con diferentes usuarios totales partiendo del caso inical del cuadro \ref{estrés}}
+			\end{figure}
+			
+			Como se puede observar en el panel de locust, ninguno de los intentos anteriores llegaba a tener un tiempo de respuesta razonable, con valores muy alejados de los 250ms que nos indicaban en el enunciado.\\
+			Con esto demostramos la existencia de un cuello de botella en la concurrencia de usuarios.
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=\textwidth]{Recursos/6concurrentes}
+				\caption{Pruebas con 10 y 9 usuarios,siendo el primer valor el límite de nuestro sistema sin que el tiempo de usuario tome valores inceptables. Estas métricas se han tomado el viernes, por lo que debido a la cantidad de personas conectadas a las VM pueden arrojar un rendimiento ligeramente peor del real. }
+			\end{figure}		
+			En lo referente a la carga máxima del sistema, nos hemos percatado de dos problemas para llegar a ello; la primera de ellas es la nula paralelización de la máquina, contamos con dos cores pero la aplicación no está preparada para emplearlos, de tal manera que toda la ejecución se realiza sobre un único hilo y un core, lo que acaba  generando un cuello de botella importante para nuestro servidor y cómo atiende las peticiones, teniendo un límite de 12 rps lo que lastra el rendimiento de todo el sistema.\\
+			El segundo impedimento es nuestro \textit{locustfile}, el cual está enfocado en peticiones muy pesadas debido a nuestro enfoque de EDR. Por ello, es imposible llegar a las 250 ms de tiempo de respuesta que se nos marca como tiempo aceptable en el enunciado, debido a que ya incluso con 2 usuarios, al tener que pasar por el proceso de cifrado para la obtención de los \textit{tokens}, el usuario que esté en ese proceso "secuestra" la CPU generando una cola de espera enorme.\\
+			En versiones anteriores de nuestro fichero de locust, versiones más ligeras, obteníamos mejores marcas de cargas de trabajo, pero esto se debía a que generaban un \textit{fail fast} omitiendo algunas de las peticiones más pesadas y dando muestras \enquote{falsas} y ocultando el cuello de botella real de nuestro sistema, puesto que realmente estos ficheros de pruebas no estaban tan bien diseñados como el que finalmente hemos empleado en nuestra entrega.\\
+			Debido a esto, hemos decidido cambiar el tiempo entre peticiones para ver si eso ayudaba en algo, debido a que modificar la probabilidad de cada una de las tareas arruinaría por completo nuestra práctica y falsearía los resultados.\\
+			Por ello y tras realizar pruebas con 100, 25, 15, 10 usuarios, hemos llegado a la conclusión de que este último valor es el límite de nuestro sistema por lo puntos mencionados anteriormente.\\
+			El la captura del locust que adjuntamos, vemos la evolución del tiempo de respuesta con 10 y con 9 usuarios durante 3 minutos, tiempo más que suficiente para que ese número de usuarios se mantenga estable en el sistema y las métricas que nos arroja Locust sean realmente significativas.\\
+			
+		
+		\subsubsection{Flujo de ejecución de las aplicaciones}
+		\begin{enumerate}
+			\item Terminal 1:\\
+			  \texttt{uv run python app.py}
+			\item Terminal 2:\\
+			  \texttt{./prometheus --config.file=prometheus.yml}
+			\item Terminal 3:\\
+			  \texttt{uv run python test.py \\uv run locust -f locustfile.py --host=http://localhost:5001}
+			\item Terminal 4  (opcional, sólo si tenemos pocos recursos en la VM):\\
+			 \texttt{watch} para vigilancia de recursos
+		\end{enumerate}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/EjecucionTodoSistema}
+			\caption{Ejecutamos la \textit{app.py}, el locust y el prometheus, con el error de ejecución en los puertos erróneos}
+		\end{figure}
+		Y el orden de parada es el inverso, esperando 30 segundos entre Locust y Prometheus para que este último recoja los últimos datos antes de apagarse.
+		
+		\newpage
+		\section{Verificación manual de métricas EDR}
+		En el punto anterior hemos mencionado el \texttt{test.py}, el cual es un script que comprueba cada métrica de manera individual, en concreto comprobamos las siguientes:
+		\begin{table}[H]
+			\centering
+			\begin{tabular}{clp{6cm}}
+				\toprule
+				\textbf{Test} & \textbf{Nombre} & \textbf{Métricas verificadas} \\
+				\midrule
+				1 & client\_credentials válido    & auth\_flows\_success, active\_tokens \\
+				2 & Fuerza bruta M2M              & auth\_flows\_failed, brute\_force\_attempts \\
+				3 & Fuerza bruta web              & user\_auth\_failed \\
+				4 & authorization\_code completo  & refresh\_tokens\_issued, pending\_auth\_codes \\
+				5 & refresh\_token válido         & tokens\_revoked, active\_tokens \\
+				6 & \textit{Token} replay attack           & revoked\_token\_usage \\
+				7 & Auth code reuse               & auth\_code\_reuse \\
+				8 & Peticiones en paralelo        & requests\_in\_progress, request\_duration \\
+				9 & \textit{Token }falso/expirado          & expired\_token\_usage \\
+				\bottomrule
+			\end{tabular}
+			\caption{Tests del script de verificación manual}
+		\end{table}
+		La comprobación se describe en detalle en el anexo, \ref{anexo:test.py} \nameref{anexo:test.py}
+		
+		%\vspace{1cm}
+		%\lstinputlisting[style=python, inputencoding=latin1]{test.py}
+		%\vspace{1cm}
+		
+		
+	\newpage
+	\section{Enfoque EDR del sistema de métricas}
+	
+		El enunciado de la práctica señala explícitamente que uno de los objetivos
+		de las pruebas de carga es identificar \textit{``si surgen fallos de seguridad
+			fruto del alto nivel de carga''} y que \textit{``se podrán añadir métricas
+			adicionales''}. Partiendo de este punto, hemos añadido un enfoque orientado
+		a la ciberseguridad intentando emular un  EDR (\textit{Endpoint Detection and
+			Response}), permitiendo detectar comportamientos anómalos en tiempo real
+		durante las pruebas de carga.
+		
+		Un sistema EDR monitoriza eventos de seguridad en tiempo real para detectar
+		patrones de ataque como fuerza bruta, reutilización de tokens o intentos de
+		acceso con credenciales comprometidas. Prometheus y Grafana permiten replicar
+		este comportamiento de forma sencilla sobre el servidor OAuth2.
+	
+		\subsection{Métricas adicionales implementadas}
+		
+			Se han añadido tres categorías de métricas adicionales sobre las requeridas
+			por el enunciado:
+	
+		\subsubsection{Rendimiento del sistema}
+		
+			\begin{table}[H]
+				\centering
+				\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+					\toprule
+					\textbf{Métrica} & \textbf{Descripción} \\
+					\midrule
+					oauth2\_request\_duration\_seconds & \textit{Histogram} del tiempo de respuesta por
+					endpoint y método HTTP. Permite calcular el percentil 95 que el enunciado
+					fija en 250ms como umbral de referencia. \\
+					oauth2\_requests\_in\_progress & \textit{Gauge} de peticiones HTTP simultáneas en
+					curso en este momento. Útil para detectar ataques DoS bajo pruebas de estrés. \\
+					\bottomrule
+				\end{tabular}
+				\caption{Métricas de rendimiento}
+			\end{table}
+	
+		\subsubsection{Estado de tokens}
+			\begin{table}[H]
+				\centering
+				\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+					\toprule
+					\textbf{Métrica} & \textbf{Descripción} \\
+					\midrule
+					oauth2\_active\_tokens & \textit{Gauge }de tokens activos en el sistema por tipo.
+					Sube al emitir tokens y baja al revocarlos. \\
+					oauth2\_tokens\_revoked\_total & \textit{Counter} de tokens revocados por tipo.
+					Refleja la rotación de tokens en el flujo refresh\_token. \\
+					oauth2\_pending\_auth\_codes & \textit{Gauge} de códigos de autorización emitidos
+					pero no canjeados todavía. Un valor creciente indica clientes que piden
+					códigos sin completar el flujo. \\
+					oauth2\_revoked\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
+					ya revocados. Señal de posible \textit{token replay attack}. \\
+					oauth2\_expired\_token\_usage\_total & \textit{Counter} de intentos de uso de tokens
+					expirados. \\
+					oauth2\_auth\_code\_reuse\_total & \textit{Counter }de intentos de reutilización de
+					códigos de autorización ya consumidos. Señal de authorization code replay
+					attack. \\
+					\bottomrule
+				\end{tabular}
+				\caption{Métricas de estado de tokens}
+			\end{table}
+		
+		\subsubsection{Detección de ataques}
+	
+			\begin{table}[H]
+				\centering
+				\begin{tabular}{>{\ttfamily\small}lp{8cm}}
+					\toprule
+					\textbf{Métrica} & \textbf{Descripción} \\
+					\midrule
+					oauth2\_brute\_force\_attempts\_total & Counter de intentos fallidos de
+					autenticación por client\_id. Detecta ataques de fuerza bruta M2M. \\
+					oauth2\_user\_auth\_failed\_total & Counter de intentos fallidos de login
+					por username y client\_id. Detecta ataques de fuerza bruta sobre usuarios. \\
+					\bottomrule
+				\end{tabular}
+				\caption{Métricas de detección de ataques}
+			\end{table}
+	
+	\newpage
+	\section{Paneles de grafana}
+		Al igual que en la anterior entrega, hemos tenido que hacer un \textit{dashboard} en grafana para tener una reperesentación gráfica de nuestro trabajo en esta práctica.\\
+		\begin{figure}[H]
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/VistazoGeneralGrafana}
+				\caption{Aunque entraremos más en detalle, nuestro \textit{dashboard} presenta dos tipos de metricas, las clásicas de pruebas de carga y las métricas específicas para nuestro enfoque EDR}
+		\end{figure}
+		Una vez que ya tenemos una idea de cómo hemos ditribuido el \textit{dashboard} vamos a ir panel a panel explicando un poco la intención y alguna peculiaridad de la representación.\\
+		Las consultas con Prometheus son mucho más simples que las que nos tocó hacer con Postgres en la práctica anterior, pero al ser una herramienta nueva, nos ha llevado nuestro tiempo acostumbrarse a su sintaxis y sus operandos, teniendo que pedir consejo a Adrián sobre como escribir las peticiones para poder reflejar de una manera adecuada los datos.
+	
+		\subsection{Ataques de fuerza burta vs \textit{credential stuffing}}
+			\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+				\centering
+				% Columna 1: La Imagen
+				\begin{minipage}{0.45\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{Recursos/AtaquesFuerzaBruta}
+					\caption{Con este panel estamos intentando diferenciar entre los errores de un usuario al escribir su contraseña con un posible ataque de fuerza bruta para entrar a la cuenta de un usuario.}
+				\end{minipage}
+				\hfill % Crea un espacio elástico entre las dos minipages
+				% Columna 2: El Texto
+				\begin{minipage}{0.50\textwidth}
+						Esta métrica pertenece a nuestro enfoque EDR, pero para entenderla bien, vamos a explicar cuáles son los dos tipos de ataques que estamos midiendo.\\
+						Un \textit{Brute Forze Attack}  trata de una técnica de hacking que se basa en probar el acceso a la cuenta de un usuario empleando un diccionario de contraseñas, mientras que el \textit{credential stuffing} se basa en intentar \textit{loggearse} en un sistema empleando contraseñas de otros sitios de ese mismo usuario/mail.\\
+						Este panel muestra qué usuarios han sido atacados durante las pruebas, aquellos con más intentos fallidos son víctimas de fuerza bruta mientras que la presencia de muchos usuarios distintos con pocos intentos cada uno indica \textit{credential stuffing}.
+				\end{minipage}
+			\end{figure}
+			
+			\subsection{Ratio de Tokens }
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/TokenReplay}
+						\caption{Tipos de tokens que maneja nuestro sistema}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Con este panel lo que estamos intentando mirar es si estamos sufriendo ataques del tipo \textit{Token Replay}, los cuales se basan en que un atacante ha conseguido un \textit{token} válido y lo está empleando desde su cuenta para poder realizar ataques sobre nuestro sistema.\\
+						Para tener una visión limpia sobre este tipo de ataques estamos usando las fuunciones de incremento absoluto (\textit{increase()}) en PromQL, las cuales revelan el número exacto de intentos de ataque neutralizados durante la ventana de evaluación. Además empleamos la métrica  \textbf{\texttt{oauth2\_revoked\_token\_usage\_total}} para contabilizar las peticiones bloqueadas que intentan operar utilizando un \textit{Refresh Token} que ya ha sido invalidado. ya que cualquier intento posterior de usarlas no solo es denegado, sino que queda registrado en este contador como una brecha de seguridad interceptada.
+					\end{minipage}
+				\end{figure}
+			
+			
+			\subsection{Fallos del login de los usuarios}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/FallosLoginUsuario}
+						\caption{Número de usuarios de nuestro sistema que han tenido fallos en su login}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						A simple vista, esta métrica parece un poco irrelevante ¿qué información útil aporta el número de usuarios que se han equivocado al introducir sus datos al hacer el \textit{login}?,  y la respuesta a esta pregunta es simple, un alto número de usuarios que fallan en su inicio de sesión es un indicativo de que algo anda mal, de tal manera que unido al panel anterior, nos da la información de que puede que uno de esos usuarios esté sufiendo un ataque y que por ende sea un vector de infección a nuestro sistema.
+					\end{minipage}
+				\end{figure}
+			\subsection{Fallos del login de los usuarios}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/IntentosLoginsFallidosPorUser}
+						\caption{Usuarios de nuestro sistema que han tenido fallos en su login}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Métrica complementaria a la anterior, la cuál ya no sólo nos dice los intentos fallidos de \textit{login en el  sistema}, sino que tenemos una visión de qué usuarios están teniendo este comportamiento.\\
+						Decimos que es complementaria puesto que si el adminitrador del sistema detecta en el panel anterior un número grande de errores de login por parte de usuarios, consultado este panel puede ver qué usuario en concreto está teniendo este comportamiento, lo que permite contactar con él para que revise la actividad o en su defecto, cortarle el acceso al sistema por si te trata de un bot o un usuario que ha perdido el acceso a sus credenciales.\\
+						Así como dato extra la gráfica se construye mediante una consulta PromQL que calcula la tasa de fallos (\textit{rate()}) y los agrupa por nombre de usuario (\textit{sum(...) by (username)}), para poder realizar esta distinción.
+					\end{minipage}
+				\end{figure}
+			
+			\subsection{Logins correctos en el sistema}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/loginsCorrectos}
+						\caption{Número de logins correctos en el sistema}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Esta métrica es una clásica en lo que se refiere al monitoreo de un sistema y a las pruebas de carga. Con locust estamos testeando una carga de usuarios y peticiones simultáneas de tal manera que este panel nos sirve para ver cuántos usuarios están intentando acceder a nuestro sistema.
+					\end{minipage}
+				\end{figure}
+			\subsection{Intento de login por parte de usuarios desconocidos}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/IntentosUsuariosDesconocidos}
+						\caption{Peticiones de inicio de sesión de usuarios desconocidos para nuestro sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Esta métrica  es interesante, ya que estamos empleando un servidor de autenticación con una bbdd para registrar los usuarios con acceso a nuestros recursos y en caso de detectar algún incremento en esta métrica podríamos deducir que el sistema se ha visto comprometido o está siendo atacado desde un usuario del que no tenemos conocimiento. Adicionalmente casa muy bien con el enfoque que hemos decidido darle a la práctica ya que buscamos detectar posibles fallas cuando la carga de trabajo del sistema es muy grande.
+					\end{minipage}
+				\end{figure}
+			\subsection{Peticiones a los diferentes endpoints de nuestro sistema}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/RequestAEndPoints}
+						\caption{Peticiones que le llegan a los diferentes endpoints al sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						En este panel, nos encontramos con la distribución de peticiones a nuestro sistema.\\
+						Nos puede llamar la atención la distribución tan dispar de peticiones a cada uno de los \textit{endpoints} pero hay que tener en cuenta que (\texttt{authorize}) es el endpoint que  refleja una interacción humana, es decir, sería el formulario que seguiría un cliente al autenticarte en el sistema, por lo que, siguiendo el consejo de Adrián hemos generado una carga de trabajo lo más cercana a la realidad para ello.\\
+						Sin embargo el 	\texttt{/admin/clients} es la ruta de administración interna, la cual no debería estar expuesto a ataques del exterior, por lo que registra un tráfico residual y estable.\\
+						Hemos decidido implementar este panel para tener una información de la carga de trabajo en nuestro sistema, ya que podemos modificar los recursos destinados a cada uno o en caso de tener que tomar medidas saber exactamente la parte de nuestro sistema que está lastrando la \textit{performance} del entorno.
+					\end{minipage}
+				\end{figure}
+			
+			\subsection{Distribución de las peticiones en nuestro sistema}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/RespuestasARequests}
+						\caption{Distribución de las peticiones en nuestro sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+					Panel que sirve para ver el estado de sistemas\\
+					El 200 es el código para las peticiones correctas, representado de color verde, mientras que las peticiones en el sector de color rojo  agrupan todas las respuestas que no han resultado en un éxito, principalmente errores 400 de \textit{Bad Request}, 401 de \textit{Unauthorized} y posibles redirecciones 302, los cuales nos aportan una información muy relevante ya que los errores pueden implicar un mal funcionamiento del sistema.
+					\end{minipage}
+				\end{figure}
+			
+			\subsection{ Ratio peticiones correctas/fallidas por los usuarios}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/RatioPeticones}
+						\caption{Tipos de tokens que maneja nuestro sistema}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Nuestra idea con este panel es ver cómo se comportaba nuestro sistema ante los flujos de autenticación. \\
+						Como ya hemos comentado, nuestras pruebas no sólo buscan una prueba de carga sino comprobar la seguridad del sistema, por lo que este gráfico nos dice que el sistema es capaz de mantener un flujo constante de autorizaciones válidas pese a todo el ruido de peticiones maliciosas que le estamos haciendo, teniendo un comportamiento estable por lo que se puede ver en la linea de tendencias y que, además, no está dando falsos positivos. Es decir estamos ante un sistema robusto en lo referente a los \textit{logeos}.
+					\end{minipage}
+				\end{figure}
+			
+			\subsection{ Tiempo de respuesta a cada \textit{endpoint}}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/TiempoRespuestaEndPoints}
+						\caption{Gráfico que muestra el tiempo de respuesta a cada endpoint con una leyenda la cual nos da información exacta sobre los valores límite}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Para entender la utilidad del panel tenemos que entender en la situación en la que estamos ejecutando este código.\\
+						Nuestro código se está ejecutando sobre el servidor de desarrollo integrado de Flask, y el entorno opera bajo un modelo de procesamiento síncrono. Cuando Locust inyecta un volumen de peticiones superior a la capacidad de despacho del servidor, el sistema operativo se ve obligado a encolar las peticiones entrantes en sus \textit{buffers} de red (cola TCP), por este motivo, hay una discrepancia de tiempo entre lo que nos muestra el locust y lo mostrado en la gráfica, nosotros sólo estamos midiendo el tiempo de procesamiento de la petición mientras que locust nos da una visión más cercana al tiempo de usuario, desde que hace click y la web le devuelve el resultado de su petición.\\
+						La métrica \texttt{oauth2\_request\_duration\_seconds} instrumentada en la aplicación Flask evalúa estrictamente el \textbf{tiempo de procesamiento interno}. Es decir, el sistema comienza a cronometrar en el milisegundo exacto en el que el servidor web acepta la conexión y entrega la petición al código Python, deteniéndose al emitir la respuesta. El código de la aplicación es inherentemente \enquote{ciego} al tiempo que la petición ha pasado esperando en etapas previas.\\
+						De hecho para ser más precisos estamos empleando un percentil 95 para tener en cuenta el máximo rango posible de cara a la representación.
+						
+					\end{minipage}
+				\end{figure}
+				
+			\subsection{Tipos de \textit{tokens} en nuestro sistema.}
+				\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+					\centering
+					% Columna 1: La Imagen
+					\begin{minipage}{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{Recursos/RatioTokens}
+						\caption{Información sobre tokens que hay actualmente en circulación en nuestro sistema.}
+					\end{minipage}
+					\hfill % Crea un espacio elástico entre las dos minipages
+					% Columna 2: El Texto
+					\begin{minipage}{0.50\textwidth}
+						Con este panel estamos registrando los tokens que se están emitiendo/empleando en nuestro sistema. \\
+						Debemos recordar que estamos empleando un servidor oauth2 para la autenticación, por lo que esta estadística es necesaria para comprobar que el sistema funciona bien y que no estamos sufriendo ningún tipo de ataque.\\ 
+						Como tenemos 3 tipos vamos a explicar cada uno de ellos:
+						\begin{itemize}
+							\item  \textbf{Query A (\textit{Access Tokens}):} representa el número de sesiones activas que pueden realizar peticiones a recursos protegidos.
+							\item  \textbf{Query B (\textit{Refresh Tokens}):} representa el número de sesiones de larga duración que permiten a los clientes obtener nuevas credenciales sin intervención del usuario.
+							\item \textbf{Query C (\textit{Total Tokens}):} como su nombre indica, la suma de las anteriores.
+						\end{itemize}
+					\end{minipage}
+				\end{figure}
+				
+				\subsection{Distribución de \textit{tokens} en el sistema}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/TokensActivos}
+							\caption{Información sobre todos los \textit{tokens} emitidos en nuestro sistema.}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.50\textwidth}
+							Esta métrica es un histórico de todos los \textit{tokens} emitidos en el sistema a nivel de acumulador\\
+							Si nos damos cuenta, esta métrica y la anterior tienen una relación, ya que una nos sirve de acumulador mientras que la anterior nos da una información de la producción de tokens y los tipos de cada uno.
+						\end{minipage}
+					\end{figure}
+					
+				\subsection{Intentos de ataque de fuerza bruta}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/bruteForze}
+							\caption{Peticiones consideradas de fuerza bruta que está recibiendo el sistema.}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.50\textwidth}
+							Esta métrica es vital para el enfoque EDR, puesto que nos da una información sobre un posible ataque al sistema.\\
+							Nuestro enfoque ha sido el siguiente, tenemos una métrica que se incrementa cuando un usuario falla el login, y debido a las condiciones del sistema no podemos tener un indicador más grande a puro código, pero si nos dirigimos al grafana, tenemos un panel para los intentos fallidos de login por usuario, lo que unido a un valor elevado de las \textit{requests per second} en este panel nos permite aislar a aquellos usuarios que son problemáticos.
+						\end{minipage}
+					\end{figure}
+					
+				\subsection{Flujos de autenticación en cada uno de los \textit{endpoints}}
+					\begin{figure}[H] % El [H] requiere el paquete \usepackage{float}
+						\centering
+						% Columna 1: La Imagen
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionInvalidos}
+							\caption{Tipos de tokens que maneja nuestro sistema}
+						\end{minipage}
+						\hfill % Crea un espacio elástico entre las dos minipages
+						% Columna 2: El Texto
+						\begin{minipage}{0.45\textwidth}
+							\centering
+							\includegraphics[width=\linewidth]{Recursos/FlujosAutenticacionValidos}
+							\caption{Tipos de tokens que maneja nuestro sistema}
+						\end{minipage}
+					\end{figure}
+					Para este panel lo que hemos buscado tener una representación visual de los intentos fallidos de inicio de sesión en cada uno de los \textit{endpoints} de nuestro sistema.
+					\begin{itemize}
+						\item \textbf{Verde}: registra fallos en la autenticación máquina-a-máquina. Una tasa alta aquí indica intentos de fuerza bruta contra secretos de aplicaciones o cuentas de servicio.
+						\item \textbf{Amarillo}: representa intentos fallidos de inicio de sesión en el formulario web, usualmente vinculados a ataques de diccionario o \textit{credential stuffing}.
+						\item \textbf{Azul:} contabiliza intentos de usar tokens de refresco inválidos, caducados o revocados. Es un indicador clave de ataques de \textit{Replay} o de sesiones persistentes comprometidas.
+					\end{itemize}
+	\section{Distribución del trabajo}
+		Para la realización de esta práctica, nos hemos distribuido el trabajo encargándonos cada integrante de diferentes responsabilidades:
+		\begin{table}[h!] % <-- Añadido el entorno contenedor
+			\centering    % <-- Para que la tabla quede centrada en el folio
+			\begin{tabularx}{\textwidth}{llX} 
+				\toprule
+				\textbf{Nombre} & \textbf{Porcentaje} & \textbf{Responsabilidad principal} \\
+				\midrule
+				ÁLVAREZ FULCONIS, MARCOS P. & 33\% & LocustFile, redacción de dicha parte en el documento y revisión de los esquemas de colores en el grafana \\
+				\midrule
+				SANTIESTEBAN MENDO, EDGAR   & 33\% & Edicion del prometheus, de oauth\_routes, models.py, redacción del documento \\
+				\midrule
+				LOPEZ PRIMO, ÁLVARO         & 33\% & Creación de las métricas, modificación del app.py, enfoque EDR, dashboard grafana. \\
+				\bottomrule
+			\end{tabularx}
+			\caption{Distribución de Responsabilidades por Equipo y Miembro}
+		\end{table} % <-- Comprueba que cierra bien con el de arriba
+
+% ─────────────────────────────────────────────────────────────────────────────
+%  ANEXOS / APÉNDICES
+% ─────────────────────────────────────────────────────────────────────────────
+\clearpage % Fuerza a que el anexo empiece en una página nueva limpia
+
+% ─── ESTA LÍNEA INYECTA EL SEPARADOR EN EL ÍNDICE ────────────────────────
+\addtocontents{toc}{\protect\vspace{1em}\textbf{\large Apéndices}\par\protect\nopagebreak}
+% ─────────────────────────────────────────────────────────────────────────
+
+
+\appendix  % Cambia la numeración de secciones a letras (A, B, C...)
+\section{Métricas del sistema en metrics.py} \label{anexo:metrics.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=utf8]{./metrics.py}
+\vspace{1cm}
+
+\newpage
+\section{app.py modificado} \label{anexo:app.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{app.py}
+\vspace{1cm}
+
+\newpage
+\section{Verificación manual con test.py} \label{anexo:test.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{test.py}
+\vspace{1cm}
+
+\newpage
+\section{Locust} \label{anexo:locust.py}
+\vspace{1cm}
+\lstinputlisting[style=python, inputencoding=latin1]{./locustfile_v2.py}
+\vspace{1cm}
+
+\end{document}
+
+

@@ -1,0 +1,16 @@
+global:
+  #intervalo de busqueda de las metricas en el localhost 5001
+  scrape_interval: 15s
+  #intervalo de evaluacion de las reglas, para que nos llame grafana si se lia
+  #no lo vamos a emplear en la practica
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  #Esto es un nuevo trabajo que le dice al prometheus donde tiene que ir a buscar
+  - job_name: "oauth2"
+    static_configs:
+      - targets: ["localhost:5001"]
