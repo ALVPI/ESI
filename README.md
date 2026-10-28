@@ -34,15 +34,6 @@ El código fuente ha sido organizado separando la lógica de la aplicación, la 
     *   `prometheus.yml`: Archivo de configuración del servidor Prometheus. Define los intervalos de *scrapeo* (15s) y el objetivo (`localhost:5001`).
 
 
-## ⚙️ Ejecución del Proyecto
-
-El proyecto utiliza `uv` como gestor de paquetes y dependencias para garantizar un entorno reproducible.
-
-**1. Preparar el entorno**
-Clona el repositorio y sincroniza las dependencias (esto instalará Flask, Prometheus Client, Locust, etc.):
-```bash
-uv sync
-
 ## 🔍 Instrumentación y Enfoque EDR
 El servidor ha sido modificado siguiendo el principio DRY (centralizando los contadores en `metrics.py` e inyectando decoradores de *middleware* en `app.py`). Se han implementado métricas clave para la seguridad:
 
