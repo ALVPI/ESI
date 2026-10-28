@@ -10,6 +10,39 @@ El objetivo principal ha sido instrumentar el código base para exponer métrica
 *   **Visualización:** Grafana (Dashboards interactivos mediante *PromQL*).
 *   **Pruebas de Carga:** Locust (Simulación de usuarios concurrentes y flujos de tráfico).
 
+## 📁 Estructura del Proyecto
+
+El código fuente ha sido organizado separando la lógica de la aplicación, la infraestructura de pruebas y la documentación:
+
+*   **`P1/`** — *Histórico de la asignatura, entrega de la práctica 1*
+
+*   **`src/`** — *Núcleo del servidor OAuth2 y monitorización*
+    *   `app.py`: Punto de entrada de la aplicación Flask. Configura la base de datos, registra los *blueprints* e inyecta los decoradores (`@before_request`, `@after_request`) para la recolección automática de métricas HTTP y la exposición del endpoint `/metrics` mediante *DispatcherMiddleware*.
+    *   `metrics.py`: Definición centralizada de todas las métricas de Prometheus (Counters, Gauges, Histograms) orientadas tanto a rendimiento como a seguridad (EDR).
+    *   `models.py`: Capa de acceso a datos (SQLite). Gestiona el ciclo de vida de clientes, códigos de autorización y tokens, disparando métricas clave de seguridad (ej. `auth_code_reuse`, `revoked_token_usage`) al detectar anomalías.
+    *   `oauth2_routes.py`: Implementación de los endpoints principales (`/authorize`, `/token`). Maneja los flujos *Authorization Code*, *Client Credentials* y *Refresh Token*, registrando los intentos de fuerza bruta y *credential stuffing*.
+    *   `admin_routes.py`: Endpoints de administración interna (`/admin/clients`) para el registro y borrado de clientes OAuth2.
+
+*   **`tests/`** — *Simulación de carga y validación*
+    *   `locustfile.py`: Script de pruebas de estrés para Locust. Define los perfiles de usuarios virtuales, orquestando el tráfico legítimo y los ataques (fuerza bruta, recolección de tokens, enumeración de clientes, etc.).
+    *   `test.py`: Script de verificación secuencial automatizada. Simula los 12 escenarios de prueba y comprueba mediante aserciones directas al endpoint `/metrics` que Prometheus registra correctamente cada evento de seguridad.
+
+*   **`docs/`** — *Documentación del proyecto*
+    *   Contiene la memoria técnica detallada (`ESI_P2_G16.pdf`) y las diapositivas de la presentación final (`Presentacion.pdf`).
+
+*   **Raíz del proyecto**
+    *   `prometheus.yml`: Archivo de configuración del servidor Prometheus. Define los intervalos de *scrapeo* (15s) y el objetivo (`localhost:5001`).
+
+
+## ⚙️ Ejecución del Proyecto
+
+El proyecto utiliza `uv` como gestor de paquetes y dependencias para garantizar un entorno reproducible.
+
+**1. Preparar el entorno**
+Clona el repositorio y sincroniza las dependencias (esto instalará Flask, Prometheus Client, Locust, etc.):
+```bash
+uv sync
+
 ## 🔍 Instrumentación y Enfoque EDR
 El servidor ha sido modificado siguiendo el principio DRY (centralizando los contadores en `metrics.py` e inyectando decoradores de *middleware* en `app.py`). Se han implementado métricas clave para la seguridad:
 
